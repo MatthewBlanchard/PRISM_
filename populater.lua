@@ -128,6 +128,7 @@ function Populater(level, map)
     spawnActor(room, game.Player)
     spawnActor(room, actors.Box())
     spawnActor(room, actors.Snip())
+    spawnActor(room, actors.Lizbop())
     --spawnActor(room, actors.Fink())
   --  spawnActor(room, actors.Gazer())
   end
@@ -248,6 +249,7 @@ function Populater(level, map)
   table.insert(toSpawn, actors.Prism())
   table.insert(toSpawn, actors.Stairs())
   table.insert(toSpawn, actors.Webweaver())
+  table.insert(toSpawn, actors.Lizbop())
 
   local startRoom = table.remove(map._rooms, love.math.random(1, #map._rooms))
 
