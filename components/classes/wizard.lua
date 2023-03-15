@@ -27,7 +27,7 @@ function Blast:perform(level)
 end
 
 --class establishment
-local Wizard = Component:extern()
+local Wizard = Component:extend()
 Wizard.name = "Wizard"
 
 Wizard.actions = {
