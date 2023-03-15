@@ -45,8 +45,8 @@ Fighter.actions = {
     SecondWind
 }
 
-function Fighter:__new(options)
-  self.duration = options.duration
+function Fighter:__new()
+  self.duration = 500
 end
 
 function Fighter:initialize(actor)
