@@ -50,7 +50,7 @@ function LizBop:act(level)
   end
 
   if player and player:getRange("box", self) == 1 then
-    return self:getAction(actions.Attack)(self, {player})
+    return self:getAction(actions.Attack)(self, player)
     end
 
   if target then
