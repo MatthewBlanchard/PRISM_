@@ -13,7 +13,7 @@ CrystalSword.components = {
     components.Weapon{
         stat = "MGK",
         name = "CrystalSword",
-        dice = "1d2",
+        dice = "1d3",
         time = 100
     },
     components.Light{
