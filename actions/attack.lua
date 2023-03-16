@@ -27,7 +27,6 @@ function Attack:perform(level)
   local dmg = ROT.Dice.roll(weapon.dice) + self.owner:getStatBonus(weapon.stat)
 
   local critical = naturalRoll >= self.criticalOn
-  local messageSystem = level:getSystem("Message")
   
   if roll >= defender:getAC() or critical then
     self.hit = true
