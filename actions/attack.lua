@@ -24,7 +24,9 @@ function Attack:perform(level)
   local roll = naturalRoll + bonus
 
   local defender = self:getTarget(1)
-  local dmg = ROT.Dice.roll(weapon.dice) + self.owner:getStatBonus(weapon.stat)
+  local dmg = ROT.Dice.roll(weapon.dice)
+    + self.owner:getStatBonus(weapon.stat)
+    + ROT.Dice.roll(self.damageBonus)
 
   local critical = naturalRoll >= self.criticalOn
   
