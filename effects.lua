@@ -29,7 +29,7 @@ effects.PoisonEffect = function(actor, damage)
   end
 end
 
-effects.OpenEffect = function(actor)
+effects.OpenEffect = function(actor, totalTime)
   local t = 0
   local lastflip = 9
   return function(dt, interface)
@@ -41,6 +41,22 @@ effects.OpenEffect = function(actor)
       interface:effectWriteOffset(Tiles["pointy_poof"], actor.position.x, actor.position.y, c)
     elseif t < .8 then
       interface:effectWriteOffset(Tiles["chest_open"], actor.position.x, actor.position.y, actor.color)
+    else
+      return true
+    end
+  end
+end
+
+effects.CritEffect = function(actor, totalTime)
+  local t = 0
+  local lastflip = 9
+  return function(dt, interface)
+    t = t + dt
+
+    local color = { 1, 1, .1, 1 }
+    if t < .5 then
+      local c = Color.mul(color, t / 0.5)
+      interface:effectWriteOffset(actor.char, actor.position.x, actor.position.y, c)
     else
       return true
     end
