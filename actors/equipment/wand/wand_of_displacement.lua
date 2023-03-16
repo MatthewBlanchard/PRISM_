@@ -9,13 +9,14 @@ Zap.name = "zap"
 Zap.targets = {targets.Item}
 
 function Zap:perform(level)
+  local effects_system = level:getSystem("Effects")
   actions.Zap.perform(self, level)
   local target = self.targetActors[2]
   local position = self.owner.position
 
   local x, y = level:getRandomWalkableTile()
-  self.owner.position = Vector2(x, y)
-  level:addEffect(effects.Character(x, y, Tiles["poof"], {.4, .4, .4}, 0.3))
+  level:moveActor(self.owner, Vector2(x, y))
+  effects_system:addEffect(effects.Character(x, y, Tiles["poof"], {.4, .4, .4}, 0.3))
 end
 
 local WandOfRandomTeleportation = Actor:extend()
