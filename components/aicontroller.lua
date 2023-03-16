@@ -314,7 +314,7 @@ function AIController.getLightestTile(level, actor)
 end
 
 function AIController.getDarkestTile(level, actor)
-  local lowestLightValue = 0
+  local lowestLightValue = math.huge
   local lowest = {x = actor.position.x, y = actor.position.y}
 
   local light_system = level:getSystem("Lighting")
@@ -350,7 +350,6 @@ function AIController.moveTowardDarkness(level, actor)
   local x, y, lightVal = AIController.getDarkestTile(level, actor)
 
   local moveVec = Vector2(-(actor.position.x - x), -(actor.position.y - y))
-  print(moveVec)
   return actor:getAction(actions.Move)(actor, moveVec)
 end
 
