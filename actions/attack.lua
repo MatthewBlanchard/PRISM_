@@ -1,7 +1,6 @@
 local Action = require "action"
 
 local AttackTarget = targets.Creature:extend()
-AttackTarget:setRange(1)
 
 local Attack = Action:extend()
 Attack.name = "attack"

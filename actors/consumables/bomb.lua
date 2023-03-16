@@ -40,8 +40,6 @@ function Arm:perform(level)
   bomb:applyCondition(explode_condition)
 end
 
-print("ARM", Arm)
-
 local Bomb = Actor:extend()
 
 Bomb.name = "Bomb"

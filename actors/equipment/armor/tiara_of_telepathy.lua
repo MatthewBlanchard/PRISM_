@@ -13,7 +13,6 @@ Scrying:onScry(
       table.insert(scryed, actor)
     end
 
-    print("scry'd", #scryed)
     return scryed
   end
 )

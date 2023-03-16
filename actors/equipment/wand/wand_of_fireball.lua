@@ -36,7 +36,6 @@ function Zap:perform(level)
 
   effects_system:suppressEffects()
   for i, actor in ipairs(actors) do
-    print(i, actor)
     if targets.Creature:validate(self.owner, actor) then
       local damage = actor:getReaction(reactions.Damage)(actor, {self.owner}, damage, self.targetActors[1])
       level:performAction(damage)

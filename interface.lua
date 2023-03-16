@@ -6,6 +6,7 @@ local Panel = require "panel"
 local Inventory = require "panels.inventory"
 local Status = require "panels.status"
 local Message = require "panels.message"
+local Selector = require "panels.selector"
 
 local Interface = Panel()
 
@@ -144,7 +145,6 @@ function Interface:draw()
   end
 
   local function drawActors(actorTable, conditional)
-    print(actorTable == scryActors, #actorTable)
     for k, actor in pairs(actorTable) do
       local char = getAnimationChar(actor)
       if conditional and conditional(actor) or true then
@@ -234,7 +234,8 @@ Interface.keybinds = {
   ["tab"] = "inventory",
   p = "pickup",
   l = "log",
-  m = "map"
+  m = "map",
+  ["space"] = "classAbility"
 }
 
 function Interface:clearEffects()
@@ -269,6 +270,18 @@ function Interface:handleKeyPress(keypress)
 
     if self.keybinds[keypress] == "map" then
       game.viewDisplay = game.viewDisplay == game.viewDisplay1x and game.viewDisplay2x or game.viewDisplay1x
+    end
+  end
+
+  local progression_component = game.curActor:getComponent(components.Progression)
+  if self.keybinds[keypress] == "classAbility" and progression_component and progression_component.classAbility then
+    local classAbility = progression_component.classAbility
+    print(classAbility:getNumTargets())
+    if classAbility:getNumTargets() == 0 then
+      game.interface:reset()
+      game.interface:setAction(classAbility(game.curActor))
+    else
+      game.interface:push(Selector(self.display, self, classAbility))
     end
   end
 

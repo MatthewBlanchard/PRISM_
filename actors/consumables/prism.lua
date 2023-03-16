@@ -3,6 +3,7 @@ local Action = require "action"
 local Tiles = require "tiles"
 local FeatsPanel = require "panels.feats"
 local SwirlPanel = require "panels.swirl"
+local ClassSelectPanel = require "panels.class_select"
 
 local Gaze = Action:extend()
 Gaze.name = "gaze"
@@ -34,7 +35,12 @@ function Gaze:perform(level)
   end
 
   -- TODO: Better way to do this
-  if self.owner.level % 3 == 1 then
+  local progression_component = self.owner:getComponent(components.Progression)
+  if progression_component.level == 0 then
+    game.music:changeSong(game.music.ominousmusic, true)
+    game.interface:push(SwirlPanel(game.interface.display, game.interface))
+    game.interface:push(ClassSelectPanel(game.interface.display, game.interface))
+  else
     local feat1 = table.remove(feats, love.math.random(1, #feats))
     local feat2 = table.remove(feats, love.math.random(1, #feats))
     local feat3 = table.remove(feats, love.math.random(1, #feats))
@@ -46,7 +52,7 @@ function Gaze:perform(level)
 
   self.owner.maxHP = self.owner.maxHP + 5
   self.owner.HP = self.owner.HP + 5
-  self.owner.level = self.owner.level + 1
+  progression_component.level = progression_component.level + 1
 end
 
 local Prism = Actor:extend()

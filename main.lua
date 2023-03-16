@@ -33,7 +33,7 @@ end
 targets = require "target"
 loadItems("actions", actions, false)
 loadItems("actions/reactions", reactions, true)
-loadItems("components", components)
+loadItems("components", components, true)
 loadItems("conditions", conditions, true)
 loadItems("actors", actors, true)
 loadItems("systems", systems, true)
@@ -99,7 +99,7 @@ function love.load()
   table.insert(player:getComponent(components.Inventory).inventory, actors.Wand_of_mind_control())
   table.insert(player:getComponent(components.Inventory).inventory, actors.Prism())
   table.insert(player:getComponent(components.Inventory).inventory, actors.Gloop())
-  table.insert(player:getComponent(components.Inventory).inventory, actors.Tiara_of_telepathy())
+  table.insert(player:getComponent(components.Inventory).inventory, actors.Scroll_of_find_familiar())
 
   love.keyboard.setKeyRepeat(true)
 end

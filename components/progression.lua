@@ -7,13 +7,8 @@ Progression.requirements = {components.Stats}
 Progression.actions = {actions.Level}
 
 function Progression:initialize(actor)
-  actor.level = 1
-  actor.class = nil
-  actor.feats = {}
-end
-
-function Progression:setClass(actor, class_enum)
-  actor.class = class_enum
+  self.level = 0
+  self.classAbility = nil
 end
 
 return Progression

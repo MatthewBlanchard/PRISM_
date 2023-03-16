@@ -46,7 +46,6 @@ function Level:run()
   self.__map:create(self:getMapCallback())
   populateMap(self, self.__map)
 
-  print(#self.actors)
   -- no brakes baby
   while true do
     -- check if we should quit before we move onto the next actor
