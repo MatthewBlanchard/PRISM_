@@ -25,8 +25,6 @@ function Weapon:initialize(actor)
   if item_component then
     item_component.stackable = false
   end
-  
-  actor:applyCondition(conditions.Wield())
 end
 
 return Weapon

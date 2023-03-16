@@ -9,6 +9,10 @@ function Unwield:perform(level)
 
   local attacker = self.owner:getComponent(components.Attacker)
   attacker.wielded = attacker.defaultAttack
+
+  for k, effect in pairs(weapon.effects) do
+    action.owner:removeCondition(effect)
+  end
 end
 
 return Unwield
