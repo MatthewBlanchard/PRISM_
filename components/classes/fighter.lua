@@ -21,7 +21,7 @@ end
 
 -- Action that applies the Second Wind condition to the actor.
 local SecondWind = Action:extend()
-SecondWind.name = "Second Wind"
+SecondWind.name = "activated Second Wind"
 
 function SecondWind:__new(owner, targets)
   Action.__new(self, owner, targets)

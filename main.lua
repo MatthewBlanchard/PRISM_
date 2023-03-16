@@ -64,6 +64,7 @@ local function createLevel()
   level:addSystem(systems.Lighting())
   level:addSystem(systems.Sight())
   level:addSystem(systems.Equipment())
+  level:addSystem(systems.Weapon())
   return level
 end
 
@@ -96,10 +97,6 @@ function love.load()
   game.curActor = player
 
   table.insert(player:getComponent(components.Inventory).inventory, actors.Torch())
-  table.insert(player:getComponent(components.Inventory).inventory, actors.Wand_of_mind_control())
-  table.insert(player:getComponent(components.Inventory).inventory, actors.Prism())
-  table.insert(player:getComponent(components.Inventory).inventory, actors.Gloop())
-  table.insert(player:getComponent(components.Inventory).inventory, actors.Scroll_of_find_familiar())
 
   love.keyboard.setKeyRepeat(true)
 end

@@ -128,9 +128,10 @@ function Populater(level, map)
     spawnActor(room, game.Player)
     spawnActor(room, actors.Box())
     spawnActor(room, actors.Snip())
-    spawnActor(room, actors.Lizbop())
+    --spawnActor(room, actors.Lizbop())
     --spawnActor(room, actors.Fink())
   --  spawnActor(room, actors.Gazer())
+    spawnActor(room, actors.Shortsword())
   end
 
   local chestContents = {

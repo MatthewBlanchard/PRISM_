@@ -20,30 +20,30 @@ function StatusPanel:draw()
     c = c == "" and " " or c
 
     local bg = barLength >= i and { .3, .3, .3, 1 } or { .2, .1, .1, 1 }
-    self:write(c, i + 1, 3, { .75, .75, .75, 1 }, bg)
+    self:write(c, i + 1, 2, { .75, .75, .75, 1 }, bg)
   end
 
   local attacker = game.curActor:getComponent(components.Attacker)
   if attacker then
     local statbonus = game.curActor:getStatBonus(attacker.wielded.stat)
-    self:write(attacker.wielded.name, 2, 4, { .75, .75, .75, 1 })
-    self:write("AC: " .. game.curActor:getAC(), 2, 5, { .75, .75, .75, 1 })
-    self:write("ATK: " .. game.curActor:getStat("ATK"), 2, 6, { .75, .75, .75, 1 })
-    self:write("MGK: " .. game.curActor:getStat("MGK"), 2, 7, { .75, .75, .75, 1 })
+    self:write(attacker.wielded.name, 2, 3, { .75, .75, .75, 1 })
+    self:write("AC: " .. game.curActor:getAC(), 2, 4, { .75, .75, .75, 1 })
+    self:write("ATK: " .. game.curActor:getStat("ATK"), 2, 5, { .75, .75, .75, 1 })
+    self:write("MGK: " .. game.curActor:getStat("MGK"), 2, 6, { .75, .75, .75, 1 })
     local wizard_component = game.curActor:getComponent(components.Wizard)
     if wizard_component then
-      self:write("Blast: " .. wizard_component.charges, 2, 8, {.75, .75, .75, 1})
+      self:write("Blast: " .. wizard_component.charges, 2, 7, {.75, .75, .75, 1})
     end
     local rogue_component = game.curActor:getComponent(components.Rogue)
     if rogue_component then
-      self:write("Invisibility: " .. rogue_component.charges, 2, 8, {.75, .75, .75, 1})
+      self:write("Invisibility: " .. rogue_component.charges, 2, 7, {.75, .75, .75, 1})
     end
     local fighter_component = game.curActor:getComponent(components.Fighter)
     if fighter_component then
-      self:write("Second Wind: " .. fighter_component.charges, 2, 8, {.75, .75, .75, 1})
+      self:write("Second Wind: " .. fighter_component.charges, 2, 7, {.75, .75, .75, 1})
     end
 
-    local i = 7
+    local i = 8
     local wallet_component = game.curActor:getComponent(components.Wallet)
     if wallet_component then
       for k, v in pairs(wallet_component.wallet) do
