@@ -43,7 +43,6 @@ function EquipmentSystem:registerLights(level)
 
     for actor, equipper_component in level:eachActor(components.Equipper) do
         for _, equipment in pairs(equipper_component.slots) do
-            print(_, equipment)
             if equipment then
                 local light_component = equipment:getComponent(components.Light)
                 if light_component then

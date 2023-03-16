@@ -96,7 +96,10 @@ function love.load()
   local player = game.Player
   game.curActor = player
 
-  table.insert(player:getComponent(components.Inventory).inventory, actors.Torch())
+  local torch = actors.Torch()
+  table.insert(player:getComponent(components.Inventory).inventory, torch)
+  table.insert(player:getComponent(components.Inventory).inventory, actors.Prism())
+  player:getComponent(components.Equipper):setSlot("offhand", torch)
 
   love.keyboard.setKeyRepeat(true)
 end

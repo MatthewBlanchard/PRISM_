@@ -131,7 +131,7 @@ function Populater(level, map)
     --spawnActor(room, actors.Lizbop())
     --spawnActor(room, actors.Fink())
   --  spawnActor(room, actors.Gazer())
-    spawnActor(room, actors.Shortsword())
+    spawnActor(room, actors.Rusty_shortsword())
   end
 
   local chestContents = {

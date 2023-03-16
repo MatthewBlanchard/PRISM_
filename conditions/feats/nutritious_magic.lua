@@ -9,7 +9,7 @@ NitritiousMagic:afterAction(actions.Zap,
     local eater = action.owner
     local food = action:getTarget(1)
     local heal = eater:getReaction(reactions.Heal)
-    level:performAction(heal(eater, {eater}, eater:getStatBonus("MGK")))
+    level:performAction(heal(eater, nil, eater:getStatBonus("MGK")))
   end
 )
 

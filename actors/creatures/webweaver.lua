@@ -19,7 +19,7 @@ Webweaver.components = {
   components.Stats{
     ATK = 1,
     MGK = 0,
-    PR = 1,
+    PR = 0,
     MR = 0,
     maxHP = 12,
     AC = 2
