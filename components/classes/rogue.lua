@@ -4,7 +4,7 @@ local MinorInvisibility = require "conditions.minor_invisibility"
 
 -- Action that applies the Second Wind condition to the actor.
 local BecomeInvisible = Action:extend()
-BecomeInvisible.name = "are Invisible"
+BecomeInvisible.name = "become invisible"
 
 function BecomeInvisible:__new(owner, targets)
   Action.__new(self, owner, targets)

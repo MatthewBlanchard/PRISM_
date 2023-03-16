@@ -10,7 +10,6 @@ end
 
 Sneaky:setTime(actions.Move,
   function(self, level, actor, action)
-    print "SKEET YEET KREET"
     action.time = action.time - 10
   end
 )
