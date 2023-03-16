@@ -207,7 +207,7 @@ function Populater(level, map)
     spawnActor(room, chest)
     table.insert(toSpawn, key)
 
-    spawnShards(room, 3, 10)
+    spawnShards(room, 10, 12)
   end
 
   local function populateRoom(room)

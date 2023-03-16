@@ -36,7 +36,8 @@ Bow.color = {0.8, 0.5, 0.1, 1}
 
 Bow.components = {
   components.Item(),
-  components.Usable{Shoot}
+  components.Usable{Shoot},
+  components.Cost{}
 }
 
 return Bow

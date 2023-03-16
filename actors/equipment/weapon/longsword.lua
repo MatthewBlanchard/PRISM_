@@ -12,7 +12,8 @@ Longsword.components = {
     name = "Longsword",
     dice = "1d8",
     time = 100
-  }
+  },
+  components.Cost{}
 }
 
 return Longsword

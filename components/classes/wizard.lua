@@ -11,6 +11,7 @@ local BlastWeapon = {
   stat = "MGK",
   name = "magic blast",
   dice = "1d2",
+  bonus = 1,
 }
 
 --activated ability

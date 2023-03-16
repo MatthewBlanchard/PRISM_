@@ -12,7 +12,8 @@ Dagger.components = {
     name = "Dagger",
     dice = "1d4",
     time = 50
-  }
+  },
+  components.Cost{}
 }
 
 return Dagger

@@ -12,7 +12,8 @@ Greatsword.components = {
     name = "Greatsword",
     dice = "2d6",
     time = 150
-  }
+  },
+  components.Cost{}
 }
 
 return Greatsword

@@ -53,7 +53,8 @@ Axe.components = {
     effects = {
       Swing 
     }
-  }
+  },
+  components.Cost{}
 }
 
 return Axe

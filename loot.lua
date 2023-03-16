@@ -36,7 +36,7 @@ end
 
 function lootUtil.generateLoot(comp, rarity)
   local found = {}
-  local rarity = rarity or "mythic"
+  local rarity = rarity or "common"
   local rarityMod = rarityModifier[rarity]
 
   for k, actor in pairs(actors) do

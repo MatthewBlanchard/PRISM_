@@ -13,14 +13,16 @@ CrystalSword.components = {
     components.Weapon{
         stat = "MGK",
         name = "CrystalSword",
-        dice = "1d3",
+        dice = "1d2",
+        bonus = 1,
         time = 100
     },
     components.Light{
         color = { 0.498, 1.00, 0.831, 1},
         intensity = 3,
         effect = lightEffect
-    }
+    },
+    components.Cost{rarity = "uncommon"}
 }
 
 return CrystalSword
