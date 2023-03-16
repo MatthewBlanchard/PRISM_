@@ -143,10 +143,6 @@ function Lighting:_emitLightFromCell(x, y, color, litCells)
     end
     for l = 1, 3 do
       cellColor[l] = cellColor[l] + color[l] * formFactor * falloff
-
-      if cellColor[1] ~= cellColor[1] then
-        print("NaN", x, y, color[l], formFactor, falloff)
-      end
     end
   end
   return self

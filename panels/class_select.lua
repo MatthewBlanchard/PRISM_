@@ -4,16 +4,16 @@ local Colors = require "colors"
 
 local ClassSelectPanel = Panel:extend()
 
-ClassSelectPanel.classes = {
-    components.Fighter,
-    components.Rogue,
-    components.Wizard,
-}
-
 function ClassSelectPanel:__new(display, parent)
   local halfx = display:getWidth() / 2 - 33 / 2
   local halfy = display:getHeight() / 2 - 27 / 2
   Panel.__new(self, display, parent, math.floor(halfx) + 1, math.floor(halfy), 33, 27)
+
+  self.classes = {
+    components.Fighter,
+    components.Rogue,
+    components.Wizard,
+  }
 
   self.SwirlPanel = SwirlPanel(display, parent)
 end
@@ -33,7 +33,9 @@ function ClassSelectPanel:draw()
 
     local descHeight = 0
     local extra = 0
+    
     for k, class in pairs(self.classes) do
+        print "HELLO DAWG"
         self:writeFormatted({ Colors.YELLOW, k .. ") " .. class.name }, 2, k * 2 + 3 + extra + descHeight)
         self:writeText("%b{black}" .. class.description, 5, k * 2 + 4 + extra + descHeight, self.w - 5)
         descHeight = descHeight + math.ceil(#class.description / (self.w - 5))
@@ -45,7 +47,7 @@ function ClassSelectPanel:handleKeyPress(keypress)
     local class = self.classes[tonumber(keypress)]
     if class then
       game.music:changeSong(game.music.mainmusic)
-      game.interface:setAction(actions.Level(game.curActor, class))
+      game.interface:setAction(actions.Choose_class(game.curActor, class))
       game.interface:reset()
     end
 end

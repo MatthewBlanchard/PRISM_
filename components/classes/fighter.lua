@@ -28,18 +28,17 @@ function SecondWind:__new(owner, targets)
 end
 
 function SecondWind:perform(level)
-  local actor = self:getTarget(1)
-
   local customSecondWind = SecondWindCondition:extend()
   customSecondWind:setDuration(500)
 
-  actor:applyCondition(customSecondWind)
+  self.owner:applyCondition(customSecondWind)
 end
 
 -- This component provides the active ability of the Fighter class to the actor
 -- it is attached to.
 local Fighter = Component:extend()
 Fighter.name = "Fighter"
+Fighter.description = "A chunky fighter with an active heal."
 
 Fighter.actions = {
     SecondWind
@@ -50,6 +49,10 @@ function Fighter:__new()
 end
 
 function Fighter:initialize(actor)
+  local progression_component = actor:getComponent(components.Progression)
+  progression_component.classAbility = SecondWind
+
+  actor.ATK = actor.ATK + 1
   actor:applyCondition(conditions.Tough())
 end
 

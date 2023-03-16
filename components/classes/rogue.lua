@@ -11,24 +11,27 @@ function BecomeInvisible:__new(owner, targets)
 end
 
 function BecomeInvisible:perform(level)
-  local actor = self:getTarget(1)
-
   local customMinorInvisibility = MinorInvisibility:extend()
   customMinorInvisibility:setDuration(500)
 
-  actor:applyCondition(customMinorInvisibility)
+  self.owner:applyCondition(customMinorInvisibility)
 end
 
 -- This component provides the active ability of the Rogue class to the actor
 -- it is attached to.
 local Rogue = Component:extend()
 Rogue.name = "Rogue"
+Rogue.description = "A sneaky guy who moves fast and can turn invisible."
 
 Rogue.actions = {
     BecomeInvisible
 }
 
 function Rogue:initialize(actor)
+  local progression_component = actor:getComponent(components.Progression)
+  progression_component.classAbility = BecomeInvisible
+
+  actor.ATK = actor.ATK + 1
   actor:applyCondition(conditions.Sneaky())
 end
 

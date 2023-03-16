@@ -2,48 +2,61 @@ local Component = require "component"
 local Condition = require "condition"
 local Action = require "action"
 
+local BlastTarget = targets.Creature:extend()
+BlastTarget.name = "BlastTarget"
+BlastTarget.range = 6
+
+
+local BlastWeapon = {
+  stat = "MGK",
+  name = "magic blast",
+  dice = "1d4",
+}
+
 --activated ability
 local Blast = actions.Zap:extend()
 Blast.name = "blast"
-Blast.targets = {targets.Item, BlastTarget}
+Blast.targets = {BlastTarget}
 
 function Blast:perform(level)
-    local wizard = self.targetActors[1]
+    local wizard = self.owner
     local wizard_component = wizard:getComponent(components.Wizard)
 
-    if wizard_component.charges <1 then
+    if wizard_component.charges < 1  then
         return
     end
 
     wizard_component:modifyCharges(-1)
 
-    if self:getTarget(2) then
-        local effectPos = self:getTarget(2).position or self:getTarget(2)
-        level:getSystem("Effects"):addEffect(effects.Zap(wand, self.owner, effectPos))
-    end
-    local target = self.targetActors[2]
-    local attack = actions.Attack(self.owner, target, BlastWeapon)
-    level:performAction(attack, true)
+    local target = self:getTarget(1)
+    level:getSystem("Effects"):addEffect(effects.Zap(self.owner, self.owner, target.position))
+
+    actions.Attack(self.owner, target, BlastWeapon):perform(level)
 end
 
 --class establishment
 local Wizard = Component:extend()
 Wizard.name = "Wizard"
+Wizard.description = "A wand slinging nerd who regains wand charges each floor."
 
 Wizard.actions = {
     Blast
 }
 
-function Wizard:_new()
-    self.charges = 3
-    self.maxCharges = 3
+function Wizard:__new()
+    self.charges = 5
+    self.maxCharges = 5
 end
 
-function Wizard.modifyCharges()
+function Wizard:modifyCharges(n)
     self.charges = math.min(math.max(self.charges + n, 0), self.maxCharges)
 end
 
 function Wizard:initialize(actor)
+    local progression_component = actor:getComponent(components.Progression)
+    progression_component.classAbility = Blast
+
+    actor.MGK = actor.MGK + 1
     actor:applyCondition(conditions.Arcane())
 end
 
