@@ -1,8 +1,20 @@
 local System = require "system"
-
+local Vector2 = require "vector"
 
 local InventorySystem = System:extend()
 InventorySystem.name = "Inventory"
+
+function InventorySystem:afterAction(level, actor, action)
+    local inventory_component = actor:getComponent(components.Inventory)
+
+    if inventory_component and action:is(reactions.Die) then
+        for _, item in pairs(inventory_component.inventory) do
+            inventory_component:removeItem(item)
+            level:addActor(item)
+            level:moveActor(item, Vector2(actor.position.x, actor.position.y))
+        end
+    end
+end
 
 -- Handles removing actors that are in the inventory at the time removeActor is called.
 function InventorySystem:onActorRemoved(level, actor)
