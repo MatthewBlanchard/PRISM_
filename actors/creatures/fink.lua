@@ -1,6 +1,7 @@
 local Actor = require "actor"
 local Vector2 = require "vector"
 local Tiles = require "tiles"
+local Shard = require "actors.other.shard"
 
 local Fink = Actor:extend()
 
@@ -30,14 +31,43 @@ Fink.components = {
     }
   },
 
+  components.Inventory(),
   components.Aicontroller(),
   components.Animated(),
   components.Faction{ "fink", "warmblooded" }
 }
 
+function Fink:initialize()
+  local inventory_component = self:getComponent(components.Inventory)
+  
+  for i = 1, math.random(2, 4) do
+    inventory_component:addItem(Shard())
+  end
+end
+
 local actUtil = components.Aicontroller
 function Fink:act(level)
-    return actUtil.moveTowardDarkness(level, self)
+  local effect_system = level:getSystem("Effects")
+
+  local target_player = actUtil.closestSeenActorByFaction(self, "player")
+
+  if target_player then
+    if target_player:getRange("box", self) <= 1 then
+      return self:getAction(actions.Attack)(self, target_player)
+    end
+    
+    local player_hp_percentage = target_player.HP / target_player.maxHP
+
+    if player_hp_percentage < 0.3 then
+      if target_player:getRange("box", self) <= 1 then
+        return self:getAction(actions.Attack)(self, target_player)
+      else
+        return actUtil.moveToward(self, target_player)
+      end
+    end
+  end
+
+  return actUtil.moveTowardDarkness(level, self)
 end
 
 return Fink
