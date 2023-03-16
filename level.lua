@@ -203,10 +203,6 @@ function Level:removeActor(actor)
   for _, condition in ipairs(actor:getConditions()) do
     condition:onActorRemoved(self, actor)
   end
-
-  -- TODO: Move checking the lose condition to a global system that listens
-  -- for the player's death.
-  self:checkLoseCondition()
 end
 
 --- A utility function that returns true if the level contains the given
@@ -451,15 +447,8 @@ function Level:getCellVisibility(x, y)
 end
 
 -- TODO: Replace with global system.
-function Level:checkLoseCondition()
-  local foundPlayerActor = false
-
-  for i, v in ipairs(self.actors) do
-    foundPlayerActor = foundPlayerActor or v:getComponent(components.Controller) ~= nil
-  end
-
-  -- set the shouldQuit flag which will be checked in Level.update
-  self.shouldQuit = not foundPlayerActor
+function Level:quit()
+  self.shouldQuit = true
 end
 
 -- Some simple callback generation stuff.
