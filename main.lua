@@ -76,8 +76,8 @@ function love.load()
   local w, h = math.floor(81 / scale), math.floor(49 / scale)
   local w2, h2 = math.floor(81 / 2), math.floor(49 / 2)
   local display = Display:new(w, h, scale, nil, { 1, 1, 1, 0 }, nil, nil, true)
-  local viewDisplay2x = Display:new(w2, h2, 2, nil, { .09, .09, .09 }, nil, nil, true)
-  local viewDisplay1x = Display:new(w, h, 1, nil, { .09, .09, .09 }, nil, nil, true)
+  local viewDisplay2x = Display:new(w2, h2, 2, nil, { .09, .09, .09 }, nil, nil, false)
+  local viewDisplay1x = Display:new(w, h, 1, nil, { .09, .09, .09 }, nil, nil, false)
 
   game.music = MusicManager()
   game.display = display
@@ -98,7 +98,6 @@ function love.load()
 
   local torch = actors.Torch()
   table.insert(player:getComponent(components.Inventory).inventory, torch)
-  table.insert(player:getComponent(components.Inventory).inventory, actors.Prism())
   player:getComponent(components.Equipper):setSlot("offhand", torch)
 
   love.keyboard.setKeyRepeat(true)
