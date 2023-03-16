@@ -4,7 +4,7 @@ local MinorInvisibility = require "conditions.minor_invisibility"
 
 -- Action that applies the Second Wind condition to the actor.
 local BecomeInvisible = Action:extend()
-BecomeInvisible.name = "Second Wind"
+BecomeInvisible.name = "are Invisible"
 
 function BecomeInvisible:__new(owner, targets)
   Action.__new(self, owner, targets)
@@ -13,6 +13,15 @@ end
 function BecomeInvisible:perform(level)
   local customMinorInvisibility = MinorInvisibility:extend()
   customMinorInvisibility:setDuration(500)
+  local rogue = self.owner
+  local rogue_component = rogue:getComponent(components.Rogue)
+
+  if rogue_component.charges < 1 then
+    self.time = 0
+    return
+  end
+
+  rogue_component:modifyCharges(-1)
 
   self.owner:applyCondition(customMinorInvisibility)
 end
@@ -27,7 +36,16 @@ Rogue.actions = {
     BecomeInvisible
 }
 
-function Rogue:initialize(actor)
+function Rogue:__new()
+  self.charges = 1
+  self.maxCharges = 1
+end
+
+function Rogue:modifyCharges(n)
+  self.charges = math.min(math.max(self.charges + n, 0), self.maxCharges)
+end
+
+  function Rogue:initialize(actor)
   local progression_component = actor:getComponent(components.Progression)
   progression_component.classAbility = BecomeInvisible
 

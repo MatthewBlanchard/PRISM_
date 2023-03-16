@@ -4,13 +4,13 @@ local Action = require "action"
 
 local BlastTarget = targets.Creature:extend()
 BlastTarget.name = "BlastTarget"
-BlastTarget.range = 6
+BlastTarget.range = 4
 
 
 local BlastWeapon = {
   stat = "MGK",
   name = "magic blast",
-  dice = "1d4",
+  dice = "1d2",
 }
 
 --activated ability
@@ -44,8 +44,8 @@ Wizard.actions = {
 }
 
 function Wizard:__new()
-    self.charges = 5
-    self.maxCharges = 5
+    self.charges = 7
+    self.maxCharges = 7
 end
 
 function Wizard:modifyCharges(n)

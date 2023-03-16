@@ -28,6 +28,20 @@ function StatusPanel:draw()
     local statbonus = game.curActor:getStatBonus(attacker.wielded.stat)
     self:write(attacker.wielded.name, 2, 4, { .75, .75, .75, 1 })
     self:write("AC: " .. game.curActor:getAC(), 2, 5, { .75, .75, .75, 1 })
+    self:write("ATK: " .. game.curActor:getStat("ATK"), 2, 6, { .75, .75, .75, 1 })
+    self:write("MGK: " .. game.curActor:getStat("MGK"), 2, 7, { .75, .75, .75, 1 })
+    local wizard_component = game.curActor:getComponent(components.Wizard)
+    if wizard_component then
+      self:write("Blast: " .. wizard_component.charges, 2, 8, {.75, .75, .75, 1})
+    end
+    local rogue_component = game.curActor:getComponent(components.Rogue)
+    if rogue_component then
+      self:write("Invisibility: " .. rogue_component.charges, 2, 8, {.75, .75, .75, 1})
+    end
+    local fighter_component = game.curActor:getComponent(components.Fighter)
+    if fighter_component then
+      self:write("Second Wind: " .. fighter_component.charges, 2, 8, {.75, .75, .75, 1})
+    end
 
     local i = 7
     local wallet_component = game.curActor:getComponent(components.Wallet)

@@ -30,6 +30,15 @@ end
 function SecondWind:perform(level)
   local customSecondWind = SecondWindCondition:extend()
   customSecondWind:setDuration(500)
+  local fighter = self.owner
+  local fighter_component = fighter:getComponent(components.Fighter)
+
+  if fighter_component.charges < 1 then
+    self.time = 0
+    return
+  end
+
+  fighter_component:modifyCharges(-1)
 
   self.owner:applyCondition(customSecondWind)
 end
@@ -45,7 +54,12 @@ Fighter.actions = {
 }
 
 function Fighter:__new()
-  self.duration = 500
+  self.charges = 1
+  self.maxCharges = 1
+end
+
+function Fighter:modifyCharges(n)
+  self.charges = math.min(math.max(self.charges + n, 0), self.maxCharges)
 end
 
 function Fighter:initialize(actor)
