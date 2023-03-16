@@ -36,6 +36,12 @@ Rogue.actions = {
     BecomeInvisible
 }
 
+if Action.attack then
+  if conditions.MinorInvisibility then
+    dice = "1d6"
+  end
+end
+
 function Rogue:__new()
   self.charges = 1
   self.maxCharges = 1
