@@ -227,7 +227,9 @@ Interface.movementTranslation = {
   q = Vector2(-1, -1),
   e = Vector2(1, -1),
   z = Vector2(-1, 1),
-  c = Vector2(1, 1)
+  c = Vector2(1, 1),
+
+  x = "wait"
 }
 
 Interface.keybinds = {
@@ -287,6 +289,10 @@ function Interface:handleKeyPress(keypress)
 
   -- we're dealing with a directional command here
   if self.movementTranslation[keypress] and game.curActor:hasComponent(components.Move) then
+    if self.movementTranslation[keypress] == "wait" then
+      return self:setAction(game.curActor:getAction(actions.Wait)(game.curActor))
+    end
+
     local targetPosition = game.curActor.position + self.movementTranslation[keypress]
 
     local sight_component = game.curActor:getComponent(components.Sight)
