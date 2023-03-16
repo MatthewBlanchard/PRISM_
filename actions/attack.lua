@@ -16,6 +16,7 @@ function Attack:__new(owner, defender, weapon)
 end
 
 function Attack:perform(level)
+  local effects_system = level:getSystem("Effects")
   local weapon = self.weapon
   local weaponBonus = weapon.bonus or 0
   local bonus = self.owner:getStatBonus(weapon.stat) + weaponBonus + self.attackBonus
@@ -32,6 +33,7 @@ function Attack:perform(level)
     self.hit = true
     if critical then
       dmg = dmg * 2
+      effects_system:addEffect(effects.CritEffect(defender))
     end
 
     local damage = defender:getReaction(reactions.Damage)(defender, {self.owner}, dmg)
@@ -40,7 +42,6 @@ function Attack:perform(level)
     return
   end
 
-  local effects_system = level:getSystem("Effects")
   if effects_system then
     effects_system:addEffect(effects.DamageEffect(self.owner.position, defender, dmg, false))
   end
