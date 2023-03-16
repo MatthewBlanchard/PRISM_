@@ -84,6 +84,12 @@ function Condition:extend()
   return self
 end
 
+function Condition:onApply()
+end
+
+function Condition:onRemove()
+end
+
 -- a helper function to handle condition durations
 function Condition:setDuration(duration)
   self:onTick(

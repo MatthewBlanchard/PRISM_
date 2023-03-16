@@ -35,7 +35,6 @@ function ClassSelectPanel:draw()
     local extra = 0
     
     for k, class in pairs(self.classes) do
-        print "HELLO DAWG"
         self:writeFormatted({ Colors.YELLOW, k .. ") " .. class.name }, 2, k * 2 + 3 + extra + descHeight)
         self:writeText("%b{black}" .. class.description, 5, k * 2 + 4 + extra + descHeight, self.w - 5)
         descHeight = descHeight + math.ceil(#class.description / (self.w - 5))

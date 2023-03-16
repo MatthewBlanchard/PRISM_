@@ -54,6 +54,7 @@ local tiles = {
 	pants = 374,
 	parsnip = 368,
 	player = 304,
+	inivs_player = 305,
 	fink = 306,
 	gazer = 305,
 	pointy_poof = 290,

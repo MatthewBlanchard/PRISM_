@@ -26,7 +26,13 @@ function StatusPanel:draw()
   local attacker = game.curActor:getComponent(components.Attacker)
   if attacker then
     local statbonus = game.curActor:getStatBonus(attacker.wielded.stat)
-    self:write(attacker.wielded.name, 2, 3, { .75, .75, .75, 1 })
+    local wielded_name_truncated = string.sub(attacker.wielded.name, 1, 21-7)
+
+    if wielded_name_truncated ~= attacker.wielded.name then
+      wielded_name_truncated = wielded_name_truncated .. "..."
+    end
+
+    self:write(wielded_name_truncated, 2, 3, { .75, .75, .75, 1 })
     self:write("AC: " .. game.curActor:getAC(), 2, 4, { .75, .75, .75, 1 })
     self:write("ATK: " .. game.curActor:getStat("ATK"), 2, 5, { .75, .75, .75, 1 })
     self:write("MGK: " .. game.curActor:getStat("MGK"), 2, 6, { .75, .75, .75, 1 })

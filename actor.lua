@@ -293,6 +293,8 @@ function Actor:applyCondition(condition)
 
   table.insert(self.conditions, condition)
   condition.owner = self
+
+  condition:onApply()
 end
 
 -- Checks if the actor has a condition of the given type.
@@ -311,6 +313,7 @@ end
 function Actor:removeCondition(condition)
   for i = 1, #self.conditions do
     if self.conditions[i]:is(condition) then
+      self.conditions[i]:onRemove()
       table.remove(self.conditions, i)
       return true
     end

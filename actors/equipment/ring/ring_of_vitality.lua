@@ -11,7 +11,7 @@ RingOfRegeneration.components = {
     slot = "ring",
     effects = {
       conditions.Modifystats{
-        maxHP = 5
+        maxHP = 3
       }
     }
   },

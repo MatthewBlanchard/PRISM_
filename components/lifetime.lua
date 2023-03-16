@@ -10,7 +10,6 @@ function Lifetime:__new(options)
 end
 
 function Lifetime:initialize(actor)
-  print "HAPPENING"
   local customLifetime = conditions.Lifetime:extend()
   customLifetime:setDuration(self.duration)
 
