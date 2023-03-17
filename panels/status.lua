@@ -26,7 +26,7 @@ function StatusPanel:draw()
   local attacker = game.curActor:getComponent(components.Attacker)
   if attacker then
     local statbonus = game.curActor:getStatBonus(attacker.wielded.stat)
-    local wielded_name_truncated = string.sub(attacker.wielded.name, 1, 21-7)
+    local wielded_name_truncated = string.sub(attacker.wielded.name, 1, 23-7)
 
     if wielded_name_truncated ~= attacker.wielded.name then
       wielded_name_truncated = wielded_name_truncated .. "..."
