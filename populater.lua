@@ -36,8 +36,13 @@ end
 local function getRandomWalkableAdjacentCardinal(level, x, y)
   local dir = randDirectionCardinal()
 
+  local tries = 0
   while not level:getCellPassable(x + dir.x, y + dir.y) do
     dir = randDirectionCardinal()
+    tries = tries + 1
+    if tries > 10 then
+      return nil
+    end
   end
 
   local final = Vector2(x + dir.x, y + dir.y)
@@ -70,6 +75,8 @@ function Populater(level, map)
     for i = 1, math.random(6) do
       local adjacent = getRandomWalkableAdjacentCardinal(level, curCell.x, curCell.y)
 
+      if not adjacent then break end
+
       local grass = Grass()
       grass.grassID = grassID
   
@@ -82,10 +89,12 @@ function Populater(level, map)
   end
 
   local function spawnActor(room, actor, x, y)
+    local tries = 0
     repeat 
       local _x, _y = room:getRandomWalkableTile()
       x, y = x or _x, y or _y
-    until level:getCellPassable(x, y)
+      tries = tries + 1
+    until level:getCellPassable(x, y) or tries > 10
 
     actor.position.x = x
     actor.position.y = y
@@ -129,7 +138,7 @@ function Populater(level, map)
     spawnActor(room, actors.Box())
     spawnActor(room, actors.Snip())
     --spawnActor(room, actors.Lizbop())
-    spawnActor(room, actors.Fink())
+    spawnActor(room, actors.Webweaver())
   --  spawnActor(room, actors.Gazer())
     spawnActor(room, actors.Rusty_shortsword())
   end
