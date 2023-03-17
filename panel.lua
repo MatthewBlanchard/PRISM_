@@ -124,6 +124,7 @@ function Panel:effectWriteOffsetUI(toWrite, x, y, ofx, ofy, fg, bg)
     return
   end
 
+  self.effectWrite = true
   local scale = game.viewDisplay.scale
   self._curEffectDone = false
   self:write(toWrite, mx * scale + ofx, my * scale + ofy, fg, bg)
