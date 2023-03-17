@@ -168,7 +168,13 @@ function SightSystem:updateSeenActors(level, actor)
 
     -- we loop through all the actors on the level and check if they are visible to the actor
     for k, other in ipairs(level.actors) do
-        if (other:isVisible() or actor == other) and sight_component:canSeeCell(other.position.x, other.position.y) then
+        local other_cell = level:getCell(other.position.x, other.position.y)
+        local actor_cell = level:getCell(actor.position.x, actor.position.y)
+        if  (other:isVisible() or actor == other) and
+            sight_component:canSeeCell(other.position.x, other.position.y) and
+            actor_cell:visibleFromCell(level, other_cell) and
+            other_cell:visibleFromCell(level, actor_cell)
+        then
             table.insert(sight_component.seenActors, other)
         end
     end
@@ -243,19 +249,5 @@ function SightSystem:createFOVClosure(level, sight_component)
         sight_component.fov[x][y] = level:getCell(x, y)
     end
 end
-
--- TODO: Generalize this so that cells can define their own visibility in 
--- relation to other cells
-function SightSystem:grassCheck(actor, other)
-    local otherid = self:getCell(other.position.x, other.position.y).grassID
-    local id = self:getCell(actor.position.x, actor.position.y).grassID
-  
-    if not id and not otherid then return true end
-    if not id and otherid then return false end
-    if id and not otherid then return true end
-    if id == otherid then return true end
-    return false
-  end
-  
 
 return SightSystem
