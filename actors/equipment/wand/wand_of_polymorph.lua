@@ -29,7 +29,6 @@ WandOfLight.char = Tiles["wand_gnarly"]
 WandOfLight.components = {
     components.Item{stackable = false},
     components.Usable(),
-    components.Edible{nutrition = 5},
     components.Wand{
         maxCharges = 3,
         zap = Zap
