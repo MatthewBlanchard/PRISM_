@@ -172,6 +172,25 @@ function SightSystem:updateSeenActors(level, actor)
             table.insert(sight_component.seenActors, other)
         end
     end
+
+    self:updateRememberedActors(level, actor)
+end
+
+function SightSystem:updateRememberedActors(level, actor)
+    local sight_component = actor:getComponent(components.Sight)
+    if not sight_component then return end
+
+    for x, _ in pairs(sight_component.fov) do
+        for y, _ in pairs(sight_component.fov[x]) do
+            sight_component.rememberedActors:removeCell(x, y)
+        end
+    end
+
+    for _, actor in ipairs(sight_component.seenActors) do
+        if actor.remembered then
+            sight_component.rememberedActors:setCell(actor.position.x, actor.position.y, actor)
+        end
+    end
 end
 
 function SightSystem:updateExplored(actor)
