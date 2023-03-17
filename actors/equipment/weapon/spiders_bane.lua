@@ -30,14 +30,20 @@ local SentientWeapon = Condition:extend()
 
 SentientWeapon:afterAction(actions.Attack,
   function(self, level, actor, action)
-    local message_system = level:getSystem("Message")
+    local effect_system = level:getSystem("Effects")
 
     local defender = action:getTarget(1)
     local faction_component = defender:getComponent(components.Faction)
 
     local defender_died = defender.HP <= 0
     if faction_component:has("arachnid") and action.hit and defender_died then
-        message_system:add(level, onkill_messages[math.random(1, #onkill_messages)], actor)
+        local speak_effect = effects.SpeakEffect(
+            actor,
+            onkill_messages[math.random(1, #onkill_messages)],
+            { 0.0, 1.0, 0.0, 1.0 }
+        )
+
+        effect_system:addEffect(speak_effect)
     end
   end
 )
