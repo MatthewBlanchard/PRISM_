@@ -4,6 +4,8 @@ MusicManager = require "musicmanager"
 vector22 = require "vector"
 Actor = require "actor"
 
+require "lib.batteries":export()
+
 systems = {}
 conditions = {}
 reactions = {}
@@ -65,6 +67,7 @@ local function createLevel()
   level:addSystem(systems.Sight())
   level:addSystem(systems.Equipment())
   level:addSystem(systems.Weapon())
+  level:addSystem(systems.Lose_condition())
   return level
 end
 
@@ -86,7 +89,6 @@ function love.load()
   game.viewDisplay = viewDisplay2x
   game.Player = actors.Player()
 
-
   local interface = Interface(display)
   interface:push(Start(display, interface))
 
@@ -98,7 +100,6 @@ function love.load()
 
   local torch = actors.Torch()
   table.insert(player:getComponent(components.Inventory).inventory, torch)
-  player:getComponent(components.Equipper):setSlot("offhand", torch)
 
   love.keyboard.setKeyRepeat(true)
 end
