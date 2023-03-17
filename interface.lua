@@ -91,6 +91,12 @@ function Interface:draw()
   local seenActors = self.seenActors
   local scryActors = sight_component.scryActors
 
+  local rememberedActors = {}
+
+  for _, _, _, actor in sight_component.rememberedActors:each() do
+    table.insert(rememberedActors, actor)
+  end
+
   local lighting_system = game.level:getSystem("Lighting")
   if lighting_system then
     lighting_system:rebuildLighting(game.level, self.dt)
@@ -150,7 +156,6 @@ function Interface:draw()
       if conditional and conditional(actor) or true then
         local x, y = actor.position.x, actor.position.y
         if actorTable == scryActors then
-          print(actor.name)
           self:writeOffset(char, x, y, actor.color)
         elseif light[x] and light[x][y] then
           local lightCol = lighting_system:getLightingAt(x, y, fov, light)
@@ -166,6 +171,7 @@ function Interface:draw()
     end
   end
 
+  drawActors(rememberedActors)
   drawActors(scryActors)
 
   -- draw things that don't move furst
@@ -278,7 +284,6 @@ function Interface:handleKeyPress(keypress)
   local progression_component = game.curActor:getComponent(components.Progression)
   if self.keybinds[keypress] == "classAbility" and progression_component and progression_component.classAbility then
     local classAbility = progression_component.classAbility
-    print(classAbility:getNumTargets())
     if classAbility:getNumTargets() == 0 then
       game.interface:reset()
       game.interface:setAction(classAbility(game.curActor))

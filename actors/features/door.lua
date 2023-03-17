@@ -26,6 +26,7 @@ Door.char = Tiles["door_closed"]
 Door.name = "door"
 Door.passable = false
 Door.blocksVision = true
+Door.remembered = true
 
 Door.components = {
   components.Usable({Open}, Open),
