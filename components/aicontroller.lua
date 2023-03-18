@@ -31,7 +31,8 @@ function AIController.isPassable(actor, vec)
   end
 
   for _, seen in ipairs(sight_component.seenActors) do
-    if seen.position.x == vec.x and seen.position.y == vec.y and not seen.passable and seen ~= actor then
+    local seen_passable = seen:hasComponent(components.Collideable)
+    if seen.position.x == vec.x and seen.position.y == vec.y and not seen_passable and seen ~= actor then
       return false
     end
   end

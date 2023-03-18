@@ -56,10 +56,10 @@ local Chest = Actor:extend()
 Chest.char = Tiles["chest"]
 Chest.color = {0.8, 0.8, 0.1, 1}
 Chest.name = "chest"
-Chest.passable = false
 Chest.blocksView = false
 
 Chest.components = {
+  components.Collideable{},
   components.Usable({Open}, Open),
   components.Inventory(),
   components.Lock()

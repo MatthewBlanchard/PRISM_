@@ -3,9 +3,9 @@ local Condition = require "condition"
 
 local Player = Actor:extend()
 Player.name = "Player"
-Player.passable = false
 
 Player.components = {
+  components.Collideable(),
   components.Sight{ range = 30, fov = true, explored = true },
   components.Message(),
   components.Move{ speed = 100 },

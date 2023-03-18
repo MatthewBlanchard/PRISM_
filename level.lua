@@ -419,7 +419,7 @@ function Level:getCellPassable(x, y)
     return false
   else
     for actor, _ in pairs(self.sparseMap:get(x, y)) do
-      if actor.passable == false then
+      if actor:hasComponent(components.Collideable) then
         return false
       end
     end

@@ -184,14 +184,14 @@ function Interface:draw()
   -- next up draw things that move but don't block movement
   drawActors(seenActors,
     function(actor)
-      return actor:hasComponent(components.Move) and actor.passable
+      return actor:hasComponent(components.Move) and actor:hasComponent(components.Collideable)
     end
   )
 
   -- now we draw the stuff that moves and blocks movement
   drawActors(seenActors,
     function(actor)
-      return actor:hasComponent(components.Move) and not actor.passable
+      return actor:hasComponent(components.Move) and not actor:hasComponent(components.Collideable)
     end
   )
 
@@ -309,18 +309,19 @@ function Interface:handleKeyPress(keypress)
     end
 
     if enemy then
+      local enemy_passable = enemy:hasComponent(components.Collideable)
       if enemy:hasComponent(components.Usable) and
           enemy.defaultUseAction and
           enemy.defaultUseAction:validateTarget(1, game.curActor, enemy) and
           not love.keyboard.isDown("lctrl")
       then
-        if not enemy.passable or love.keyboard.isDown("lshift") then
+        if enemy_passable or love.keyboard.isDown("lshift") then
           return self:setAction(enemy.defaultUseAction(game.curActor, { enemy }))
         end
       end
 
       if game.curActor:hasComponent(components.Attacker) and enemy:hasComponent(components.Stats) then
-        if not enemy.passable or love.keyboard.isDown("lctrl") then
+        if enemy_passable or love.keyboard.isDown("lctrl") then
           return self:setAction(game.curActor:getAction(actions.Attack)(game.curActor, enemy))
         end
       end

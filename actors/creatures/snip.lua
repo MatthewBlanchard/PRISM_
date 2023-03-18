@@ -21,7 +21,6 @@ Snip.char = Tiles["snip"]
 Snip.name = "Snip"
 Snip.description = "The sweet and savory song of the snip is a feast for the ears and the belly!"
 Snip.color = {0.97, 0.93, 0.55, 1}
-Snip.passable = true
 
 Snip.components = {
   components.Sight{ range = 6, fov = true, explored = false },

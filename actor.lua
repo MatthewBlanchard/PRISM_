@@ -38,10 +38,6 @@ Actor.position = nil
 -- @tfield string name
 Actor.name = "actor"
 
---- Defines whether the actor can be moved through.
--- @tfield boolean passable
-Actor.passable = true
-
 --- Defines whether the actor can be seen.
 -- @tfield boolean passable
 Actor.visible = true 

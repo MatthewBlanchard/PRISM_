@@ -2,7 +2,6 @@ local Actor = require "actor"
 local Action = require "action"
 
 local Product = Actor:extend()
-Product.passable = false
 
 local targetProduct = targets.Actor:extend()
 
@@ -11,6 +10,7 @@ function targetProduct:validate(owner, actor)
 end
 
 Product.components = {
+  components.Collideable(),
   components.Sellable(),
   components.Usable({actions.Buy}, actions.Buy)
 }
