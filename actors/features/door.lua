@@ -15,16 +15,16 @@ Open.targets = {targetDoor}
 function Open:perform(level)
   local door = self.targetActors[1]
 
-  local passable = door:hasComponent(components.Collideable)
-  door.char = passable and Tiles["door_closed"] or Tiles["door_open"]
+  local collideable = door:hasComponent(components.Collideable)
+  door.char = not collideable and Tiles["door_closed"] or Tiles["door_open"]
 
-  if passable then
+  if collideable then
     door:removeComponent(components.Collideable)
   else
-    door:addComponent(components.Collideable{})
+    door:addComponent(components.Collideable())
   end
 
-  door.blocksVision = not passable
+  door.blocksVision = not collideable
 end
 
 local Door = Actor:extend()
@@ -35,7 +35,7 @@ Door.blocksVision = true
 Door.remembered = true
 
 Door.components = {
-  components.Collideable{},
+  components.Collideable(),
   components.Usable({Open}, Open),
   components.Stats{
     maxHP = 12,

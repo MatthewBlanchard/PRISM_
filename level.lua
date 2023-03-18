@@ -159,7 +159,6 @@ function Level:getSystem(system_name)
   end
 end
 
-
 --
 -- Actors
 --
@@ -171,7 +170,10 @@ function Level:addActor(actor)
 
   actor:initialize(self)
   table.insert(self.actors, actor)
-  self.sparseMap:insert(actor.position.x, actor.position.y, actor)
+  
+  for vec in self:eachActorTile(actor) do
+    self.sparseMap:insert(vec.x, vec.y, actor)
+  end
 
   if actor:hasComponent(components.Aicontroller) or
       actor:hasComponent(components.Controller)
@@ -187,7 +189,10 @@ function Level:addActor(actor)
 end
 
 function Level:removeActor(actor)
-  self.sparseMap:remove(actor.position.x, actor.position.y, actor)
+  for vec in self:eachActorTile(actor) do
+    self.sparseMap:remove(vec.x, vec.y, actor)
+  end
+
   self.scheduler:remove(actor)
 
   for k, v in ipairs(self.actors) do
@@ -263,6 +268,25 @@ function Level:eachActor(...)
   end
 end
 
+function Level:eachActorTile(actor, callback)
+  local list = {}
+
+  local collideable_component = actor:getComponent(components.Collideable)
+  if collideable_component then
+    for vec in collideable_component.boundingBox:eachCell(actor.position) do
+      table.insert(list, vec)
+    end
+  else
+    table.insert(list, actor.position)
+  end
+
+  return function()
+    while #list > 0 do
+      return table.remove(list)
+    end
+  end
+end
+
 function Level:getActorsAtPosition(x, y)
   local actorsAtPosition = {}
   for i = 1, #self.actors do
@@ -279,6 +303,10 @@ end
 function Level:moveActor(actor, pos)
   assert(pos.is and pos:is(Vector2), "Expected a Vector2 for pos in Level:moveActor.")
 
+  for vec in self:eachActorTile(actor) do
+    self.sparseMap:remove(vec.x, vec.y, actor)
+  end
+  
   local oldpos = actor.position
   -- we copy the position here so that the caller doesn't have to worry about
   -- allocating a new table
@@ -289,8 +317,9 @@ function Level:moveActor(actor, pos)
     suppressOnLeave = suppressOnLeave or system:beforeMove(self, actor, oldpos, pos)
   end
 
-  self.sparseMap:remove(oldpos.x, oldpos.y, actor)
-  self.sparseMap:insert(pos.x, pos.y, actor)
+  for vec in self:eachActorTile(actor) do
+    self.sparseMap:insert(vec.x, vec.y, actor)
+  end
 
   self.map[oldpos.x][oldpos.y]:onLeave(self, actor)
   self.map[pos.x][pos.y]:onEnter(self, actor)
@@ -414,12 +443,12 @@ function Level:getCell(x, y)
   return nil
 end
 
-function Level:getCellPassable(x, y)
+function Level:getCellPassable(x, y, actor)
   if not self:getCell(x, y).passable then
     return false
   else
-    for actor, _ in pairs(self.sparseMap:get(x, y)) do
-      if actor:hasComponent(components.Collideable) then
+    for other, _ in pairs(self.sparseMap:get(x, y)) do
+      if actor ~= other and other:hasComponent(components.Collideable) then
         return false
       end
     end

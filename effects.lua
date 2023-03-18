@@ -79,7 +79,9 @@ effects.DamageEffect = function(source, actor, dmg, hit)
     local dmgstring = tostring(dmg)
     local dmglen = string.len(dmgstring)
 
-    interface:effectWriteOffset(char, position.x, position.y, color)
+    for vec in game.level:eachActorTile(actor) do
+      interface:effectWriteOffset(char, vec.x, vec.y, color)
+    end
 
     if hit then
       interface:effectWriteOffsetUI(181, position.x, position.y, 1, -1, color)
@@ -121,7 +123,6 @@ effects.SpeakEffect = function(actor, text, color)
     end
 
     t = t + dt
-    print(t, dt)
     if t > 5 then
       return true
     end

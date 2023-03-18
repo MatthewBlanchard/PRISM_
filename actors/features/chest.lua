@@ -59,7 +59,7 @@ Chest.name = "chest"
 Chest.blocksView = false
 
 Chest.components = {
-  components.Collideable{},
+  components.Collideable(),
   components.Usable({Open}, Open),
   components.Inventory(),
   components.Lock()

@@ -154,18 +154,20 @@ function Interface:draw()
     for k, actor in pairs(actorTable) do
       local char = getAnimationChar(actor)
       if conditional and conditional(actor) or true then
-        local x, y = actor.position.x, actor.position.y
-        if actorTable == scryActors then
-          self:writeOffset(char, x, y, actor.color)
-        elseif light[x] and light[x][y] then
-          local lightCol = lighting_system:getLightingAt(x, y, fov, light)
-          local lightValue = value(lightCol)
-          local t = math.max(lightValue - ambientValue, 0)
-          t = math.min(t / (1 - ambientValue), 1)
-          local finalColor = clerp(ambientColor, lightCol, t)
-          self:writeOffset(char, x, y, clerp(ambientColor, actor.color, t))
-        else
-          self:writeOffset(char, x, y, ambientColor)
+        for vec in game.level:eachActorTile(actor) do
+          local x, y = vec.x, vec.y
+          if actorTable == scryActors then
+            self:writeOffset(char, x, y, actor.color)
+          elseif light[x] and light[x][y] then
+            local lightCol = lighting_system:getLightingAt(x, y, fov, light)
+            local lightValue = value(lightCol)
+            local t = math.max(lightValue - ambientValue, 0)
+            t = math.min(t / (1 - ambientValue), 1)
+            local finalColor = clerp(ambientColor, lightCol, t)
+            self:writeOffset(char, x, y, clerp(ambientColor, actor.color, t))
+          else
+            self:writeOffset(char, x, y, ambientColor)
+          end
         end
       end
     end
@@ -302,9 +304,12 @@ function Interface:handleKeyPress(keypress)
 
     local sight_component = game.curActor:getComponent(components.Sight)
     local enemy
+    
     for k, actor in pairs(sight_component.seenActors) do
-      if actor.position == targetPosition then
-        enemy = actor
+      for vec in game.level:eachActorTile(actor) do
+        if vec == targetPosition then
+          enemy = actor
+        end
       end
     end
 

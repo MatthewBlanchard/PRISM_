@@ -333,8 +333,45 @@ function Actor:getPosition()
 end
 
 function Actor:getRange(type, actor)
-  local vec = actor.position and Vector2(actor.position.x, actor.position.y) or actor
-  return self:getRangeVec(type, vec)
+  local lowest = math.huge
+
+  if not actor:is(Actor) then
+    return self:getRangeVec(type, actor)
+  end
+
+  local collideable_component = self:getComponent(components.Collideable)
+  local other_collideable_component = actor:getComponent(components.Collideable)
+
+  local self_tiles = {}
+  if collideable_component then
+    for vec in collideable_component.boundingBox:eachCell(self.position) do
+      table.insert(self_tiles, vec)
+    end
+  else
+    self_tiles = {self.position}
+  end
+
+  local other_tiles = {}
+  if other_collideable_component then
+    for vec in other_collideable_component.boundingBox:eachCell(actor.position) do
+      table.insert(other_tiles, vec)
+    end
+  else
+    other_tiles = {actor.position}
+  end
+
+  -- now that we've assembled lists of tiles, we can iterate over them and find
+  -- the lowest range.
+  for _, self_tile in pairs(self_tiles) do
+    for _, other_tile in pairs(other_tiles) do
+      local range = self_tile:getRange(type, other_tile)
+      if range < lowest then
+        lowest = range
+      end
+    end
+  end
+
+  return lowest
 end
 
 function Actor:getRangeVec(type, vector)

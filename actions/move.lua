@@ -13,9 +13,16 @@ function Move:perform(level)
   local direction = self:getTarget(1)
 
   local newPosition = self.owner.position + direction
-  if level:getCellPassable(newPosition.x, newPosition.y) then
-    level:moveActor(self.owner, newPosition)
+
+  for cell in level:eachActorTile(self.owner) do
+    local check = cell + direction
+    if not level:getCellPassable(check.x, check.y, self.owner) then
+      print(self.owner.name, "YEP")
+      return
+    end
   end
+
+  level:moveActor(self.owner, newPosition)
 end
 
 return Move
