@@ -1,4 +1,5 @@
-local Object = require "Object"
+local Object = require "object"
+local Vector2 = require "vector"
 
 local BoundingBox = Object:extend()
 
@@ -11,14 +12,16 @@ end
 -- position). The iterator returns the x and y coordinates of the cell.
 -- The first return should be 0, 0.
 function BoundingBox:eachCell(position)
-    local x, y = 0, 0
+    local list = {}
+
+    for x = 0, self.size - 1 do
+        for y = 0, self.size - 1 do
+            table.insert(list, Vector2(x, y) + position)
+        end
+    end
 
     return function()
-        for x = 0, self.size - 1 do
-            for y = 0, self.size - 1 do
-                return Vector2(x, y) + position
-            end
-        end
+        return table.remove(list, 1)
     end
 end
 
