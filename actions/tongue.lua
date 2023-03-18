@@ -13,7 +13,8 @@ function Tongue:perform(level)
     for i, point in ipairs (line) do
         local additionaltarget = level:getActorsAtPosition(point[1], point[2])
         for _, actor in ipairs (additionaltarget) do
-            if not actor.passable then
+            local actor_collide = actor:hasComponent(components.Collideable)
+            if not actor_collide then
                 local damageAmount = ROT.Dice.roll("1d1")
                 local damageAction = target:getReaction(reactions.Damage)(target, {self.owner}, damageAmount)
                 level:performAction(damageAction)
