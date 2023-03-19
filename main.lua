@@ -1,5 +1,20 @@
+-- require is not smart so we are going to wrap it to warn us if we include
+-- a file using /s instead of .s
+local _require = require
+require = function(path)
+  if path:find("/") and not path:find("rot") then
+    print("WARNING: require(" .. path .. ") uses / instead of .")
+  end
+
+  if string.lower(path) ~= path and not path:find("rot") then
+    print("WARNING: require(" .. path .. ") uses uppercase letters")
+  end
+
+  return _require(path)
+end
+
 -- TODO: Refactor this! We need a World object that holds all of the loaded actors, actions, etc. and the current level.
-ROT = require 'lib/rot/rot'
+ROT = require 'lib.rot.rot'
 MusicManager = require "musicmanager"
 vector22 = require "vector"
 Actor = require "actor"
@@ -23,6 +38,7 @@ local function loadItems(directoryName, items, recurse)
     love.filesystem.getInfo(fileName, info)
     if info.type == "file" then
       fileName = string.gsub(fileName, ".lua", "")
+      fileName = string.gsub(fileName, "/", ".")
       local name = string.gsub(item:sub(1, 1):upper() .. item:sub(2), ".lua", "")
 
       items[name] = require(fileName)
@@ -55,7 +71,6 @@ end
 -- Global
 
 game = {}
-
 
 local function createLevel()
   local map = ROT.Map.Brogue(50, 50)

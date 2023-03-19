@@ -4,7 +4,7 @@ local Vector = require "vector"
 local Bresenham = require "bresenham"
 
 local function bresenhamCallback(x, y)
-  return game.level:getCellPass(x, y)
+  return game.level:getCellPassableNoActors(x, y)
 end
 
 local function blink(period)

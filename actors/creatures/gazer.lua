@@ -9,7 +9,7 @@ Gazer.name = "gazer"
 Gazer.color = {0.8, 0.8, 0.8}
 
 Gazer.components = {
-  components.Collideable(),
+  components.Collideable_box(),
   components.Sight{range = 8, fov = true, explored = false},
   components.Move{speed = 115},
   components.Stats {

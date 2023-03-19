@@ -7,7 +7,7 @@ local SparseMap = require "sparsemap"
 local Vector2 = require "vector"
 
 local Cell = require "cell"
-local Wall = require "cells/wall"
+local Wall = require "cells.wall"
 
 local Level = Object:extend()
 
@@ -268,12 +268,12 @@ function Level:eachActor(...)
   end
 end
 
-function Level:eachActorTile(actor, callback)
+function Level:eachActorTile(actor)
   local list = {}
 
   local collideable_component = actor:getComponent(components.Collideable)
   if collideable_component then
-    for vec in collideable_component.boundingBox:eachCell(actor.position) do
+    for vec in collideable_component:eachCell(actor) do
       table.insert(list, vec)
     end
   else
@@ -300,11 +300,16 @@ function Level:getActorsAtPosition(x, y)
   return actorsAtPosition
 end
 
-function Level:moveActor(actor, pos)
+function Level:moveActor(actor, pos, skipSparseMap)
   assert(pos.is and pos:is(Vector2), "Expected a Vector2 for pos in Level:moveActor.")
 
-  for vec in self:eachActorTile(actor) do
-    self.sparseMap:remove(vec.x, vec.y, actor)
+  -- if the actor isn't in the level, we don't do anything
+  if not self:hasActor(actor) then
+    return
+  end
+
+  if not skipSparseMap then
+    self:removeSparseMapEntries(actor)
   end
   
   local oldpos = actor.position
@@ -317,8 +322,8 @@ function Level:moveActor(actor, pos)
     suppressOnLeave = suppressOnLeave or system:beforeMove(self, actor, oldpos, pos)
   end
 
-  for vec in self:eachActorTile(actor) do
-    self.sparseMap:insert(vec.x, vec.y, actor)
+  if not skipSparseMap then
+    self:insertSparseMapEntries(actor)
   end
 
   self.map[oldpos.x][oldpos.y]:onLeave(self, actor)
@@ -326,6 +331,87 @@ function Level:moveActor(actor, pos)
   
   for _, system in ipairs(self.systems) do
     system:onMove(self, actor, oldpos, pos)
+  end
+end
+
+-- moveActor doesn't do any checking for overlaps or collisions
+-- this function does and handles moving multi-tile actors. Soon
+-- I want to make this the default moveActor function and have
+-- moveActorUnchecked be a special case.
+function Level:moveActorChecked(actor, direction)
+  local newPosition = actor.position + direction
+
+  local candidate_rejected = {}
+  local collideable = actor:getComponent(components.Collideable)
+  if collideable then 
+    for cell in collideable:moveCandidate(actor, direction) do
+      local blockSelf = actor
+      
+      if collideable and collideable.blockSelf then
+        blockSelf = nil
+      end
+
+      if not self:getCellPassable(cell.x, cell.y, blockSelf) then
+        print(cell)
+        table.insert(candidate_rejected, cell)
+      end
+    end
+  else
+    if not self:getCellPassableNoActors(newPosition.x, newPosition.y, actor) then
+      return
+    end
+  end
+
+  if #candidate_rejected > 0 then
+    local trySqueeze = collideable:trySqueeze(actor, direction, candidate_rejected)
+    -- we didn't come up with a squeeze so we should abort
+    if not trySqueeze then
+      return
+    end
+
+    local squeeze_success = true
+    for cell in trySqueeze do
+      if not self:getCellPassable(cell.x, cell.y, actor) then
+        squeeze_success = false
+      end
+    end
+
+    if squeeze_success then
+      self:removeSparseMapEntries(actor)
+
+        collideable:acceptedSqueeze(actor, direction, candidate_rejected)
+      
+
+      self:moveActor(actor, newPosition, true)
+
+      self:insertSparseMapEntries(actor)
+    end
+
+    return
+  end
+
+  self:removeSparseMapEntries(actor)
+  -- we use the unchecked move actor here but pass in true to skip the
+  -- sparse map update. We do this because we're going to update the
+  -- sparse map ourselves.
+  self:moveActor(actor, newPosition, true)
+
+  if collideable and #candidate_rejected == 0 then
+    collideable:acceptedCandidate(actor, direction)
+  end
+
+  self:insertSparseMapEntries(actor)
+end
+
+function Level:removeSparseMapEntries(actor)
+  for vec in self:eachActorTile(actor) do
+    self.sparseMap:remove(vec.x, vec.y, actor)
+  end
+end
+
+function Level:insertSparseMapEntries(actor)
+  for vec in self:eachActorTile(actor) do
+    self.sparseMap:insert(vec.x, vec.y, actor)
   end
 end
 
@@ -457,7 +543,7 @@ function Level:getCellPassable(x, y, actor)
   end
 end
 
-function Level:getCellPass(x, y)
+function Level:getCellPassableNoActors(x, y)
   return self:getCell(x, y).passable
 end
 

@@ -13,6 +13,7 @@ Webweaver.actions = {
 }
 
 Webweaver.components = {
+  components.Collideable_box(),
   components.Sight{ range = 8, fov = true, explored = false },
   components.Move{ speed = 75 },
   components.Stats{

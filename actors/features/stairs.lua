@@ -23,7 +23,7 @@ Stairs.name = "stairs"
 Stairs.remembered = true
 
 Stairs.components = {
-  components.Collideable(),
+  components.Collideable_box(),
   components.Usable({Exit}, Exit),
 }
 

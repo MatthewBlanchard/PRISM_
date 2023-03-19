@@ -7,7 +7,7 @@ Shopkeep.char = Tiles["shop"]
 Shopkeep.color = {0.5, 0.5, 0.8}
 
 Shopkeep.components = {
-    components.Collideable(),
+    components.Collideable_box(),
 }
 
 return Shopkeep

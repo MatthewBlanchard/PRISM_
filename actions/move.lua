@@ -12,17 +12,14 @@ end
 function Move:perform(level)
   local direction = self:getTarget(1)
 
-  local newPosition = self.owner.position + direction
-
-  for cell in level:eachActorTile(self.owner) do
-    local check = cell + direction
-    if not level:getCellPassable(check.x, check.y, self.owner) then
-      print(self.owner.name, "YEP")
-      return
-    end
+  if not direction or direction:length() == 0 then
+    -- we've effectively taken a wait action
+    -- this should lead to an error or warning in the future
+    -- since we now have a wait action
+    return
   end
 
-  level:moveActor(self.owner, newPosition)
+  level:moveActorChecked(self.owner, direction)
 end
 
 return Move

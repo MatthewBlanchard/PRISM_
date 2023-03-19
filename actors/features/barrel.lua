@@ -31,7 +31,7 @@ Barrel.name = "barrel"
 Barrel.blocksVision = false
 
 Barrel.components = {
-  components.Collideable{},
+  components.Collideable_box(),
   components.Stats {
     maxHP = 1,
   }

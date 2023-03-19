@@ -94,6 +94,7 @@ function Actor:__new()
 
       -- This is a hack to prevent components from being shared between actors by copying
       -- the prototype's 
+      component.owner = self
       temp[k] = component:extend()
     end
 
@@ -135,6 +136,7 @@ end
 -- @tparam Component component The component to add to the actor.
 function Actor:addComponent(component)
   assert(component:is(Component), "Expected argument component to be of type Component!")
+  assert(component.name, "Component must have name field!")
 
   if not component:checkRequirements(self) then
     error("Unsupported component added to actor!")
@@ -144,6 +146,7 @@ function Actor:addComponent(component)
     error("Actor already has component " .. component.name .. "!")
   end
 
+  component.owner = self
   table.insert(self.components, component)
   component:initialize(self)
 end
@@ -156,9 +159,10 @@ function Actor:removeComponent(component)
   assert(component:is(Component), "Expected argument component to be of type Component!")
 
   for i = 1, #self.components do
-    if self.components[i]:is(component) then
-      table.remove(self.components, i)
-      return
+    if self.components[i]:is(getmetatable(component)) then
+      local component = table.remove(self.components, i)
+      component.owner = nil
+      return component
     end
   end
 end
@@ -336,6 +340,7 @@ function Actor:getRange(type, actor)
   local lowest = math.huge
 
   if not actor:is(Actor) then
+    assert(actor:is(Vector2))
     return self:getRangeVec(type, actor)
   end
 
@@ -344,7 +349,7 @@ function Actor:getRange(type, actor)
 
   local self_tiles = {}
   if collideable_component then
-    for vec in collideable_component.boundingBox:eachCell(self.position) do
+    for vec in collideable_component:eachCell(self) do
       table.insert(self_tiles, vec)
     end
   else
@@ -353,7 +358,7 @@ function Actor:getRange(type, actor)
 
   local other_tiles = {}
   if other_collideable_component then
-    for vec in other_collideable_component.boundingBox:eachCell(actor.position) do
+    for vec in other_collideable_component:eachCell(actor) do
       table.insert(other_tiles, vec)
     end
   else

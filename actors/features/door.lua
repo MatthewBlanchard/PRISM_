@@ -21,7 +21,7 @@ function Open:perform(level)
   if collideable then
     door:removeComponent(components.Collideable)
   else
-    door:addComponent(components.Collideable())
+    door:addComponent(components.Collideable_box())
   end
 
   door.blocksVision = not collideable
@@ -35,7 +35,7 @@ Door.blocksVision = true
 Door.remembered = true
 
 Door.components = {
-  components.Collideable(),
+  components.Collideable_box(),
   components.Usable({Open}, Open),
   components.Stats{
     maxHP = 12,

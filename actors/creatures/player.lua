@@ -5,7 +5,7 @@ local Player = Actor:extend()
 Player.name = "Player"
 
 Player.components = {
-  components.Collideable(),
+  components.Collideable_box(),
   components.Sight{ range = 30, fov = true, explored = true },
   components.Message(),
   components.Move{ speed = 100 },

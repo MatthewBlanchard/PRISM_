@@ -11,7 +11,7 @@ Box.color = {0.8, 0.5, 0.1, 1}
 Box.blocksView = false
 
 Box.components = {
-  components.Collideable(),
+  components.Collideable_box(),
   components.Move{speed = 0},
   components.Usable(),
   components.Pushable(),

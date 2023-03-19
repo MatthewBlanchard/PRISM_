@@ -10,7 +10,7 @@ function targetProduct:validate(owner, actor)
 end
 
 Product.components = {
-  components.Collideable(),
+  components.Collideable_box(),
   components.Sellable(),
   components.Usable({actions.Buy}, actions.Buy)
 }
