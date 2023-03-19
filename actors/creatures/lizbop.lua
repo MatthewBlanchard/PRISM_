@@ -11,7 +11,7 @@ LizBop.actions = {
 }
 
 LizBop.components = {
-  components.Collideable(),
+  components.Collideable_box(),
   components.Sight {fov = true, range = 6, expored = false},
   components.Move {speed = 90},
   components.Stats {
