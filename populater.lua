@@ -204,6 +204,7 @@ function Populater(level, map)
 
     local chest_lock = chest:getComponent(components.Lock)
     chest_lock:setKey(key)
+    
     spawnActor(room, chest)
     table.insert(toSpawn, key)
 
