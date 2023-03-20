@@ -38,10 +38,6 @@ Actor.position = nil
 -- @tfield string name
 Actor.name = "actor"
 
---- Defines whether the actor can be moved through.
--- @tfield boolean passable
-Actor.passable = true
-
 --- Defines whether the actor can be seen.
 -- @tfield boolean passable
 Actor.visible = true 
@@ -98,6 +94,7 @@ function Actor:__new()
 
       -- This is a hack to prevent components from being shared between actors by copying
       -- the prototype's 
+      component.owner = self
       temp[k] = component:extend()
     end
 
@@ -139,6 +136,7 @@ end
 -- @tparam Component component The component to add to the actor.
 function Actor:addComponent(component)
   assert(component:is(Component), "Expected argument component to be of type Component!")
+  assert(component.name, "Component must have name field!")
 
   if not component:checkRequirements(self) then
     error("Unsupported component added to actor!")
@@ -148,6 +146,7 @@ function Actor:addComponent(component)
     error("Actor already has component " .. component.name .. "!")
   end
 
+  component.owner = self
   table.insert(self.components, component)
   component:initialize(self)
 end
@@ -160,9 +159,10 @@ function Actor:removeComponent(component)
   assert(component:is(Component), "Expected argument component to be of type Component!")
 
   for i = 1, #self.components do
-    if self.components[i]:is(component) then
-      table.remove(self.components, i)
-      return
+    if self.components[i]:is(getmetatable(component)) then
+      local component = table.remove(self.components, i)
+      component.owner = nil
+      return component
     end
   end
 end
@@ -337,8 +337,46 @@ function Actor:getPosition()
 end
 
 function Actor:getRange(type, actor)
-  local vec = actor.position and Vector2(actor.position.x, actor.position.y) or actor
-  return self:getRangeVec(type, vec)
+  local lowest = math.huge
+
+  if not actor:is(Actor) then
+    assert(actor:is(Vector2))
+    return self:getRangeVec(type, actor)
+  end
+
+  local collideable_component = self:getComponent(components.Collideable)
+  local other_collideable_component = actor:getComponent(components.Collideable)
+
+  local self_tiles = {}
+  if collideable_component then
+    for vec in collideable_component:eachCell(self) do
+      table.insert(self_tiles, vec)
+    end
+  else
+    self_tiles = {self.position}
+  end
+
+  local other_tiles = {}
+  if other_collideable_component then
+    for vec in other_collideable_component:eachCell(actor) do
+      table.insert(other_tiles, vec)
+    end
+  else
+    other_tiles = {actor.position}
+  end
+
+  -- now that we've assembled lists of tiles, we can iterate over them and find
+  -- the lowest range.
+  for _, self_tile in pairs(self_tiles) do
+    for _, other_tile in pairs(other_tiles) do
+      local range = self_tile:getRange(type, other_tile)
+      if range < lowest then
+        lowest = range
+      end
+    end
+  end
+
+  return lowest
 end
 
 function Actor:getRangeVec(type, vector)

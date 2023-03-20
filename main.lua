@@ -1,8 +1,25 @@
+-- require is not smart so we are going to wrap it to warn us if we include
+-- a file using /s instead of .s
+local _require = require
+require = function(path)
+  if path:find("/") and not path:find("rot") then
+    print("WARNING: require(" .. path .. ") uses / instead of .")
+  end
+
+  if string.lower(path) ~= path and not path:find("rot") then
+    print("WARNING: require(" .. path .. ") uses uppercase letters")
+  end
+
+  return _require(path)
+end
+
 -- TODO: Refactor this! We need a World object that holds all of the loaded actors, actions, etc. and the current level.
-ROT = require 'lib/rot/rot'
+ROT = require 'lib.rot.rot'
 MusicManager = require "musicmanager"
 vector22 = require "vector"
 Actor = require "actor"
+
+require "lib.batteries":export()
 
 systems = {}
 conditions = {}
@@ -21,6 +38,7 @@ local function loadItems(directoryName, items, recurse)
     love.filesystem.getInfo(fileName, info)
     if info.type == "file" then
       fileName = string.gsub(fileName, ".lua", "")
+      fileName = string.gsub(fileName, "/", ".")
       local name = string.gsub(item:sub(1, 1):upper() .. item:sub(2), ".lua", "")
 
       items[name] = require(fileName)
@@ -54,7 +72,6 @@ end
 
 game = {}
 
-
 local function createLevel()
   local map = ROT.Map.Brogue(50, 50)
   local level = Level(map)
@@ -65,6 +82,7 @@ local function createLevel()
   level:addSystem(systems.Sight())
   level:addSystem(systems.Equipment())
   level:addSystem(systems.Weapon())
+  level:addSystem(systems.Lose_condition())
   return level
 end
 
@@ -86,7 +104,6 @@ function love.load()
   game.viewDisplay = viewDisplay2x
   game.Player = actors.Player()
 
-
   local interface = Interface(display)
   interface:push(Start(display, interface))
 
@@ -98,7 +115,7 @@ function love.load()
 
   local torch = actors.Torch()
   table.insert(player:getComponent(components.Inventory).inventory, torch)
-  player:getComponent(components.Equipper):setSlot("offhand", torch)
+  table.insert(player:getComponent(components.Inventory).inventory, actors.Tiara_of_telepathy())
 
   love.keyboard.setKeyRepeat(true)
 end

@@ -7,9 +7,9 @@ local Sqeeto = Actor:extend()
 Sqeeto.char = Tiles["sqeeto"]
 Sqeeto.name = "sqeeter"
 Sqeeto.color = {0.8, 0.7, 0.09}
-Sqeeto.passable = false
 
 Sqeeto.components = {
+  components.Collideable_box(),
   components.Sight{ range = 4, fov = true, explored = false, darkvision = 0.25 },
   components.Move{ speed = 100 },
   components.Stats{

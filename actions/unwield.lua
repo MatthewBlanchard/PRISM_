@@ -11,7 +11,7 @@ function Unwield:perform(level)
   attacker.wielded = attacker.defaultAttack
 
   for k, effect in pairs(weapon.effects) do
-    action.owner:removeCondition(effect)
+    self.owner:removeCondition(effect)
   end
 end
 

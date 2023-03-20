@@ -79,7 +79,9 @@ effects.DamageEffect = function(source, actor, dmg, hit)
     local dmgstring = tostring(dmg)
     local dmglen = string.len(dmgstring)
 
-    interface:effectWriteOffset(char, position.x, position.y, color)
+    for vec in game.level:eachActorTile(actor) do
+      interface:effectWriteOffset(char, vec.x, vec.y, color)
+    end
 
     if hit then
       interface:effectWriteOffsetUI(181, position.x, position.y, 1, -1, color)
@@ -88,6 +90,42 @@ effects.DamageEffect = function(source, actor, dmg, hit)
 
     t = t + dt
     if t > 0.3 then return true end
+  end
+end
+
+local function wrap(str, limit)
+  local Lines, here, limit = {}, 1, limit or 72
+  Lines[1] = string.sub(str,1,str:find("(%s+)()(%S+)()")-1)  -- Put the first word of the string in the first index of the table.
+
+  str:gsub("(%s+)()(%S+)()",
+        function(sp, st, word, fi)  -- Function gets called once for every space found.
+          if fi-here > limit then
+                here = st
+                Lines[#Lines+1] = word                                             -- If at the end of a line, start a new table index...
+          else Lines[#Lines] = Lines[#Lines].." "..word end  -- ... otherwise add to the current table index.
+        end)
+
+  return Lines
+end
+
+effects.SpeakEffect = function(actor, text, color)
+  local position = actor.position
+  local t = 0
+  local char = actor.char
+  local strings = wrap(text, 25)
+  
+
+  return function(dt, interface)
+
+    for i, string in ipairs(strings) do
+      interface:effectWriteOffsetUI(181, position.x, position.y, 1, -1, color)
+      interface:effectWriteOffsetUI(string, position.x, position.y, 2, -1 + i - 1, { 1, 1, 1 }, color)
+    end
+
+    t = t + dt
+    if t > 5 then
+      return true
+    end
   end
 end
 

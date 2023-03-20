@@ -39,7 +39,6 @@ local Gloop = Actor:extend()
 Gloop.char = Tiles["gloop"]
 Gloop.name = "gloop"
 Gloop.color = {90 / 230, 161 / 230, 74 / 230}
-Gloop.passable = true
 
 Gloop.components = {
   components.Sight{ range = 2, fov = true, explored = false },

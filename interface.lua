@@ -91,6 +91,12 @@ function Interface:draw()
   local seenActors = self.seenActors
   local scryActors = sight_component.scryActors
 
+  local rememberedActors = {}
+
+  for _, _, _, actor in sight_component.rememberedActors:each() do
+    table.insert(rememberedActors, actor)
+  end
+
   local lighting_system = game.level:getSystem("Lighting")
   if lighting_system then
     lighting_system:rebuildLighting(game.level, self.dt)
@@ -148,24 +154,26 @@ function Interface:draw()
     for k, actor in pairs(actorTable) do
       local char = getAnimationChar(actor)
       if conditional and conditional(actor) or true then
-        local x, y = actor.position.x, actor.position.y
-        if actorTable == scryActors then
-          print(actor.name)
-          self:writeOffset(char, x, y, actor.color)
-        elseif light[x] and light[x][y] then
-          local lightCol = lighting_system:getLightingAt(x, y, fov, light)
-          local lightValue = value(lightCol)
-          local t = math.max(lightValue - ambientValue, 0)
-          t = math.min(t / (1 - ambientValue), 1)
-          local finalColor = clerp(ambientColor, lightCol, t)
-          self:writeOffset(char, x, y, clerp(ambientColor, actor.color, t))
-        else
-          self:writeOffset(char, x, y, ambientColor)
+        for vec in game.level:eachActorTile(actor) do
+          local x, y = vec.x, vec.y
+          if actorTable == scryActors then
+            self:writeOffset(char, x, y, actor.color)
+          elseif light[x] and light[x][y] then
+            local lightCol = lighting_system:getLightingAt(x, y, fov, light)
+            local lightValue = value(lightCol)
+            local t = math.max(lightValue - ambientValue, 0)
+            t = math.min(t / (1 - ambientValue), 1)
+            local finalColor = clerp(ambientColor, lightCol, t)
+            self:writeOffset(char, x, y, clerp(ambientColor, actor.color, t))
+          else
+            self:writeOffset(char, x, y, ambientColor)
+          end
         end
       end
     end
   end
 
+  drawActors(rememberedActors)
   drawActors(scryActors)
 
   -- draw things that don't move furst
@@ -178,14 +186,14 @@ function Interface:draw()
   -- next up draw things that move but don't block movement
   drawActors(seenActors,
     function(actor)
-      return actor:hasComponent(components.Move) and actor.passable
+      return actor:hasComponent(components.Move) and actor:hasComponent(components.Collideable)
     end
   )
 
   -- now we draw the stuff that moves and blocks movement
   drawActors(seenActors,
     function(actor)
-      return actor:hasComponent(components.Move) and not actor.passable
+      return actor:hasComponent(components.Move) and not actor:hasComponent(components.Collideable)
     end
   )
 
@@ -278,7 +286,6 @@ function Interface:handleKeyPress(keypress)
   local progression_component = game.curActor:getComponent(components.Progression)
   if self.keybinds[keypress] == "classAbility" and progression_component and progression_component.classAbility then
     local classAbility = progression_component.classAbility
-    print(classAbility:getNumTargets())
     if classAbility:getNumTargets() == 0 then
       game.interface:reset()
       game.interface:setAction(classAbility(game.curActor))
@@ -297,25 +304,29 @@ function Interface:handleKeyPress(keypress)
 
     local sight_component = game.curActor:getComponent(components.Sight)
     local enemy
+    
     for k, actor in pairs(sight_component.seenActors) do
-      if actor.position == targetPosition then
-        enemy = actor
+      for vec in game.level:eachActorTile(actor) do
+        if vec == targetPosition then
+          enemy = actor
+        end
       end
     end
 
     if enemy then
+      local enemy_passable = enemy:hasComponent(components.Collideable)
       if enemy:hasComponent(components.Usable) and
           enemy.defaultUseAction and
           enemy.defaultUseAction:validateTarget(1, game.curActor, enemy) and
           not love.keyboard.isDown("lctrl")
       then
-        if not enemy.passable or love.keyboard.isDown("lshift") then
+        if enemy_passable or love.keyboard.isDown("lshift") then
           return self:setAction(enemy.defaultUseAction(game.curActor, { enemy }))
         end
       end
 
       if game.curActor:hasComponent(components.Attacker) and enemy:hasComponent(components.Stats) then
-        if not enemy.passable or love.keyboard.isDown("lctrl") then
+        if enemy_passable or love.keyboard.isDown("lctrl") then
           return self:setAction(game.curActor:getAction(actions.Attack)(game.curActor, enemy))
         end
       end

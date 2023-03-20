@@ -5,34 +5,35 @@ local tiles = require "tiles"
 LizBop.name = "Lizard"
 LizBop.char = tiles.lizbop
 LizBop.color = {0.0, 1.0, 0.0}
-LizBop.passable = false
+
 LizBop.actions = {
   actions.Tongue
 }
 
 LizBop.components = {
-    components.Sight {fov = true, range = 6, expored = false},
-    components.Move {speed = 90},
-    components.Stats {
-        ATK = 1,
-        MGK = 0,
-        PR = 0,
-        MR = 0,
-        maxHP = 3,
-        AC = 1
-    },
-    components.Aicontroller(),
-    components.Inventory(),
-    components.Attacker{
-        defaultAttack =
-        {
-          name = "Tail Swipe",
-          stat = "ATK",
-          dice = "1d2",
-        }
-    },
-    components.Animated(),
-    components.Faction{ "reptile" }
+  components.Collideable_box(),
+  components.Sight {fov = true, range = 6, expored = false},
+  components.Move {speed = 90},
+  components.Stats {
+      ATK = 1,
+      MGK = 0,
+      PR = 0,
+      MR = 0,
+      maxHP = 3,
+      AC = 1
+  },
+  components.Aicontroller(),
+  components.Inventory(),
+  components.Attacker{
+      defaultAttack =
+      {
+        name = "Tail Swipe",
+        stat = "ATK",
+        dice = "1d2",
+      }
+  },
+  components.Animated(),
+  components.Faction{ "reptile" }
 }
 
 local actUtil = components.Aicontroller

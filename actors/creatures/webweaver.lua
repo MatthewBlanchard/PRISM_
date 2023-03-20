@@ -7,13 +7,13 @@ local Webweaver = Actor:extend()
 Webweaver.char = Tiles["spider"]
 Webweaver.name = "weaver"
 Webweaver.color = {0.7, 0.7, 0.9}
-Webweaver.passable = false
 
 Webweaver.actions = {
   actions.Web
 }
 
 Webweaver.components = {
+  components.Collideable_box(),
   components.Sight{ range = 8, fov = true, explored = false },
   components.Move{ speed = 75 },
   components.Stats{

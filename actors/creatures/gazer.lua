@@ -7,9 +7,9 @@ local Gazer = Actor:extend()
 Gazer.char = Tiles["gazer"]
 Gazer.name = "gazer"
 Gazer.color = {0.8, 0.8, 0.8}
-Gazer.passable = false
 
 Gazer.components = {
+  components.Collideable_box(),
   components.Sight{range = 8, fov = true, explored = false},
   components.Move{speed = 115},
   components.Stats {

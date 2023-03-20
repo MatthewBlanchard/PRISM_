@@ -1,4 +1,5 @@
 local Object = {}
+Object.name = "Object"
 
 function Object:extend()
   local o = {}

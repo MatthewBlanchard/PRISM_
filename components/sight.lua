@@ -6,7 +6,13 @@ Sight.name = "Sight"
 function Sight:__new(options)
   self.range = options.range
   self.fov = options.fov
+  
+  -- explored tracks tiles that have been seen by the player
   self.explored = options.explored
+
+  -- remembered actors that have been seen by the player
+  self.rememberedActors = ROT.Type.Grid:new()
+
   self.darkvision = options.darkvision or 0.25
 end
 

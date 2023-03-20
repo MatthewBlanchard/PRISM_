@@ -10,7 +10,7 @@ function Wield:perform(level)
   self.owner:getComponent(components.Attacker).wielded = weapon
 
   for k, effect in pairs(weapon.effects) do
-    action.owner:applyCondition(effect)
+    self.owner:applyCondition(effect)
   end
 end
 

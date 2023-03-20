@@ -20,9 +20,10 @@ local Stairs = Actor:extend()
 
 Stairs.char = Tiles["stairs"]
 Stairs.name = "stairs"
-Stairs.passable = false
+Stairs.remembered = true
 
 Stairs.components = {
+  components.Collideable_box(),
   components.Usable({Exit}, Exit),
 }
 

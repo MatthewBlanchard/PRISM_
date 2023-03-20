@@ -1,4 +1,5 @@
 local Actor = require "actor"
+local Box = require "box"
 local Vector2 = require "vector"
 local Tiles = require "tiles"
 local Shard = require "actors.other.shard"
@@ -8,9 +9,9 @@ local Fink = Actor:extend()
 Fink.char = Tiles["fink"]
 Fink.name = "fink"
 Fink.color = {0.596, 0.462, 0.329}
-Fink.passable = false
 
 Fink.components = {
+  components.Collideable_box(),
   components.Sight{ range = 12, fov = true, explored = false, darkvision = 0.1 },
   components.Move{ speed = 100 },
   components.Stats{

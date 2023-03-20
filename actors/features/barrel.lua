@@ -28,10 +28,10 @@ local Barrel = Actor:extend()
 
 Barrel.char = Tiles["barrel"]
 Barrel.name = "barrel"
-Barrel.passable = false
 Barrel.blocksVision = false
 
 Barrel.components = {
+  components.Collideable_box(),
   components.Stats {
     maxHP = 1,
   }

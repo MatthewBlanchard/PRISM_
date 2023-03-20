@@ -8,4 +8,8 @@ Grass.opaque = false -- defines whether a cell can be seen through
 Grass.tile = Tiles["grass"]
 Grass.sightLimit = 3 -- when standing on this tile does it interfere with sight?
 
+function Grass:visibleFromCell(level, cell) 
+  return cell.grassID == self.grassID
+end
+
 return Grass

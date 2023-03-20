@@ -12,10 +12,14 @@ end
 function Move:perform(level)
   local direction = self:getTarget(1)
 
-  local newPosition = self.owner.position + direction
-  if level:getCellPassable(newPosition.x, newPosition.y) then
-    level:moveActor(self.owner, newPosition)
+  if not direction or direction:length() == 0 then
+    -- we've effectively taken a wait action
+    -- this should lead to an error or warning in the future
+    -- since we now have a wait action
+    return
   end
+
+  level:moveActorChecked(self.owner, direction)
 end
 
 return Move

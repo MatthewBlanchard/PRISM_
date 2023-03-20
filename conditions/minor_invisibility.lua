@@ -26,7 +26,6 @@ function MinorInvisibility:breakInvisibility(level, actor)
 end
 
 function MinorInvisibility:onApply()
-  print "WOWEE"
   self.storedChar = self.owner.char
   self.owner.char = Tiles["inivs_player"]
 end

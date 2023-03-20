@@ -28,6 +28,10 @@ function Vector2:copy()
   return Vector2(self.x, self.y)
 end
 
+function Vector2:length()
+  return math.sqrt(self.x * self.x + self.y * self.y)
+end
+
 --- Adds two vectors together.
 --@tparam Vector2 a The first vector.
 --@tparam Vector2 b The second vector.
