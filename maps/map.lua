@@ -8,8 +8,13 @@ local extension = jit.os == 'Windows' and 'dll' or jit.os == 'Linux' and 'so' or
 package.cpath = string.format('%s;%s/?.%s', package.cpath, lib_path, extension)
 local Clipper = require('maps.clipper.clipper')
 
-local tablex = require 'maps.batteries.tablex'
+local tablex = require 'lib.batteries.tablex'
 
+local id_generator_index = 0
+local id_generator = function()
+  id_generator_index = id_generator_index + 1
+  return id_generator_index
+end
 
 function Map:new(width, height, value)
   local o = {}
@@ -38,14 +43,12 @@ function Map:init(width, height, value)
   self.height = height
 end
 
-function Map:insert_actor(actor_id, x, y)
+function Map:insert_actor(actor_id, x, y, callback)
   local position = vec2(x, y)
+  local unique_id = id_generator()
+  table.insert(self.actors.list, {id = actor_id, unique_id = unique_id, pos = position, callback = callback})
   
-  table.insert(self.actors.list, {id = actor_id, pos = position})
-  self.actors.position_key[tostring(position)] = self.actors.position_key[tostring(position)] or {}
-  table.insert(self.actors.position_key[tostring(position)], actor_id)
-  
-  return self
+  return self, unique_id
 end
 
 -- Merging
@@ -71,11 +74,11 @@ function Map:special_merge(graph)
     local width = params.width or 4
     local height = params.height or 4
     local actors = params.actors or {}
-    local shaping = params.shaping or function(params, chunk) chunk:clearArea(1,1, chunk.width-1, chunk.height-1) end
+    local shaper = params.shaper or function(params, chunk) chunk:clear_rect(1,1, chunk.width-1, chunk.height-1) end
 
     local chunk = Map:new(width, height, 1)
     
-    shaping(params, chunk)
+    shaper(params, chunk)
 
     return chunk:new_from_outline()
   end
@@ -115,22 +118,9 @@ function Map:special_merge(graph)
     table.insert(paths, path)
   end
 
+  -- populater
   for _, v in ipairs(graph.nodes) do
-
-    for _, v2 in ipairs(v.parameters.actors) do
-      local x, y
-      if v2.positioning == 'Center' then
-        x, y = math.floor(v.parameters.width/2)+1, math.floor(v.parameters.height/2)+1
-      elseif v2.positioning == 'Random' then
-        repeat
-          x, y = love.math.random(1, v.parameters.width-1)+1, love.math.random(1, v.parameters.height-1)+1
-          local path = paths[graph.nodes[v]]
-        until Clipper.PointInPolygon(Clipper.IntPoint(x, y), path) == 1
-      end
-
-      v.room:insert_actor(v2.name, x, y)
-    end
-
+    if v.parameters.populater then v.parameters.populater(v.parameters, v.room, paths[graph.nodes[v]]) end
   end
   
   local function getMatches(lines1, lines2)
@@ -722,18 +712,9 @@ end
 
 -- -------------------------------------------------------------------------- --
 
--- Checks
-function Map:posIsInArea(x,y, xMin,yMin, xMax,yMax)
-  if x >= xMin and x <= xMax and y >= yMin and y <= yMax then
-    return true
-  else
-    return false
-  end
+function Map:get_center()
+  return math.floor(self.width/2), math.floor(self.height/2)
 end
-function Map:posIsInMap(x,y)
-  return Map:posIsInArea(x,y, 1,1, self.width,self.height)
-end
-
 
 --Space
 function Map:clear_cell(x,y)
@@ -741,20 +722,15 @@ function Map:clear_cell(x,y)
   
   return self
 end
-function Map:fillPoint(x,y)
+function Map:fill_cell(x,y)
   self.cells[x][y] = 1
   
   return self
 end
-function Map:set_point(x, y, id)
-  self.cells[x][y] = id
-  
-  return self
-end
 
 
---Area
-function Map:targetArea(x1,y1, x2,y2, func)
+-- Rect
+function Map:target_rect(x1,y1, x2,y2, func)
   for x = x1, x2 do
     for y = y1, y2 do
       func(x, y)
@@ -763,8 +739,8 @@ function Map:targetArea(x1,y1, x2,y2, func)
   
   return self
 end
-function Map:clearArea(x1,y1, x2,y2)
-  self:targetArea(
+function Map:clear_rect(x1,y1, x2,y2)
+  self:target_rect(
   x1,y1, x2,y2,
   function(x,y)
     self:clear_cell(x,y)
@@ -773,8 +749,8 @@ function Map:clearArea(x1,y1, x2,y2)
 
 return self
 end
-function Map:fillArea(x1,y1, x2,y2)
-  self:targetArea(
+function Map:fill_rect(x1,y1, x2,y2)
+  self:target_rect(
   x1,y1, x2,y2,
   function(x,y)
     self:fillPoint(x,y)
@@ -784,9 +760,9 @@ function Map:fillArea(x1,y1, x2,y2)
 return self
 end
 
---Perimeter
-function Map:targetPerimeter(x1,y1, x2,y2, func)
-  Map:targetArea(
+-- Perimeter
+function Map:target_perimeter(x1,y1, x2,y2, func)
+  Map:target_rect(
   x1,y1, x2,y2,
   function(x,y)
     if x==x1 or x==x2 or y==y1 or y==y2 then
@@ -795,22 +771,86 @@ function Map:targetPerimeter(x1,y1, x2,y2, func)
   end
 )
 end
-function Map:clearPerimeter(x1,y1, x2,y2)
-  Map:targetPerimeter(
+function Map:clear_perimeter(x1,y1, x2,y2)
+  Map:target_perimeter(
   x1,y1, x2,y2,
   function(x,y)
     self:clear_cell(x, y)
   end
 )
 end
-function Map:fillPerimeter(x1,y1, x2,y2)
-  Map:targetPerimeter(
+function Map:fill_perimeter(x1,y1, x2,y2)
+  Map:target_perimeter(
   x1,y1, x2,y2,
   function(x,y)
-    self:fillPoint(x, y)
+    self:fill_cell(x, y)
   end
 )
 end
+
+-- Ellipse
+function Map:target_ellipse(cx, cy, radx, rady, func)
+  for x = cx-radx, cx+radx do
+    for y = cy-rady, cx+rady do
+      local dx = (x - cx)^2
+      local dy = (y - cy)^2
+      if dx/(radx^2) + dy/(rady)^2 <= 1 then
+        func(x, y)
+      end
+
+    end
+  end
+
+  return self
+end
+function Map:clear_ellipse(cx, cy, radx, rady)
+  self:target_ellipse(
+    cx, cy, radx, rady,
+  function(x,y)
+    self:clear_cell(x,y)
+  end
+)
+end
+function Map:fill_ellipse(cx, cy, radx, rady)
+  self:target_ellipse(
+    cx, cy, radx, rady,
+  function(x,y)
+    self:fill_cell(x,y)
+  end
+)
+end
+
+-- Circumference
+function Map:target_circumference(cx, cy, radx, rady, func)
+  Map:target_ellipse(cx, cy, radx, rady, function(x, y)
+    local dx = (x - cx)^2
+    local dy = (y - cy)^2
+    print(dx/(radx^2) + dy/(rady)^2)
+    if dx/(radx^2) + dy/(rady)^2 >= 0.5 then
+      func(x, y)
+    end
+  end)
+
+  return self
+end
+function Map:clear_circumference(cx, cy, radx, rady)
+  self:target_circumference(
+    cx, cy, radx, rady,
+  function(x,y)
+    self:clear_cell(x,y)
+  end
+)
+end
+function Map:fill_circumference(cx, cy, radx, rady)
+  self:target_circumference(
+    cx, cy, radx, rady,
+  function(x,y)
+    self:clear_cell(x,y)
+  end
+)
+end
+
+-- Path
 
 --Designation
 function Map:newZoneMap()
@@ -1186,6 +1226,7 @@ function Map:automata2()
   end
 end
 
+-- DLA needs a cleared cell to start from and a space to clear
 function Map:DLAInOut()
   local function clamp(n, min, max)
     local n = math.max(math.min(n, max), min)
