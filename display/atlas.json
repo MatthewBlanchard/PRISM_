@@ -130,6 +130,21 @@
             "rotated": false
         },
         {
+            "idx": 265,
+            "name": "box",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                135,
+                240,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
             "idx": 303,
             "name": "bubble_angry",
             "origin": [
@@ -431,7 +446,7 @@
         },
         {
             "idx": 306,
-            "name": "fink",
+            "name": "fink_1",
             "origin": [
                 7,
                 7
@@ -439,6 +454,21 @@
             "rect": [
                 30,
                 285,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 322,
+            "name": "fink_2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                30,
+                300,
                 15,
                 15
             ],
@@ -461,7 +491,7 @@
         },
         {
             "idx": 311,
-            "name": "gloop",
+            "name": "gloop_1",
             "origin": [
                 7,
                 7
@@ -469,6 +499,21 @@
             "rect": [
                 105,
                 285,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 327,
+            "name": "gloop_2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                105,
+                300,
                 15,
                 15
             ],
@@ -566,7 +611,7 @@
         },
         {
             "idx": 305,
-            "name": "invis_player",
+            "name": "invis_player_1",
             "origin": [
                 7,
                 7
@@ -574,6 +619,21 @@
             "rect": [
                 15,
                 285,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 321,
+            "name": "invis_player_2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                15,
+                300,
                 15,
                 15
             ],
@@ -596,7 +656,7 @@
         },
         {
             "idx": 314,
-            "name": "lizbop",
+            "name": "lizbop_1",
             "origin": [
                 7,
                 7
@@ -604,6 +664,21 @@
             "rect": [
                 150,
                 285,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 330,
+            "name": "lizbop_2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                150,
+                300,
                 15,
                 15
             ],
@@ -618,21 +693,6 @@
             ],
             "rect": [
                 75,
-                315,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 338,
-            "name": "meat",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                30,
                 315,
                 15,
                 15
@@ -656,7 +716,7 @@
         },
         {
             "idx": 304,
-            "name": "player",
+            "name": "player_1",
             "origin": [
                 7,
                 7
@@ -664,6 +724,21 @@
             "rect": [
                 0,
                 285,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 320,
+            "name": "player_2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                0,
+                300,
                 15,
                 15
             ],
@@ -3370,51 +3445,6 @@
             "rotated": false
         },
         {
-            "idx": 257,
-            "name": "region_257",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                15,
-                240,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 258,
-            "name": "region_258",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                30,
-                240,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 259,
-            "name": "region_259",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                45,
-                240,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
             "idx": 26,
             "name": "region_26",
             "origin": [
@@ -3424,36 +3454,6 @@
             "rect": [
                 150,
                 15,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 260,
-            "name": "region_260",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                60,
-                240,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 265,
-            "name": "region_265",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                135,
-                240,
                 15,
                 15
             ],
@@ -3559,21 +3559,6 @@
             "rect": [
                 180,
                 15,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 283,
-            "name": "region_283",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                165,
-                255,
                 15,
                 15
             ],
@@ -3775,51 +3760,6 @@
             "rotated": false
         },
         {
-            "idx": 320,
-            "name": "region_320",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                0,
-                300,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 321,
-            "name": "region_321",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                15,
-                300,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 322,
-            "name": "region_322",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                30,
-                300,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
             "idx": 323,
             "name": "region_323",
             "origin": [
@@ -3828,21 +3768,6 @@
             ],
             "rect": [
                 45,
-                300,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 324,
-            "name": "region_324",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                60,
                 300,
                 15,
                 15
@@ -3865,66 +3790,6 @@
             "rotated": false
         },
         {
-            "idx": 326,
-            "name": "region_326",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                90,
-                300,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 327,
-            "name": "region_327",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                105,
-                300,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 328,
-            "name": "region_328",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                120,
-                300,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 329,
-            "name": "region_329",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                135,
-                300,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
             "idx": 33,
             "name": "region_33",
             "origin": [
@@ -3934,21 +3799,6 @@
             "rect": [
                 15,
                 30,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 330,
-            "name": "region_330",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                150,
-                300,
                 15,
                 15
             ],
@@ -5516,7 +5366,7 @@
         },
         {
             "idx": 310,
-            "name": "shop",
+            "name": "shop_1",
             "origin": [
                 7,
                 7
@@ -5524,6 +5374,21 @@
             "rect": [
                 90,
                 285,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 326,
+            "name": "shop_2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                90,
+                300,
                 15,
                 15
             ],
@@ -5546,7 +5411,7 @@
         },
         {
             "idx": 313,
-            "name": "snip",
+            "name": "snip_1",
             "origin": [
                 7,
                 7
@@ -5554,6 +5419,21 @@
             "rect": [
                 135,
                 285,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 329,
+            "name": "snip_2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                135,
+                300,
                 15,
                 15
             ],
@@ -5576,7 +5456,7 @@
         },
         {
             "idx": 312,
-            "name": "spider",
+            "name": "spider_1",
             "origin": [
                 7,
                 7
@@ -5590,8 +5470,23 @@
             "rotated": false
         },
         {
+            "idx": 328,
+            "name": "spider_2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                120,
+                300,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
             "idx": 308,
-            "name": "sqeeto",
+            "name": "sqeeto_1",
             "origin": [
                 7,
                 7
@@ -5599,6 +5494,21 @@
             "rect": [
                 60,
                 285,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 324,
+            "name": "sqeeto_2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                60,
+                300,
                 15,
                 15
             ],
@@ -5644,6 +5554,36 @@
             "rect": [
                 30,
                 255,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 283,
+            "name": "stationarytorch",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                165,
+                255,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 338,
+            "name": "steak",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                30,
+                315,
                 15,
                 15
             ],
@@ -5696,13 +5636,73 @@
         },
         {
             "idx": 256,
-            "name": "wall",
+            "name": "wall_1",
             "origin": [
                 7,
                 7
             ],
             "rect": [
                 0,
+                240,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 257,
+            "name": "wall_2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                15,
+                240,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 258,
+            "name": "wall_3",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                30,
+                240,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 259,
+            "name": "wall_4",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                45,
+                240,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 260,
+            "name": "wall_5",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                60,
                 240,
                 15,
                 15

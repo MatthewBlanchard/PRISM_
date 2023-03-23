@@ -4,7 +4,7 @@ local Tiles = require "tiles"
 
 local Webweaver = Actor:extend()
 
-Webweaver.char = Tiles["spider"]
+Webweaver.char = Tiles["spider_1"]
 Webweaver.name = "weaver"
 Webweaver.color = {0.7, 0.7, 0.9}
 

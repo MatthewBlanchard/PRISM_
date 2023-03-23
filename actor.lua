@@ -52,7 +52,7 @@ Actor.emissive = false
 
 --- Defines the actor's offset in the sprite sheet.
 -- @field offset integer
-Actor.char = Tiles["player"]
+Actor.char = Tiles["player_1"]
 
 --- Whether to conjugate verbs when referring to the actor. Currently non-functional.
 -- @tfield conjugate boolean

@@ -4,7 +4,7 @@ local Tiles = require "tiles"
 
 local Sqeeto = Actor:extend()
 
-Sqeeto.char = Tiles["sqeeto"]
+Sqeeto.char = Tiles["sqeeto_1"]
 Sqeeto.name = "sqeeter"
 Sqeeto.color = {0.8, 0.7, 0.09}
 
