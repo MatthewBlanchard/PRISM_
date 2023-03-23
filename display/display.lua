@@ -3,11 +3,8 @@
 local Display = {}
 local util = require 'display.util'
 local Tiles = require('tiles')
-Display.defaultTileset = {
-   path = 'display/new/atlas.png',
-   charWidth = 15,
-   charHeight = 15,
-}
+local json = require 'lib.json'
+Display.defaultTileset = 'display/atlas'
 
 --- Constructor.
 -- The display constructor.
@@ -117,19 +114,14 @@ end
 --- Change the tileset.
 -- Accepts the same table format as the one passed to the constructor.
 function Display:setTileset(tilesetInfo)
-   self.imageCharWidth = tilesetInfo.charWidth
-   self.imageCharHeight = tilesetInfo.charHeight
+   local atlas = json.decode(love.filesystem.read(tilesetInfo..'.json'))
+
+   self.imageCharWidth = atlas.grid_width
+   self.imageCharHeight = atlas.grid_height
    self.charWidth = self.imageCharWidth * self.scale
    self.charHeight = self.imageCharHeight * self.scale
-   self.glyphSprite = self.graphics.newImage(tilesetInfo.path)
+   self.glyphSprite = self.graphics.newImage(tilesetInfo..'.png')
 
-   self.rows = self.glyphSprite:getWidth() / self.imageCharWidth
-   self.columns = self.glyphSprite:getHeight() / self.imageCharHeight
-
-   --wow
-   local json = require 'lib.json'
-   local atlas = love.filesystem.read('display/new/atlas.json')
-   local atlas = json.decode(atlas)
 
    local sorted = {}
    for i, v in ipairs(atlas.regions) do
@@ -329,7 +321,7 @@ function Display:_writeValidatedString(s, x, y, fg, bg)
    for i = 1, #s do
       self.backgroundColors[x + i - 1][y]= bg
       self.foregroundColors[x + i - 1][y]= fg
-      self.chars[x + i - 1][y]        = Tiles[tostring(s:byte(i))] --wow
+      self.chars[x + i - 1][y]        = Tiles[tostring(s:byte(i))]
    end
 end
 
