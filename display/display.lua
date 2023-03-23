@@ -2,6 +2,7 @@
 -- A Code Page 437 terminal emulator based on AsciiPanel.
 local Display = {}
 local util = require 'display.util'
+local Tiles = require('tiles')
 Display.defaultTileset = {
    path = 'display/cp437_15x15.png',
    charWidth = 15,
@@ -317,7 +318,7 @@ function Display:_writeValidatedString(s, x, y, fg, bg)
    for i = 1, #s do
       self.backgroundColors[x + i - 1][y]= bg
       self.foregroundColors[x + i - 1][y]= fg
-      self.chars[x + i - 1][y]        = s:byte(i)
+      self.chars[x + i - 1][y]        = Tiles[tostring(s:byte(i))]
    end
 end
 
