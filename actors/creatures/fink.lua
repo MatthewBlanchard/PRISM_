@@ -34,7 +34,9 @@ Fink.components = {
 
   components.Inventory(),
   components.Aicontroller(),
-  components.Animated(),
+  components.Animated{
+    sheet = {Tiles["fink_1"], Tiles["fink_2"]}
+  },
   components.Faction{ "fink", "warmblooded" }
 }
 

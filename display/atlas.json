@@ -40,6 +40,21 @@
             "rotated": false
         },
         {
+            "idx": 291,
+            "name": "arrow_down",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                45,
+                270,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
             "idx": 343,
             "name": "axe",
             "origin": [
@@ -3604,21 +3619,6 @@
             "rect": [
                 195,
                 15,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 291,
-            "name": "region_291",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                45,
-                270,
                 15,
                 15
             ],
