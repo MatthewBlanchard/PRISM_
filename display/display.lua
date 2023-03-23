@@ -4,8 +4,6 @@ local Display = {}
 local util = require 'display.util'
 Display.defaultTileset = {
    path = 'display/cp437_15x15.png',
-   perRow = 16,
-   perColumn = 24,
    charWidth = 15,
    charHeight = 15,
 }
@@ -121,10 +119,13 @@ function Display:setTileset(tilesetInfo)
    self.charHeight = self.imageCharHeight * self.scale
    self.glyphSprite = self.graphics.newImage(tilesetInfo.path)
 
+   self.rows = self.glyphSprite:getWidth() / self.imageCharWidth
+   self.collums = self.glyphSprite:getHeight() / self.imageCharHeight
+
    local i = 0
-   for y = 0, tilesetInfo.perColumn - 1 do
+   for y = 0, self.collums - 1 do
       local sy = y * self.imageCharHeight
-      for x = 0, tilesetInfo.perRow - 1 do
+      for x = 0, self.rows - 1 do
          local sx = x * self.imageCharWidth
          self.glyphs[i] = self.graphics.newQuad(sx, sy, self.imageCharWidth, self.imageCharHeight,
             self.glyphSprite:getWidth(), self.glyphSprite:getHeight())
