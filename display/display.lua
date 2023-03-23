@@ -4,7 +4,7 @@ local Display = {}
 local util = require 'display.util'
 local Tiles = require('tiles')
 Display.defaultTileset = {
-   path = 'display/cp437_15x15.png',
+   path = 'display/new/atlas.png',
    charWidth = 15,
    charHeight = 15,
 }
@@ -55,10 +55,13 @@ function Display:new(w, h, scale, dfg, dbg, fullOrFlags, tilesetInfo, window)
 
    t.canvas = t.graphics.newCanvas(t.charWidth * t.widthInChars, t.charHeight * t.heightInChars)
 
+
    for i = 1, t.widthInChars do
       t.chars[i]               = {}
       t.backgroundColors[i]    = {}
-      t.foregroundColors[i]    = {}
+      t
+      
+        .foregroundColors[i]    = {}
       t.oldChars[i]            = {}
       t.oldBackgroundColors[i] = {}
       t.oldForegroundColors[i] = {}
@@ -121,17 +124,25 @@ function Display:setTileset(tilesetInfo)
    self.glyphSprite = self.graphics.newImage(tilesetInfo.path)
 
    self.rows = self.glyphSprite:getWidth() / self.imageCharWidth
-   self.collums = self.glyphSprite:getHeight() / self.imageCharHeight
+   self.columns = self.glyphSprite:getHeight() / self.imageCharHeight
 
-   local i = 0
-   for y = 0, self.collums - 1 do
-      local sy = y * self.imageCharHeight
-      for x = 0, self.rows - 1 do
-         local sx = x * self.imageCharWidth
-         self.glyphs[i] = self.graphics.newQuad(sx, sy, self.imageCharWidth, self.imageCharHeight,
-            self.glyphSprite:getWidth(), self.glyphSprite:getHeight())
-         i = i + 1
-      end
+   --wow
+   local json = require 'lib.json'
+   local atlas = love.filesystem.read('display/new/atlas.json')
+   local atlas = json.decode(atlas)
+
+   local sorted = {}
+   for i, v in ipairs(atlas.regions) do
+      sorted[v.idx] = v
+   end
+
+   for i, v in ipairs(sorted) do
+      local x, y = v.rect[1], v.rect[2]
+      local width, height = v.rect[3], v.rect[4]
+
+      self.glyphs[i] = self.graphics.newQuad(x, y, width, height,
+         atlas.width, atlas.height
+      )
    end
 
    self.tilesetChanged = true
@@ -318,7 +329,7 @@ function Display:_writeValidatedString(s, x, y, fg, bg)
    for i = 1, #s do
       self.backgroundColors[x + i - 1][y]= bg
       self.foregroundColors[x + i - 1][y]= fg
-      self.chars[x + i - 1][y]        = Tiles[tostring(s:byte(i))]
+      self.chars[x + i - 1][y]        = Tiles[tostring(s:byte(i))] --wow
    end
 end
 
