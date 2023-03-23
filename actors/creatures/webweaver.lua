@@ -35,7 +35,9 @@ Webweaver.components = {
   },
 
   components.Aicontroller(),
-  components.Animated(),
+  components.Animated{
+    sheet = {Tiles["spider_1"], Tiles["spider_2"]}
+  },
   components.Faction{ "arachnid" }
 }
 

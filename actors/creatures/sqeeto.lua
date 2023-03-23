@@ -31,7 +31,9 @@ Sqeeto.components = {
   },
 
   components.Aicontroller(),
-  components.Animated(),
+  components.Animated{
+    sheet = {Tiles["sqeeto_1"], Tiles["sqeeto_2"]}
+  },
   components.Faction{ "sqeeter" }
 }
 

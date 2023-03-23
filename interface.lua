@@ -130,11 +130,13 @@ function Interface:draw()
 
   local function getAnimationChar(actor)
     if not actor:hasComponent(components.Animated) then return actor.char end
-    if self.t % 0.600 > 0.400 then
-      return actor.char + 16
-    end
 
-    return actor.char
+    local animation = actor:getComponent(components.Animated)
+    if self.t % 0.600 > 0.400 then
+      return animation.sheet[2]
+    else
+      return animation.sheet[1]
+    end
   end
 
   local distortion = false

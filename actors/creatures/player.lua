@@ -1,8 +1,11 @@
 local Actor = require "actor"
 local Condition = require "condition"
+local Tiles = require "tiles"
 
 local Player = Actor:extend()
 Player.name = "Player"
+Player.char = Tiles["player"]
+
 
 Player.components = {
   components.Collideable_box(),
@@ -43,7 +46,9 @@ Player.components = {
     "cloak"
   },
 
-  components.Animated(),
+  components.Animated{
+    sheet = {Tiles["player_1"], Tiles["player_2"]}
+  },
   components.Faction{ "player", "warmblooded" }
 }
 return Player

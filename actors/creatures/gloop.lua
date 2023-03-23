@@ -53,7 +53,9 @@ Gloop.components = {
   },
   components.Item{stackable = true},
   components.Aicontroller(),
-  components.Animated(),
+  components.Animated{
+    sheet = {Tiles["gloop_1"], Tiles["gloop_2"]}
+  },
   components.Faction{ "critter" }
 }
 

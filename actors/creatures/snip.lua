@@ -37,7 +37,9 @@ Snip.components = {
   components.Usable(),
   components.Edible{nutrition = 2},
   components.Aicontroller(),
-  components.Animated(),
+  components.Animated{
+    sheet = {Tiles["snip_1"], Tiles["snip_2"]}
+  },
   components.Faction{ "critter" }
 }
 
