@@ -236,7 +236,7 @@ function Level:create(callback)
   }
   graph:add_node(tunnel)
 
-  graph:connect_nodes({type = 'Join'}, start, shop, finish)
+  graph:connect_nodes({type = 'Join'}, start, spider_nest, finish)
 
   -- local filler_nodes = {}
   -- for i = 1, 4 do
