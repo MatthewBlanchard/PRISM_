@@ -3,7 +3,7 @@ local LizBop = Actor:extend()
 local tiles = require "tiles"
 
 LizBop.name = "Lizard"
-LizBop.char = tiles.lizbop
+LizBop.char = tiles["lizbop_1"]
 LizBop.color = {0.0, 1.0, 0.0}
 
 LizBop.actions = {
