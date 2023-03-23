@@ -1,7 +1,17 @@
+local json = require 'lib.json'
+local atlas = love.filesystem.read('display/atlas.json')
+
+local tile_mapping = json.decode(atlas)
+local auto_tiles = {}
+for k, v in pairs(tile_mapping.regions) do
+	if v.idx >= 256 then
+		auto_tiles[v.name] = v.idx
+	end
+end
+
 local tiles = {
 	arrow_down = 291,
 
-	bubble_surprise = 292,
 	bubble_exclamation = 293,
 	bubble_question = 294,
 	bubble_sleep = 295,
@@ -15,7 +25,6 @@ local tiles = {
 	bubble_angry = 303,
 
 	axe = 343,
-	torch = 344,
 	armor = 354,
 	arrow = 378,
 	barrel = 281,
@@ -24,7 +33,6 @@ local tiles = {
 	bow = 336,
 	steak = 338,
 	cleaver = 339,
-	tiara = 342,
 
 	box = 265,
 	projectile1 = 266,
@@ -40,20 +48,15 @@ local tiles = {
 	glowshroom = 282,
 	stationarytorch = 283,
 	web = 284,
-	stairs = 286,
 	dagger = 359,
-	door_closed = 273,
-	door_open = 272,
 	floor = 261,
 	gloves = 373,
 	gobbo = 357,
 	golem = 309,
-	sqeeto = 308,
 	heal = 289,
 	key = 369,
 	pants = 374,
 	parsnip = 368,
-	player = 304,
 	inivs_player = 305,
 	fink = 306,
 	gazer = 305,
@@ -61,7 +64,6 @@ local tiles = {
 	potion = 353,
 	poof = 288,
 	pot = 280,
-	prism = 375,
 	rat = 306,
 	ring = 356,
 	scroll = 361,
@@ -103,5 +105,8 @@ local tiles = {
 	b_right_top = 335,
 	b_right_middle = 366
 }
+
+local tablex = require 'lib.batteries.tablex'
+tablex.overlay(tiles, auto_tiles)
 
 return tiles
