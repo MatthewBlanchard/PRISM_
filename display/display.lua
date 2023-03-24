@@ -390,7 +390,7 @@ function Display:drawText(x, y, text, maxWidth)
       if token.type == util.TYPE_TEXT then
          local isSpace, isPrevSpace, isFullWidth, isPrevFullWidth
          for i = 1, #token.value do
-            local cc = token.value:byte(i)
+            local cc = Tiles[tostring(token.value:byte(i))]--token.value:byte(i)
             local c = token.value:sub(i, i)
             -- TODO: chars will never be full-width without special handling
             -- TODO: ... so the next 15 lines or so do some pointless stuff
