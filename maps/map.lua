@@ -3,7 +3,7 @@ local Map = Object:extend()
 
 local vec2 = require "vector"
 
-local lib_path = love.filesystem.getWorkingDirectory() .. '/maps/clipper'
+local lib_path = love.filesystem.getSource() .. '/maps/clipper'
 local extension = jit.os == 'Windows' and 'dll' or jit.os == 'Linux' and 'so' or jit.os == 'OSX' and 'dylib'
 package.cpath = string.format('%s;%s/?.%s', package.cpath, lib_path, extension)
 local Clipper = require('maps.clipper.clipper')
@@ -753,11 +753,11 @@ function Map:fill_rect(x1,y1, x2,y2)
   self:target_rect(
   x1,y1, x2,y2,
   function(x,y)
-    self:fillPoint(x,y)
+    self:fill_cell(x,y)
   end
 )
 
-return self
+  return self
 end
 
 -- Perimeter
@@ -770,6 +770,8 @@ function Map:target_perimeter(x1,y1, x2,y2, func)
     end
   end
 )
+
+  return self
 end
 function Map:clear_perimeter(x1,y1, x2,y2)
   Map:target_perimeter(
@@ -778,6 +780,8 @@ function Map:clear_perimeter(x1,y1, x2,y2)
     self:clear_cell(x, y)
   end
 )
+
+  return self
 end
 function Map:fill_perimeter(x1,y1, x2,y2)
   Map:target_perimeter(
@@ -786,6 +790,8 @@ function Map:fill_perimeter(x1,y1, x2,y2)
     self:fill_cell(x, y)
   end
 )
+
+  return self
 end
 
 -- Ellipse
@@ -810,6 +816,8 @@ function Map:clear_ellipse(cx, cy, radx, rady)
     self:clear_cell(x,y)
   end
 )
+
+  return self
 end
 function Map:fill_ellipse(cx, cy, radx, rady)
   self:target_ellipse(
@@ -818,6 +826,8 @@ function Map:fill_ellipse(cx, cy, radx, rady)
     self:fill_cell(x,y)
   end
 )
+
+  return self
 end
 
 -- Circumference
@@ -840,6 +850,8 @@ function Map:clear_circumference(cx, cy, radx, rady)
     self:clear_cell(x,y)
   end
 )
+
+  return self
 end
 function Map:fill_circumference(cx, cy, radx, rady)
   self:target_circumference(
@@ -848,9 +860,49 @@ function Map:fill_circumference(cx, cy, radx, rady)
     self:clear_cell(x,y)
   end
 )
+
+  return self
 end
 
 -- Path
+function Map:new_path()
+  local path = {
+    points = {}
+  }
+  function path:add_point(vec)
+    table.insert(self.points, vec)
+  end
+
+  return path
+end
+function Map:target_path(path, func)
+  for i = 1, #path.points do
+    local x, y = path.points[i].x, path.points[i].y
+    func(x, y)
+  end
+
+  return self
+end
+function Map:clear_path(path)
+  self:target_path(
+  path,
+  function(x,y)
+    self:clear_cell(x,y)
+  end
+)
+
+return self
+end
+function Map:fill_path(path)
+  self:target_path(
+  path,
+  function(x,y)
+    self:fill_cell(x,y)
+  end
+)
+
+  return self
+end
 
 --Designation
 function Map:newZoneMap()
@@ -1290,7 +1342,9 @@ function Map:DLA()
 end
 
 function Map:drunkWalk(x, y, exitFunc)
-  self.cells[x][y] = 0
+  local path = Map:new_path()
+  path:add_point(vec2(x, y))
+
   local neighbors = {{1,0},{-1,0},{0,1},{0,-1}}
   local function clamp(n, min, max)
     local n = math.max(math.min(n, max), min)
@@ -1304,8 +1358,10 @@ function Map:drunkWalk(x, y, exitFunc)
     x = clamp(x + neighbors[vec][1], 1, self.width-1)
     y = clamp(y + neighbors[vec][2], 1, self.height-1)
 
-    self.cells[x][y] = 0
+    path:add_point(vec2(x,y))
   until exitFunc(x, y, i, self) == true
+
+  return path
 end
 
 function Map:guidedDrunkWalk(x1, y1, x2, y2, map, limit)

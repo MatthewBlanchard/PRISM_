@@ -4,7 +4,7 @@ local Tiles = require "tiles"
 
 local Player = Actor:extend()
 Player.name = "Player"
-Player.char = "Player"--Tiles["player"]
+Player.char = Tiles["player"]
 
 
 Player.components = {
@@ -46,9 +46,9 @@ Player.components = {
     "cloak"
   },
 
-  -- components.Animated{
-  --   sheet = {Tiles["player_1"], Tiles["player_2"]}
-  -- },
+  components.Animated{
+    sheet = {Tiles["player_1"], Tiles["player_2"]}
+  },
   components.Faction{ "player", "warmblooded" }
 }
 return Player
