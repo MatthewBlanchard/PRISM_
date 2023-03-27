@@ -191,6 +191,9 @@ function Map:special_merge(graph)
             table.insert(matches_without_intersections, {
               v, segment_index_1, segment_index_2, offset_clip, node_index2, offset, num_of_points, connection_point_1, connection_point_2,
               
+              segment_index_1 = segment_index_1,
+              segment_index_2 = segment_index_2,
+
               offset = offset,
               offset_clip = offset_clip,
               clip = paths[node_index2],
@@ -463,30 +466,40 @@ function Map:special_merge(graph)
     clip_width_sum = clip_width_sum + v.room.width
     clip_height_sum = clip_height_sum + v.room.height
   end
+  local clip_dimension_sum = vec2(clip_width_sum, clip_height_sum)
   
   local map = Map:new(clip_width_sum*2, clip_height_sum*2, 0)
 
   map:copy_map_onto_self_at_position(matches[match_index][1].room, clip_width_sum, clip_height_sum, false)
   for i = 2, #matches[match_index] do
     local match = matches[match_index][i]
-    local segment_index_1 = match[2]
-    local segment_index_2 = match[3]
+    local segment_index_1 = match.segment_index_1
+    local segment_index_2 = match.segment_index_2
     local vec = match[1][1].vec
     local offset = match.offset
     local connection_point = match[8]
-    local x2, y2 = offset.x, offset.y
-    local x1, y1 = offset.x + match[1][2][segment_index_2].x, offset.y + match[1][2][segment_index_2].y
-    table.insert(connections, {x1, y1, x2, y2, vec, match.edge_meta_info})
-    map:copy_map_onto_self_at_position(graph.nodes[match[5]].room, x2+clip_width_sum, y2+clip_height_sum, false)
+
+    table.insert(connections, {
+      segment_1 = match[1][1],
+      segment_2 = match[1][2],
+
+      segment_index_1 = segment_index_1,
+      segment_index_2 = segment_index_2,
+
+      match_point_1 = match[1][1][segment_index_1],
+      match_point_2 = match[1][2][segment_index_2],
+
+      offset = vec2(offset.x, offset.y),
+      clip_dimension_sum = clip_dimension_sum,
+
+      vec = vec,
+      edge_meta_info = match.edge_meta_info,
+    })
+    map:copy_map_onto_self_at_position(graph.nodes[match[5]].room, offset.x+clip_width_sum, offset.y+clip_height_sum, false)
   end
   
   for i, v in ipairs(connections) do
-    local x, y = v[1] + clip_width_sum, v[2] + clip_height_sum
-    local vec = v[5]
-    map:clear_cell(x, y)
-    :clear_cell(x+vec[2], y+vec[1])
-    :clear_cell(x-vec[2], y-vec[1])
-    :insert_actor('Door', x, y)
+    v.edge_meta_info.callback(map, v)
   end
 
   -- do
