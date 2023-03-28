@@ -552,7 +552,7 @@ function Level:getCellVisibility(x, y)
     return false
   else
     for actor, _ in pairs(self.sparseMap:get(x, y)) do
-      if actor.blocksVision == true then
+      if actor.opaque == true then
         return false
       end
     end

@@ -28,14 +28,14 @@ end
 
 function LightingSystem:beforeAction(level, actor, action)
   for actor in level:eachActor() do
-    self.__opaqueCache[actor] = actor.blocksVision
+    self.__opaqueCache[actor] = actor.opaque
   end
 end
 -- called when an Actor takes an Action 
 function LightingSystem:afterAction(level, actor, action)
   local force_rebuild = false
   for actor in level:eachActor() do
-    if self.__opaqueCache[actor] ~= actor.blocksVision then
+    if self.__opaqueCache[actor] ~= actor.opaque then
       force_rebuild = true
     end
     self.__opaqueCache[actor] = nil

@@ -24,14 +24,14 @@ function Open:perform(level)
     door:addComponent(components.Collideable_box())
   end
 
-  door.blocksVision = not collideable
+  door.opaque = not collideable
 end
 
 local Door = Actor:extend()
 
 Door.char = Tiles["door_2"]
 Door.name = "door"
-Door.blocksVision = true
+Door.opaque = true
 Door.remembered = true
 
 Door.components = {

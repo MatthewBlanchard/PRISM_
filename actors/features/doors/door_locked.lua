@@ -37,7 +37,7 @@ function Open:perform(level)
     door:addComponent(components.Collideable_box())
   end
 
-  door.blocksVision = not collideable
+  door.opaque = not collideable
 end
 
 local Door = Actor:extend()
@@ -45,7 +45,7 @@ local Door = Actor:extend()
 Door.char = Tiles["door_2"]
 Door.name = "door"
 Door.color = {0.8, 0.1, 0.1, 1}
-Door.blocksVision = true
+Door.opaque = true
 Door.remembered = true
 
 Door.components = {

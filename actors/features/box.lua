@@ -8,7 +8,7 @@ Box.name = "box"
 Box.speed = 0
 Box.char = Tiles["box"]
 Box.color = {0.8, 0.5, 0.1, 1}
-Box.blocksView = false
+Box.opaque = false
 
 Box.components = {
   components.Collideable_box(),
