@@ -9,9 +9,9 @@ local Clipper = require('maps.clipper.clipper')
 local Level = Object:extend()
 
 function Level:__new()
-  self._width = 500
-  self._height = 500
-  self._map = Map:new(500, 500, 0)
+  self._width = 600
+  self._height = 600
+  self._map = Map:new(600, 600, 0)
 end
 
 function Level:create(callback)
@@ -55,6 +55,8 @@ function Level:create(callback)
     populater = function(params, room)
     end,
   }
+
+  local _, boss_key_uuid
   
   local start = graph:new_node{
     width = 4, height = 4,
@@ -66,23 +68,14 @@ function Level:create(callback)
       local cx, cy = room:get_center()
       room:insert_actor('Player', cx, cy)
       room:insert_actor('Shortsword', cx, cy+1)
-      local _, key_uuid = room:insert_actor('Key_type', cx-1, cy)
-      room:insert_actor('Key_id', cx, cy-1)
+      room:insert_actor('Key_type', cx-1, cy)
+      _, boss_key_uuid = room:insert_actor('Key_id', cx, cy-1)
       
       local callback = function(actor, actors_by_unique_id)
-        if not actors_by_unique_id[key_uuid] then
-          return 'Delay'
-        end
-
         local chest_inventory = actor:getComponent(components.Inventory)
         chest_inventory:addItem(actors.Potion())
         local chest_lock = actor:getComponent(components.Lock_type)
         chest_lock:setKey(actors.Key_type)
-
-        -- local chest_inventory = actor:getComponent(components.Inventory)
-        -- chest_inventory:addItem(actors.Potion())
-        -- local chest_lock = actor:getComponent(components.Lock_type)
-        -- chest_lock:setKey(actors_by_unique_id[key_uuid])
       end
       room:insert_actor('Chest_lock_type', cx+1, cy, callback)
     end,
@@ -127,44 +120,47 @@ function Level:create(callback)
   }
   graph:add_node(sqeeto_hive)
   
-  -- local spider_nest = graph:new_node{
-  --   width = 20, height = 20,
-  --   shaper = function(params, room)
-  --     for i = 1, 2 do
-  --       room:drunkWalk(room.width/2, room.height/2,
-  --         function(x, y, i, room)  
-  --           return (i > 10) or (x < 5 or x > room.width-5 or y < 5 or y > room.height-5)
-  --         end
-  --       )
-  --     end
+  local spider_nest = graph:new_node{
+    width = 20, height = 20,
+    shaper = function(params, room)
+      local cx, cy = room:get_center()
+      for i = 1, 2 do
+        local path = room:drunkWalk(cx, cy,
+          function(x, y, i, room)  
+            return (i > 10) or (x < 5 or x > room.width-5 or y < 5 or y > room.height-5)
+          end
+        )
+      
+        room:clear_path(path)
+      end
   
-  --     for i = 1, 20 do
-  --       room:DLA()
-  --     end
-  --   end,
-  --   populater = function(params, room, clipping)
-  --     local cx, cy = math.floor(params.width/2)+1, math.floor(params.height/2)+1
+      for i = 1, 20 do
+        room:DLA()
+      end
+    end,
+    populater = function(params, room, clipping)
+      local cx, cy = room:get_center()
   
-  --     for i = 1, 1 do
-  --       local x, y
-  --       repeat
-  --         x, y = love.math.random(1, params.width-1)+1, love.math.random(1, params.height-1)+1
-  --       until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-  --       room:insert_actor('Webweaver', x, y)
-  --     end
+      for i = 1, 1 do
+        local x, y
+        repeat
+          x, y = love.math.random(1, params.width-1)+1, love.math.random(1, params.height-1)+1
+        until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
+        --room:insert_actor('Webweaver', x, y)
+      end
   
-  --     for i = 1, 1 do
-  --       local x, y
-  --       repeat
-  --         x, y = love.math.random(1, params.width-1)+1, love.math.random(1, params.height-1)+1
-  --       until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-  --       --room:insert_actor('Web', x, y)
-  --     end
+      for i = 1, 1 do
+        local x, y
+        repeat
+          x, y = love.math.random(1, params.width-1)+1, love.math.random(1, params.height-1)+1
+        until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
+        --room:insert_actor('Web', x, y)
+      end
   
-  --   end,
+    end,
   
-  -- }
-  -- graph:add_node(spider_nest)
+  }
+  graph:add_node(spider_nest)
   
   -- local shop = graph:new_node{
   --   width = 8, height = 8,
@@ -325,7 +321,7 @@ function Level:create(callback)
     {cr = 3, actors = {"Webweaver"}},
   }
 
-  -- local edge_door_join = {
+  -- local edge_join_door = {
   --   type = 'Join', 
   --   callback = function(chunk, x, y, vec)
   --     chunk:clear_cell(x, y)
@@ -335,7 +331,20 @@ function Level:create(callback)
   --   end,
   -- }
 
-  local edge_door_join = {
+  local edge_join_door = {
+    type = 'Join', 
+    callback = function(chunk, info)
+      local connection_point = vec2(info.match_point_2.x, info.match_point_2.y) + info.offset + info.clip_dimension_sum
+      local x, y = connection_point.x, connection_point.y
+
+      chunk:clear_cell(x, y)
+      :clear_cell(x+info.vec[2], y+info.vec[1])
+      :clear_cell(x-info.vec[2], y-info.vec[1])
+      :insert_actor('Door', x, y)
+    end,
+  }
+
+  local edge_join_breakable_wall = {
     type = 'Join', 
     callback = function(chunk, info)
       local connection_point = vec2(info.match_point_2.x, info.match_point_2.y) + info.offset + info.clip_dimension_sum
@@ -344,11 +353,11 @@ function Level:create(callback)
       chunk:clear_cell(x, y)
       :clear_cell(x+info.vec[2], y+info.vec[1])
       :clear_cell(x-info.vec[2], y+info.vec[1])
-      :insert_actor('Door', x, y)
+      :insert_actor('Breakable_wall', x, y)
     end,
   }
 
-  local edge_river_join = {
+  local edge_join_river = {
     type = 'Join', 
     callback = function(chunk, info)
       local connection_point = vec2(info.match_point_2.x, info.match_point_2.y) + info.offset + info.clip_dimension_sum
@@ -381,6 +390,25 @@ function Level:create(callback)
 
       -- chunk:clear_cell(x, y)
 
+    end,
+  }
+
+  local edge_join_boss_door = {
+    type = 'Join', 
+    callback = function(chunk, info)
+      local connection_point = vec2(info.match_point_2.x, info.match_point_2.y) + info.offset + info.clip_dimension_sum
+      local x, y = connection_point.x, connection_point.y
+
+      chunk:clear_cell(x, y)
+      :clear_cell(x+info.vec[2], y+info.vec[1])
+      :clear_cell(x-info.vec[2], y-info.vec[1])
+      :insert_actor('Door_locked', x, y, function(actor, actors_by_unique_id)
+        if not actors_by_unique_id[boss_key_uuid] then
+          return 'Delay'
+        end
+        local chest_lock = actor:getComponent(components.Lock_id)
+        chest_lock:setKey(actors_by_unique_id[boss_key_uuid])
+      end)
     end,
   }
   
@@ -419,19 +447,24 @@ function Level:create(callback)
           repeat
             x, y = love.math.random(1, params.width-1)+1, love.math.random(1, params.height-1)+1
           until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-          room:insert_actor('Glowshroom', x, y)
+          if love.math.random(0, 1) == 1 then
+            room:insert_actor('Glowshroom_1', x, y)
+          else
+            room:insert_actor('Glowshroom_2', x, y)
+          end
         end
       end,
     }
     graph:add_node(tunnel)
     
-    graph:connect_nodes(edge_river_join, filler_nodes[i], tunnel, filler_nodes[love.math.random(1, i-1)])
+    graph:connect_nodes(edge_join_river, filler_nodes[i], tunnel, filler_nodes[love.math.random(1, i-1)])
   end
 end
 
-graph:connect_nodes(edge_door_join, start, filler_nodes[love.math.random(1, #filler_nodes)])
-graph:connect_nodes(edge_door_join, finish, filler_nodes[love.math.random(1, #filler_nodes)])
-graph:connect_nodes(edge_door_join, sqeeto_hive, filler_nodes[love.math.random(1, #filler_nodes)])
+graph:connect_nodes(edge_join_door, start, filler_nodes[love.math.random(1, #filler_nodes)])
+graph:connect_nodes(edge_join_door, finish, filler_nodes[love.math.random(1, #filler_nodes)])
+graph:connect_nodes(edge_join_breakable_wall, sqeeto_hive, filler_nodes[love.math.random(1, #filler_nodes)])
+graph:connect_nodes(edge_join_boss_door, spider_nest, filler_nodes[love.math.random(1, #filler_nodes)])
 
 
 local merged_room_3 = Map:special_merge(graph)
