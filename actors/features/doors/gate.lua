@@ -6,7 +6,7 @@ local actor = Actor:extend()
 
 actor.char = Tiles["door_3"]
 actor.name = "gate"
-actor.blocksVision = false
+actor.opaque = false
 actor.remembered = true
 
 local targetDoor = targets.Actor:extend()
@@ -31,7 +31,7 @@ function Open:perform(level)
     door:addComponent(components.Collideable_box())
   end
 
-  door.blocksVision = not collideable
+  door.opaque = not collideable
 end
 
 

@@ -56,7 +56,7 @@ local Chest = Actor:extend()
 Chest.char = Tiles["chest"]
 Chest.color = {0.8, 0.8, 0.1, 1}
 Chest.name = "chest"
-Chest.blocksView = false
+Chest.opaque = false
 
 Chest.components = {
   components.Collideable_box(),

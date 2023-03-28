@@ -7,7 +7,7 @@ local actor = Actor:extend()
 actor.name = "wall"
 actor.char = Tiles["wall_2"]
 actor.color = {0.8, 0.5, 0.1, 1}
-actor.blocksView = true
+actor.opaque = true
 
 actor.components = {
   components.Collideable_box(),
