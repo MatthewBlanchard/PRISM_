@@ -11,7 +11,7 @@ local lightEffect = components.Light.effects.pulse({ 0.627, 0.125, 0.941, 1}, 0.
 
 --need to add an interface here to allow you to select a single wand to recharge
 local WandRecovery = OnCrit:extend()
-WandRecovery:onCrit(
+WandRecovery:OnCrit(
     function(level, actor)
         local inventory_component = actor:getComponent(components.Inventory)
         for _, item in ipairs(inventory_component:getItems()) do
