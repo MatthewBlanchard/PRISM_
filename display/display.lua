@@ -128,7 +128,8 @@ function Display:setTileset(tilesetInfo)
       sorted[v.idx] = v
    end
 
-   for i, v in ipairs(sorted) do
+   for i = 0, #sorted do
+      local v = sorted[i]
       local x, y = v.rect[1], v.rect[2]
       local width, height = v.rect[3], v.rect[4]
 
