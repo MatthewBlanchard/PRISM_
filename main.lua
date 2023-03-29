@@ -115,7 +115,7 @@ function love.load()
 
   local torch = actors.Torch()
   table.insert(player:getComponent(components.Inventory).inventory, torch)
-  table.insert(player:getComponent(components.Inventory).inventory, actors.Tiara_of_telepathy())
+  table.insert(player:getComponent(components.Inventory).inventory, actors.Crystal_sword())
 
   love.keyboard.setKeyRepeat(true)
 end
