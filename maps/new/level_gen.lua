@@ -1,5 +1,5 @@
 --love.math.setRandomSeed(1)
-love.audio.setVolume(0)
+--love.audio.setVolume(0)
 
 local Map = require "maps.map"
 local Object = require "object"
@@ -67,17 +67,18 @@ function Level:create(callback)
     populater = function(params, room)
       local cx, cy = room:get_center()
       room:insert_actor('Player', cx, cy)
-      room:insert_actor('Shortsword', cx, cy+1)
-      room:insert_actor('Key_type', cx-1, cy)
-      _, boss_key_uuid = room:insert_actor('Key_id', cx, cy-1)
+      -- room:insert_actor('Wand_of_blastin', cx, cy+1)
+      -- room:insert_actor('Shortsword', cx, cy+1)
+      -- room:insert_actor('Key_type', cx-1, cy)
+      -- _, boss_key_uuid = room:insert_actor('Key_id', cx, cy-1)
       
-      local callback = function(actor, actors_by_unique_id)
-        local chest_inventory = actor:getComponent(components.Inventory)
-        chest_inventory:addItem(actors.Potion())
-        local chest_lock = actor:getComponent(components.Lock_type)
-        chest_lock:setKey(actors.Key_type)
-      end
-      room:insert_actor('Chest_lock_type', cx+1, cy, callback)
+      -- local callback = function(actor, actors_by_unique_id)
+      --   local chest_inventory = actor:getComponent(components.Inventory)
+      --   chest_inventory:addItem(actors.Potion())
+      --   local chest_lock = actor:getComponent(components.Lock_type)
+      --   chest_lock:setKey(actors.Key_type)
+      -- end
+      -- room:insert_actor('Chest_lock_type', cx+1, cy, callback)
     end,
   }
   graph:add_node(start)
@@ -421,7 +422,7 @@ function Level:create(callback)
       end,
       populater = function(params, room, clipping)
         local cx, cy = room:get_center()
-        room:insert_actor('Sqeeto', cx, cy)
+        --room:insert_actor('Sqeeto', cx, cy)
       end,
     }
     graph:add_node(filler_nodes[i])
@@ -462,9 +463,9 @@ function Level:create(callback)
 end
 
 graph:connect_nodes(edge_join_door, start, filler_nodes[love.math.random(1, #filler_nodes)])
-graph:connect_nodes(edge_join_door, finish, filler_nodes[love.math.random(1, #filler_nodes)])
-graph:connect_nodes(edge_join_breakable_wall, sqeeto_hive, filler_nodes[love.math.random(1, #filler_nodes)])
-graph:connect_nodes(edge_join_boss_door, spider_nest, filler_nodes[love.math.random(1, #filler_nodes)])
+--graph:connect_nodes(edge_join_door, finish, filler_nodes[love.math.random(1, #filler_nodes)])
+--graph:connect_nodes(edge_join_breakable_wall, sqeeto_hive, filler_nodes[love.math.random(1, #filler_nodes)])
+--graph:connect_nodes(edge_join_boss_door, spider_nest, filler_nodes[love.math.random(1, #filler_nodes)])
 
 
 local merged_room_3 = Map:special_merge(graph)
@@ -490,6 +491,16 @@ heat_map:copy_map_onto_self_at_position(map, 0, 0)
 --     end
 --   end
 -- end
+
+for x = 0, map.width do
+  for y = 0, map.height do
+    if map.cells[x][y] == 1 then
+      map:insert_actor('Wall', x, y)
+    end
+    map:clear_cell(x, y)
+  end
+end
+
 
 for x = 0, self._width do
   for y = 0, self._height do

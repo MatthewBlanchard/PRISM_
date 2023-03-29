@@ -128,7 +128,7 @@ function Populater(level, map)
 
   local function spawnShrooms(room, i, j)
     for i = 1, love.math.random(i, j) do
-      spawnActor(room, actors.Glowshroom())
+      spawnActor(room, actors.Glowshroom_1())
     end
   end
 
@@ -206,13 +206,13 @@ function Populater(level, map)
       locked = true
     end
 
-    local chest = actors.Chest()
-    local key = actors.Key()
+    local chest = actors.Chest_lock_id()
+    local key = actors.Key_id()
 
     local chest_inventory = chest:getComponent(components.Inventory)
     chest_inventory:addItem(chestContents[math.random(#chestContents)]())
 
-    local chest_lock = chest:getComponent(components.Lock)
+    local chest_lock = chest:getComponent(components.Lock_id)
     chest_lock:setKey(key)
     
     spawnActor(room, chest)

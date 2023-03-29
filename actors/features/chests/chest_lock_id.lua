@@ -19,7 +19,7 @@ function Open:perform(level)
   local effects_system = level:getSystem("Effects")
   local message_system = level:getSystem("Message")
 
-  local lock_component = chest:getComponent(components.Lock)
+  local lock_component = chest:getComponent(components.Lock_id)
   if lock_component then
     if lock_component:hasKey(self.owner) then
       level:removeActor(lock_component.key)
@@ -62,7 +62,7 @@ Chest.components = {
   components.Collideable_box(),
   components.Usable({Open}, Open),
   components.Inventory(),
-  components.Lock()
+  components.Lock_id()
 }
 
 return Chest
