@@ -2,7 +2,6 @@ local Object = require "object"
 local Actor = require "actor"
 local System = require "system"
 local Scheduler = require "scheduler"
-local populateMap = require "populater"
 local SparseMap = require "sparsemap"
 local Vector2 = require "vector"
 
@@ -11,7 +10,7 @@ local Wall = require "cells.wall"
 
 local Level = Object:extend()
 
-function Level:__new(map)
+function Level:__new(map, populater)
   self.systems = {}
 
   self.actors = {}
@@ -32,6 +31,7 @@ function Level:__new(map)
   self.width = map._width
   self.height = map._height
   self.__map = map
+  self.populater = populater
 end
 
 --- Update is the main game loop for a level. It's a coroutine that yields
@@ -43,8 +43,8 @@ function Level:run()
     system:initialize(self)
   end
 
-  self.__map:create(self:getMapCallback())
-  populateMap(self, self.__map)
+  self.__map = self.__map:create(self:getMapCallback())
+  self.populater(self, self.__map)
 
   -- no brakes baby
   while true do
