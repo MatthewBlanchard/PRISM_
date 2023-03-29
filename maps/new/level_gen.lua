@@ -67,18 +67,18 @@ function Level:create(callback)
     populater = function(params, room)
       local cx, cy = room:get_center()
       room:insert_actor('Player', cx, cy)
-      -- room:insert_actor('Wand_of_blastin', cx, cy+1)
-      -- room:insert_actor('Shortsword', cx, cy+1)
-      -- room:insert_actor('Key_type', cx-1, cy)
-      -- _, boss_key_uuid = room:insert_actor('Key_id', cx, cy-1)
+      room:insert_actor('Wand_of_blastin', cx, cy+1)
+      --room:insert_actor('Shortsword', cx, cy+1)
+      room:insert_actor('Key_type', cx-1, cy)
+      _, boss_key_uuid = room:insert_actor('Key_id', cx, cy-1)
       
-      -- local callback = function(actor, actors_by_unique_id)
-      --   local chest_inventory = actor:getComponent(components.Inventory)
-      --   chest_inventory:addItem(actors.Potion())
-      --   local chest_lock = actor:getComponent(components.Lock_type)
-      --   chest_lock:setKey(actors.Key_type)
-      -- end
-      -- room:insert_actor('Chest_lock_type', cx+1, cy, callback)
+      local callback = function(actor, actors_by_unique_id)
+        local chest_inventory = actor:getComponent(components.Inventory)
+        chest_inventory:addItem(actors.Potion())
+        local chest_lock = actor:getComponent(components.Lock_type)
+        chest_lock:setKey(actors.Key_type)
+      end
+      room:insert_actor('Chest_lock_type', cx+1, cy, callback)
     end,
   }
   graph:add_node(start)
@@ -322,16 +322,6 @@ function Level:create(callback)
     {cr = 3, actors = {"Webweaver"}},
   }
 
-  -- local edge_join_door = {
-  --   type = 'Join', 
-  --   callback = function(chunk, x, y, vec)
-  --     chunk:clear_cell(x, y)
-  --     :clear_cell(x+vec[2], y+vec[1])
-  --     :clear_cell(x-vec[2], y+vec[1])
-  --     :insert_actor('Door', x, y)
-  --   end,
-  -- }
-
   local edge_join_door = {
     type = 'Join', 
     callback = function(chunk, info)
@@ -463,9 +453,9 @@ function Level:create(callback)
 end
 
 graph:connect_nodes(edge_join_door, start, filler_nodes[love.math.random(1, #filler_nodes)])
---graph:connect_nodes(edge_join_door, finish, filler_nodes[love.math.random(1, #filler_nodes)])
---graph:connect_nodes(edge_join_breakable_wall, sqeeto_hive, filler_nodes[love.math.random(1, #filler_nodes)])
---graph:connect_nodes(edge_join_boss_door, spider_nest, filler_nodes[love.math.random(1, #filler_nodes)])
+graph:connect_nodes(edge_join_door, finish, filler_nodes[love.math.random(1, #filler_nodes)])
+graph:connect_nodes(edge_join_breakable_wall, sqeeto_hive, filler_nodes[love.math.random(1, #filler_nodes)])
+graph:connect_nodes(edge_join_boss_door, spider_nest, filler_nodes[love.math.random(1, #filler_nodes)])
 
 
 local merged_room_3 = Map:special_merge(graph)
