@@ -389,16 +389,20 @@ function Level:create(callback)
 
       for n = 1, 1 do
         local segment_index = info.segment_index_2 - n
-        local point = vec2(info.segment_2[segment_index].x, info.segment_2[segment_index].y)
-        point = point + info.offset + info.clip_dimension_sum
-        chunk:clear_cell(point.x, point.y)
-        chunk:insert_actor('River'..river_dir_type, point.x, point.y)
+        if segment_index ~= 1 then
+          local point = vec2(info.segment_2[segment_index].x, info.segment_2[segment_index].y)
+          point = point + info.offset + info.clip_dimension_sum
+          chunk:clear_cell(point.x, point.y)
+          chunk:insert_actor('River'..river_dir_type, point.x, point.y)
+        end
 
         local segment_index = info.segment_index_2 + n
-        local point = vec2(info.segment_2[segment_index].x, info.segment_2[segment_index].y)
-        point = point + info.offset + info.clip_dimension_sum
-        chunk:clear_cell(point.x, point.y)
-        chunk:insert_actor('River'..river_dir_type, point.x, point.y)
+        if segment_index ~= #info.segment_2 then
+          local point = vec2(info.segment_2[segment_index].x, info.segment_2[segment_index].y)
+          point = point + info.offset + info.clip_dimension_sum
+          chunk:clear_cell(point.x, point.y)
+          chunk:insert_actor('River'..river_dir_type, point.x, point.y)
+        end
       end
       
 
@@ -494,30 +498,24 @@ for i, v in ipairs(map.actors.list) do
 end
 
 
-for x = 0, map.width do
-  for y = 0, map.height do
-    if map.cells[x][y] == 1 then
-      --map:insert_actor('Wall', x, y)
-    end
-    --map:clear_cell(x, y)
-  end
-end
+-- for x, y, cell in map:for_cells() do
+--   if cell == 1 then
+--     map:insert_actor('Wall', x, y)
+--     map:clear_cell(x, y)
+--   end
+-- end
 
 local heat_map = Map:new(600, 600, 0)
 heat_map:copy_map_onto_self_at_position(map, 0, 0)
 heat_map = heat_map:dijkstra({player_pos}, 'vonNeuman')
-for i, v in ipairs(heat_map.cells) do
-  for i2, v2 in ipairs(v) do
-    if v2 == 999 then
-      map.cells[i][i2] = 1
-    end
+for x, y, cell in heat_map:for_cells() do
+  if cell == 999 then
+    map:fill_cell(x, y)
   end
 end
 
-for x = 0, self._width do
-  for y = 0, self._height do
-    callback(x, y, self._map.cells[x][y])
-  end
+for x, y in map:for_cells() do
+  callback(x, y, map.cells[x][y])
 end
 
 return map, heat_map, rooms
