@@ -171,7 +171,7 @@ function Level:create(callback)
       end
 
       for x, y, cell in chunk:for_cells() do
-        print(x, y)
+        -- print(x, y)
         -- if cell == 1 then
         --   if love.math.random(0, 1) == 1 then
         --     chunk:insert_actor('Rocks_1', x, y)
