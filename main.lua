@@ -73,13 +73,13 @@ end
 game = {}
 
 local function createLevel()
-  --local map, populater = ROT.Map.Brogue(50, 50), require "populater" -- Brogue Gen
-  local map, populater = require "maps.new.level_gen"(), require "maps.new.populater" -- Dim Gen
+  local map, populater = ROT.Map.Brogue(50, 50), require "populater" -- Brogue Gen
+  --ocal map, populater = require "maps.new.level_gen"(), require "maps.new.populater" -- Dim Gen
   local level = Level(map, populater)
   level:addSystem(systems.Message())
   level:addSystem(systems.Inventory())
   level:addSystem(systems.Effects())
-  level:addSystem(systems.Lighting())
+  level:addSystem(systems.New_lighting())
   level:addSystem(systems.Sight())
   level:addSystem(systems.Equipment())
   level:addSystem(systems.Weapon())

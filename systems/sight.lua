@@ -127,21 +127,12 @@ function SightSystem:updateFOV(level, actor)
             sightLimit = math.min(sightLimit, level:getCell(actor.position.x, actor.position.y).sightLimit)
         end
     
-        fovCalculator:compute(actor.position.x, actor.position.y, sightLimit, self:createFOVClosure(level, sight_component))
-    
-        -- if the level has the lighting system we check if the actor has a darkvision value and if so we update the fov
-        -- to remove any cells that are in darkness
-        local light_system = level:getSystem("Lighting")
-        if light_system and sight_component.darkvision ~= 0 then 
-            for x, _ in pairs(sight_component.fov) do
-                for y, _ in pairs(sight_component.fov[x]) do
-                local lightval = ROT.Color.value(light_system:getLightingAt(x, y, sight_component.fov))
-                    if lightval < sight_component.darkvision and not (actor:getRange("box", Vector2(x, y)) <= 1) then
-                        sight_component.fov[x][y] = nil
-                    end
-                end
-            end
-        end
+        fovCalculator:compute(
+            actor.position.x,
+            actor.position.y,
+            sightLimit,
+            self:createFOVClosure(level, sight_component, actor)
+        )
     else
         -- we have a sight component but no fov which essentially means the actor has blind sight and can see
         -- all cells within a certain radius only generally only simple actors have this vision type
@@ -243,10 +234,25 @@ function SightSystem:createVisibilityClosure(level)
     end
 end
 
-function SightSystem:createFOVClosure(level, sight_component)
+function SightSystem:createFOVClosure(level, sight_component, actor)
     return function(x, y, z)
-        if not sight_component.fov[x] then sight_component.fov[x] = {} end
-        sight_component.fov[x][y] = level:getCell(x, y)
+        local lighting_system = level:getSystem("Lighting")
+        if lighting_system then
+            local lightval = lighting_system:getLightingAt(
+                x, y,
+                level.map
+            ):average_brightness()
+
+            if  lightval >= sight_component.darkvision or
+                (actor:getRange("box", Vector2(x, y)) <= 1)
+            then
+                if not sight_component.fov[x] then sight_component.fov[x] = {} end
+                sight_component.fov[x][y] = level:getCell(x, y)
+            end
+        else
+            if not sight_component.fov[x] then sight_component.fov[x] = {} end
+            sight_component.fov[x][y] = level:getCell(x, y)
+        end
     end
 end
 

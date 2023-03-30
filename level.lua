@@ -38,13 +38,18 @@ end
 --- back to the main thread when it needs to wait for input from the player.
 --- This function is the heart of the game loop.
 function Level:run()
+  self.__map = self.__map:create(self:getMapCallback())
+
   -- we need to initialize all of our systems
   for _, system in pairs(self.systems) do
     system:initialize(self)
   end
 
-  self.__map = self.__map:create(self:getMapCallback())
   self.populater(self, self.__map)
+
+  if self:getSystem("Lighting") then
+    self:getSystem("Lighting"):forceRebuildLighting(self)
+  end
 
   -- no brakes baby
   while true do
@@ -148,6 +153,7 @@ function Level:addSystem(system)
   end
 
   -- We've succeeded and we insert the system into our systems table
+  system.owner = self
   table.insert(self.systems, system)
 end
 
@@ -303,6 +309,15 @@ end
 function Level:moveActor(actor, pos, skipSparseMap)
   assert(pos.is and pos:is(Vector2), "Expected a Vector2 for pos in Level:moveActor.")
 
+  local oldpos = actor.position
+  -- we copy the position here so that the caller doesn't have to worry about
+  -- allocating a new table
+  actor.position = pos:copy()
+
+  for _, system in ipairs(self.systems)  do
+    system:beforeMove(self, actor, oldpos, pos)
+  end
+
   -- if the actor isn't in the level, we don't do anything
   if not self:hasActor(actor) then
     return
@@ -310,16 +325,6 @@ function Level:moveActor(actor, pos, skipSparseMap)
 
   if not skipSparseMap then
     self:removeSparseMapEntries(actor)
-  end
-  
-  local oldpos = actor.position
-  -- we copy the position here so that the caller doesn't have to worry about
-  -- allocating a new table
-  actor.position = pos:copy()
-
-  local suppressOnLeave = false
-  for _, system in ipairs(self.systems)  do
-    suppressOnLeave = suppressOnLeave or system:beforeMove(self, actor, oldpos, pos)
   end
 
   if not skipSparseMap then
@@ -352,7 +357,6 @@ function Level:moveActorChecked(actor, direction)
       end
 
       if not self:getCellPassable(cell.x, cell.y, blockSelf) then
-        print(cell)
         table.insert(candidate_rejected, cell)
       end
     end
@@ -548,17 +552,17 @@ function Level:getCellPassableNoActors(x, y)
 end
 
 function Level:getCellVisibility(x, y)
-  if not self:getCell(x, y) or  self:getCell(x, y).opaque then
+  if not self:getCell(x, y) or self:getCell(x, y).opaque then
     return false
   else
     for actor, _ in pairs(self.sparseMap:get(x, y)) do
-      if actor.blocksVision == true then
+      if actor.blocksVision and actor:isVisible() then
         return false
       end
     end
-
-    return true
   end
+
+  return true
 end
 
 -- TODO: Replace with global system.

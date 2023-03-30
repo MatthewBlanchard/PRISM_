@@ -22,12 +22,12 @@ function Zap:perform(level)
   target:applyCondition(conditions.Mind_control())
 end
 
-local WandOfLethargy = Actor:extend()
-WandOfLethargy.name = "Wand of Mind Control"
-WandOfLethargy.color = {0.7, 0.1, 0.7, 1}
-WandOfLethargy.char = Tiles["wand_pointy"]
+local WandOfMindControl = Actor:extend()
+WandOfMindControl.name = "Wand of Mind Control"
+WandOfMindControl.color = {0.7, 0.1, 0.7, 1}
+WandOfMindControl.char = Tiles["wand_pointy"]
 
-WandOfLethargy.components = {
+WandOfMindControl.components = {
   components.Item{stackable = false},
   components.Usable(),
   components.Wand{
@@ -37,4 +37,4 @@ WandOfLethargy.components = {
   components.Cost{rarity = "mythic"}
 }
 
-return WandOfLethargy
+return WandOfMindControl

@@ -135,7 +135,7 @@ effects.throw = function(thrown, thrower, location)
   local t = 0
 
   return function(dt, interface)
-    local index = math.floor(t / 0.033) + 1
+    local index = math.floor(t / 0.1) + 1
     interface:effectWriteOffset(thrown.char, line[index][1], line[index][2], thrown.color)
 
     t = t + dt

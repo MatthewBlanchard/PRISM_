@@ -8,7 +8,7 @@ Pickup:afterAction(actions.Move,
 
     for _, item in pairs(sight_component.seenActors) do
       if item:is(actors.Shard) and actions.Pickup:validateTarget(1, actor, item) then
-        return level:performAction(actor:getAction(actions.Pickup)(actor, {item}), true)
+        level:performAction(actor:getAction(actions.Pickup)(actor, {item}), true)
       end
     end
   end

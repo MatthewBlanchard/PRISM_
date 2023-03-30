@@ -13,7 +13,6 @@ function CollideableSnake:__new(length)
 
     for i = 0, length - 1 do
         local u = length - i - 1
-        print(0, u)
         table.push(self.occupiedTile, Vector2(0, u))
     end
 end
@@ -54,7 +53,6 @@ function CollideableSnake:acceptedCandidate(actor, direction)
     local list = {}
 
     for i = 2, #self.occupiedTile do
-        print(self.occupiedTile[i], self.occupiedTile[i] - direction, direction)
         table.push(list, self.occupiedTile[i] - direction)
     end
     

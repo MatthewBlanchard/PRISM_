@@ -4,7 +4,7 @@ local SparseMap = require "sparsemap"
 -- TODO: Rip out the current lighting system and do something more similar to Minecraft's
 -- simple lighting system but with 3 channels r,g,b each consisting of an integer from 0-31.
 local LightingSystem = System:extend()
-LightingSystem.name = "Lighting"
+LightingSystem.name = "OldLighting"
 
 LightingSystem.__lights = nil
 LightingSystem.__lightMap = nil
@@ -201,7 +201,8 @@ end
 -- Takes a fov because wall lighting uses the fov to determine how to light the walls
 function LightingSystem:getLightingAt(x, y, fov, light)
   local light = light or self.__lightMap
-  if fov[x] and fov[x][y] and not fov[x][y].opaque then
+  print(self.owner:getCellVisibility(x, y))
+  if fov[x] and fov[x][y] and self.owner:getCellVisibility(x, y) then
     if light[x] and light[x][y] then
       return light[x][y]
     end

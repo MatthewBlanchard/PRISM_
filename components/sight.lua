@@ -13,7 +13,11 @@ function Sight:__new(options)
   -- remembered actors that have been seen by the player
   self.rememberedActors = ROT.Type.Grid:new()
 
-  self.darkvision = options.darkvision or 0.25
+  if options.darkvision and math.floor(options.darkvision) ~= options.darkvision then
+    error("Darkvision must be an integer")
+  end
+
+  self.darkvision = options.darkvision or 8
 end
 
 function Sight:initialize(actor)

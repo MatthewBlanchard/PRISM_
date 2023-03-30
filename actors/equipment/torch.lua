@@ -1,5 +1,6 @@
 local Actor = require "actor"
 local Tiles = require "tiles"
+local LightColor = require "lighting.lightcolor"
 
 local Torch = Actor:extend()
 Torch.char = Tiles["torch"]
@@ -10,8 +11,7 @@ local lightEffect = components.Light.effects.flicker({ 0.8666, 0.4509, 0.0862, 1
 
 Torch.components = {
     components.Light{
-        color = { 0.8666, 0.4509, 0.0862, 1},
-        intensity = 4,
+        color = LightColor(28, 16, 1),
         effect = lightEffect
     },
     components.Item(),

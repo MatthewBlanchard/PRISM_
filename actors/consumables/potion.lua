@@ -2,6 +2,7 @@ local Actor = require "actor"
 local Action = require "action"
 local Condition = require "condition"
 local Tiles = require "tiles"
+local LightColor = require "lighting.lightcolor"
 
 local Drink = actions.Drink:extend()
 Drink.name = "drink"
@@ -20,12 +21,11 @@ Potion.description = "Heals you for 5 HP."
 Potion.color = {1, 0, 0, 1}
 Potion.emissive = true
 Potion.char = Tiles["potion"]
-Potion.lightEffect = components.Light.effects.pulse({ 0.3, 0.0, 0.0, 1 }, 3, .5)
+--Potion.lightEffect = components.Light.effects.pulse({ 0.3, 0.0, 0.0, 1 }, 3, .5)
 
 Potion.components = {
   components.Light{
-    color = { 1, 0.0, 0.0, 1},
-    intensity = 1,
+    color = LightColor(16, 0, 0),
     effect = Potion.lightEffect
   },
   components.Item({stackable = true}),

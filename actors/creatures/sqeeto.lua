@@ -1,6 +1,7 @@
 local Actor = require "actor"
 local Vector2 = require "vector"
 local Tiles = require "tiles"
+local LightColor = require "lighting.lightcolor"
 
 local Sqeeto = Actor:extend()
 
@@ -10,7 +11,7 @@ Sqeeto.color = {0.8, 0.7, 0.09}
 
 Sqeeto.components = {
   components.Collideable_box(),
-  components.Sight{ range = 4, fov = true, explored = false, darkvision = 0.25 },
+  components.Sight{ range = 4, fov = true, explored = false, darkvision = 8 },
   components.Move{ speed = 100 },
   components.Stats{
     ATK = 0,
@@ -71,7 +72,8 @@ function Sqeeto:act(level)
     for y, _ in pairs(sight_component.fov[x]) do
       local local_lights = lights:get(x, y)
       for light, _ in pairs(local_lights) do
-        local value = ROT.Color.value(light.color) * light.intensity
+        assert(light.color:is(LightColor), "light.color is not a LightColor")
+        local value = light.color:average_brightness()
 
         if value > highest then
           highest = value

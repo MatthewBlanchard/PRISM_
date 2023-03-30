@@ -1,4 +1,5 @@
 local Component = require "component"
+local LightColor = require "lighting.lightcolor"
 
 local function randBiDirectional()
   return (math.random() - .5) * 2
@@ -46,21 +47,20 @@ Light.effects = {
 }
 
 function Light:__new(options)
+  assert(
+    options.color and options.color.is and options.color:is(LightColor),
+    "Light color must be a LightColor object"
+  )
+
+  assert(options.intensity == nil)
+
   self.color = options.color
-  self.intensity = options.intensity
   self.effect = options.effect
+  self.falloff = options.falloff or 0.4
 end
 
 function Light:initialize(actor)
-  -- We clone the color table so that we can modify it without affecting the
-  -- original table in the parent object.
-  local color = {}
-
-  for k, v in pairs(self.color) do
-    color[k] = v
-  end
-
-  self.color = color
+  self.color = LightColor(self.color.r, self.color.g, self.color.b)
 end
 
 return Light
