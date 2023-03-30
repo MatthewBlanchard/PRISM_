@@ -10,7 +10,7 @@ Poison:onTick(
   function(self, level, actor)
     local damage = actor:getReaction(reactions.Damage)(actor, { self.owner }, self.damage)
     level:performAction(damage)
-    level:addEffect(effects.PoisonEffect(actor, self.damage))
+    --level:addEffect(effects.PoisonEffect(actor, self.damage))
   end
 )
 
