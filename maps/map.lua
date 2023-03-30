@@ -195,7 +195,7 @@ function Map:special_merge(graph)
     for _, v in ipairs(matches) do
       for i = 2, #v[1]-1 do
         for i2 = 2, #v[2]-1 do
-          if i ~= math.floor((#v[1]+1)/2) or i2 ~= math.floor((#v[2]+1)/2) then goto continue end -- limiter
+          --if i ~= math.floor((#v[1]+1)/2) or i2 ~= math.floor((#v[2]+1)/2) then goto continue end -- limiter
           
           local segment_index_1 = i
           local segment_index_2 = i2
@@ -220,7 +220,7 @@ function Map:special_merge(graph)
             })
           end
           
-          ::continue::
+          --::continue::
         end
       end
     end
@@ -411,7 +411,10 @@ function Map:special_merge(graph)
         local clip_buffer = {}
         local input_matches = {}
         
+        local exit = false
+
         local function recursion(n)
+          if exit then goto exit end
           if n ~= #queue+1 then
             local node, parent = queue[n].self, queue[n].parent
             local parent_offset = offsets[parent] or vec2(0, 0)
@@ -423,7 +426,23 @@ function Map:special_merge(graph)
               recursion(n+1)
             end
 
-            for i2, v2 in ipairs(match) do
+            local function rpairs(t)
+              local total = #t
+
+              return function()
+                if total > 0 then
+                  local r = math.random(total)
+                  local v = t[r]
+
+                  t[r], t[total] = t[total], t[r]
+                  total = total - 1
+
+                  return v
+                end
+              end
+            end
+
+            for v2 in rpairs(match) do
               local clip = tablex.copy(v2)
               
               clip.offset_clip = Clipper.Path(clip.num_of_points)
@@ -458,7 +477,10 @@ function Map:special_merge(graph)
             end
           else
             table.insert(input_matches, tablex.copy(clip_buffer))
+            exit = true
           end
+
+          ::exit::
         end
         recursion(1)
 
@@ -472,7 +494,9 @@ function Map:special_merge(graph)
   end
   local start = love.timer.getTime()
   local matches, loop_points = solve_for_room_positions()
-  local match_index = love.math.random(1, #matches)
+  print(#matches)
+  local match_index = 1
+  --local match_index = love.math.random(1, #matches)
   local connections = {}
   assert(#matches > 0, 'no complex matches!')
 
