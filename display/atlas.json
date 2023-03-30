@@ -4615,6 +4615,21 @@
             "rotated": false
         },
         {
+            "idx": 177,
+            "name": "empty",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                435,
+                45,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
             "idx": 170,
             "name": "fence",
             "origin": [
@@ -4750,21 +4765,6 @@
             "rotated": false
         },
         {
-            "idx": 159,
-            "name": "grass",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                390,
-                45,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
             "idx": 161,
             "name": "grass_1",
             "origin": [
@@ -4789,6 +4789,21 @@
             "rect": [
                 390,
                 60,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 159,
+            "name": "grass_3",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                390,
+                45,
                 15,
                 15
             ],
@@ -5254,21 +5269,6 @@
             "rect": [
                 435,
                 60,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 177,
-            "name": "region_345",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                435,
-                45,
                 15,
                 15
             ],

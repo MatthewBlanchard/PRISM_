@@ -51,6 +51,23 @@ function Map:insert_actor(actor_id, x, y, callback)
   return self, unique_id
 end
 
+function Map:for_cells()
+  local x = 0
+  local y = -1
+
+  return function ()
+    if y < self.height then
+      y = y + 1
+    elseif y == self.height then
+      x = x + 1
+    end
+
+    if x <= self.width then
+      return x, y, self.cells[x][y]
+    end
+  end
+end
+
 -- Merging
 function Map:copy_map_onto_self_at_position(map, x, y, is_destructive)
   for i = x, x+map.width do
