@@ -22,7 +22,8 @@ function Open:perform(level)
   local lock_component = chest:getComponent(components.Lock_id)
   if lock_component then
     if lock_component:hasKey(self.owner) then
-      level:removeActor(lock_component.key)
+      local inventory_component = self.owner:getComponent(components.Inventory)
+      inventory_component:removeItem(lock_component.key)
     else
       message_system:add(level, "The chest is locked!", self.owner)
       return nil

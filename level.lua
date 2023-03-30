@@ -43,10 +43,8 @@ function Level:run()
     system:initialize(self)
   end
 
-  jit.on()
   self.__map = self.__map:create(self:getMapCallback())
   self.populater(self, self.__map)
-  jit.off()
 
   -- no brakes baby
   while true do

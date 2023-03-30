@@ -21,7 +21,8 @@ function Open:perform(level)
   if lock_component then
     if lock_component:hasKey(self.owner) then
       door:removeComponent(lock_component)
-      level:removeActor(lock_component.key)
+      local inventory_component = self.owner:getComponent(components.Inventory)
+      inventory_component:removeItem(lock_component.key)
     else
       message_system:add(level, "The door is locked!", self.owner)
       return nil

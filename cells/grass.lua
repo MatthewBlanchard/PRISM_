@@ -5,7 +5,7 @@ local Grass = Cell:extend()
 Grass.name = "Grass" -- displayed in the user interface
 Grass.passable = true -- defines whether a cell is passable
 Grass.opaque = false -- defines whether a cell can be seen through
-Grass.tile = Tiles["grass"]
+Grass.tile = Tiles["grass_3"]
 Grass.sightLimit = 3 -- when standing on this tile does it interfere with sight?
 
 function Grass:visibleFromCell(level, cell) 
