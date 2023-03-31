@@ -61,6 +61,14 @@ local function clamp(x, min, max)
     return x < min and min or (x > max and max or x)
 end
 
+function LightColor:lerp(otherColor, t)
+    local r = math.floor(clamp((1 - t) * self.r + t * otherColor.r, 0, 31))
+    local g = math.floor(clamp((1 - t) * self.g + t * otherColor.g, 0, 31))
+    local b = math.floor(clamp((1 - t) * self.b + t * otherColor.b, 0, 31))
+
+    return LightColor:__call(r, g, b)
+end
+
 -- Addition
 function LightColor.__add(a, b)
     local r = clamp(a.r + b.r, 0, 31)

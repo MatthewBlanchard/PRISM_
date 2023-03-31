@@ -16,7 +16,7 @@ end
 
 Wasp.components = {
   components.Collideable_box(),
-  components.Sight{ range = 4, fov = true, explored = false, darkvision = 0.25 },
+  components.Sight{ range = 4, fov = true, explored = false },
   components.Move{ speed = 100 },
   components.Stats{
     ATK = 2,
@@ -82,7 +82,7 @@ function Wasp:act(level)
     for y, _ in pairs(sight_component.fov[x]) do
       local local_lights = lights:get(x, y)
       for light, _ in pairs(local_lights) do
-        local value = ROT.Color.value(light.color) * light.intensity
+        local value = light.color:average_brightness()
 
         if value > highest then
           highest = value
