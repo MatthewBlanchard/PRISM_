@@ -47,296 +47,44 @@ function Level:create(callback)
     end
   end
   
-  local prototype = graph:new_node{
-    width = 4, height = 4,
-    shaper = function(params, chunk)
-      chunk:clear_rect(1,1, chunk.width-1, chunk.height-1)
-    end,
-    populater = function(params, chunk)
-    end,
-  }
+  local Chunk = require 'maps.chunk'
+  local id_generator = require 'maps.uuid'
 
-  local _, boss_key_uuid
-  
-  local start = graph:new_node{
-    width = 4, height = 4,
-    shaper = function(params, chunk)
-      local cx, cy = chunk:get_center()
-      chunk:clear_ellipse(cx, cy, 1, 1)
-    end,
-    populater = function(params, chunk)
-      local cx, cy = chunk:get_center()
-      chunk:insert_actor('Player', cx, cy)
-      chunk:insert_actor('Wand_of_blastin', cx, cy+1)
-      --chunk:insert_actor('Shortsword', cx, cy+1)
-      chunk:insert_actor('Key_type', cx-1, cy)
-      _, boss_key_uuid = chunk:insert_actor('Key_id', cx, cy-1)
-      
-      local callback = function(actor, actors_by_unique_id)
-        local chest_inventory = actor:getComponent(components.Inventory)
-        chest_inventory:addItem(actors.Potion())
-        local chest_lock = actor:getComponent(components.Lock_type)
-        chest_lock:setKey(actors.Key_type)
-      end
-      chunk:insert_actor('Chest_lock_type', cx+1, cy, callback)
-    end,
-  }
+  local boss_key_uuid
+
+  local Start = require 'maps.chunks.start'
+  Start.key_id = id_generator()
+  boss_key_uuid = Start.key_id
+  print(boss_key_uuid)
+  local start = graph:new_node(Start)
   graph:add_node(start)
-  
-  local finish = graph:new_node{
-    width = 4, height = 4,
-    shaper = function(params, chunk)
-      chunk:clear_rect(1,1, chunk.width-1, chunk.height-1)
-    end,
-    populater = function(params, chunk)
-      local cx, cy = chunk:get_center()
-      
-      chunk:insert_actor('Stairs', cx, cy)
-    end,
-  }
+
+
+  local Finish = require 'maps.chunks.finish'
+  local finish = graph:new_node(Finish)
   graph:add_node(finish)
   
-  local sqeeto_hive = graph:new_node{
-    width = 20, height = 20,
-    shaper = function(params, chunk)
-      chunk:clear_ellipse(chunk.width/2, chunk.height/2, 5, 5)
-      for i = 1, 20 do
-        chunk:DLAInOut()
-      end
-    end,
-    populater = function(params, chunk, clipping)
-      local cx, cy = math.floor(chunk.width/2)+1, math.floor(chunk.height/2)+1
-      
-      for i = 1, 3 do
-        local x, y
-        repeat
-          x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
-        until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-        chunk:insert_actor('Sqeeto', x, y)
-      end
-      
-      chunk:insert_actor('Prism', cx, cy)
-    end,
-    
-  }
+
+  local Sqeeto_hive = require 'maps.chunks.sqeeto_hive'
+  local sqeeto_hive = graph:new_node(Sqeeto_hive)
   graph:add_node(sqeeto_hive)
-  
-  local spider_nest = graph:new_node{
-    width = 20, height = 20,
-    shaper = function(params, chunk)
-      local cx, cy = chunk:get_center()
-      for i = 1, 2 do
-        local path = chunk:drunkWalk(cx, cy,
-          function(x, y, i, chunk)  
-            return (i > 10) or (x < 5 or x > chunk.width-5 or y < 5 or y > chunk.height-5)
-          end
-        )
-      
-        chunk:clear_path(path)
-      end
-  
-      for i = 1, 20 do
-        chunk:DLA()
-      end
-    end,
-    populater = function(params, chunk, clipping)
-      local cx, cy = chunk:get_center()
-  
-      for i = 1, 1 do
-        local x, y
-        repeat
-          x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
-        until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-        --chunk:insert_actor('Webweaver', x, y)
-      end
-  
-      for i = 1, 2 do
-        local x, y
-        repeat
-          x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
-        until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-        chunk:insert_actor('Web', x, y)
-      end
 
-      for i = 1, 2 do
-        local x, y
-        repeat
-          x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
-        until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-        if love.math.random(0, 1) == 1 then
-          chunk:insert_actor('Bones_1', x, y)
-        else
-          chunk:insert_actor('Bones_2', x, y)
-        end
-      end
-
-      for x, y, cell in chunk:for_cells() do
-        -- print(x, y)
-        -- if cell == 1 then
-        --   if love.math.random(0, 1) == 1 then
-        --     chunk:insert_actor('Rocks_1', x, y)
-        --   else
-        --     chunk:insert_actor('Rocks_2', x, y)
-        --   end
-        -- end
-      end
   
-    end,
-  
-  }
+  local Spider_nest = require 'maps.chunks.spider_nest'
+  local spider_nest = graph:new_node(Spider_nest)
   graph:add_node(spider_nest)
-  
-  -- local shop = graph:new_node{
-  --   width = 8, height = 8,
-  --   shaper = function(params, chunk)
-  --     chunk:clear_rect(1,1, chunk.width-1, chunk.height-1)
-  --   end,
-  --   populater = function(params, chunk)
-  --     local cx, cy = math.floor(chunk.width/2)+1, math.floor(chunk.height/2)+1
-  
-  --     local _, shopkeep_id = chunk:insert_actor('Shopkeep', cx, cy-1)
-  --     chunk:insert_actor('Stationarytorch', cx-2, cy-1)
-  --     chunk:insert_actor('Stationarytorch', cx+2, cy-1)
-  
-  --     local shopItems = {
-  --       {
-  --         components.Weapon,
-  --         components.Wand
-  --       },
-  --       {
-  --         components.Equipment
-  --       },
-  --       {
-  --         components.Edible,
-  --         components.Drinkable,
-  --         components.Readable
-  --       }
-  --     }
-  
-  --     for i = 1, 3 do
-  --       local itemTable = shopItems[i]
-  --       local item = Loot.generateLoot(itemTable[love.math.random(1, #itemTable)])
-  
-  --       local callback = function(actor, actors_by_unique_id)
-  --         local status = ''
-  
-  --         local sellable_component = actor:getComponent(components.Sellable)
-  --         sellable_component:setItem(item)
-  --         sellable_component:setPrice(actors.Shard, item:getComponent(components.Cost).cost)
-  
-  --         if actors_by_unique_id[shopkeep_id] then
-  --           sellable_component:setShopkeep(actors_by_unique_id[shopkeep_id])
-  --         else
-  --           status = 'Delay'
-  --         end
-  
-  --         return status
-  --       end
-  --       chunk:insert_actor('Product', cx-2+i, cy, callback)
-  --     end
-  --   end,
-  -- }
-  -- graph:add_node(shop)
-  
-  -- local snip_farm = graph:new_node{
-  --   width = 10, height = 10,
-  --   shaper = function(params, chunk)
-  --     chunk:clear_rect(1,1, chunk.width-1, chunk.height-1)
-  --   end,
-  --   populater = function(params, chunk)
-  --     local cx, cy = math.floor(chunk.width/2)+1, math.floor(chunk.height/2)+1
-  
-  --     chunk:fill_perimeter(cx-2, cy-2, cx+2, cy+2)
-  --     chunk:clear_cell(cx, cy+2)
-  
-  --     local _, shopkeep_id = chunk:insert_actor('Shopkeep', cx, cy+2)
-  
-  --     chunk:target_rect(cx-1, cy-1, cx+1, cy+1, function(x, y)
-  --         chunk:insert_actor('Snip', x, y)
-  --       end
-  --     )
-  --   end,
-  -- }
-  -- graph:add_node(snip_farm)
-  
-  -- local tunnel = graph:new_node{
-  --   width = 10, height = 10,
-  --   shaper = function(params, chunk)
-  --     local cx, cy = chunk:get_center()
-  
-  --     chunk:drunkWalk(cx, cy,
-  --       function(x, y, i, chunk)  
-  --         return (i > 10) or (x < 1 or x > chunk.width-1 or y < 1 or y > chunk.height-1)
-  --       end
-  --     )
-  
-  --   end,
-  --   populater = function(params, chunk)
-  --   end,
-  -- }
-  -- graph:add_node(tunnel)
-  
-  -- local lake = graph:new_node{
-  --   width = 10, height = 10,
-  --   shaper = function(params, chunk)
-  --     local cx, cy = chunk:get_center()
-  --     chunk:clear_rect(1, 1, chunk.width-1, chunk.height-1)
-  --   end,
-  --   populater = function(params, chunk)
-  --     local cx, cy = chunk:get_center()
-  --     chunk:target_ellipse(cx, cy, 3, 3, function(x, y)
-  --       chunk:insert_actor('Water', x, y)
-  --     end
-  --   )
-  --   end,
-  -- }
-  -- graph:add_node(lake)
-  
-  -- local path_test = graph:new_node{
-  --   width = 20, height = 20,
-  --   shaper = function(params, chunk)
-  --     local cx, cy = chunk:get_center()
-  --     for i = 1, 2 do
-  --       local path = chunk:drunkWalk(cx, cy,
-  --         function(x, y, i, chunk)  
-  --           return (i > 10) or (x < 5 or x > chunk.width-5 or y < 5 or y > chunk.height-5)
-  --         end
-  --       )
-  --       chunk:clear_path(path)
-  --     end
-  
-  --     for i = 1, 50 do
-  --       chunk:DLA()
-  --     end
-  --   end,
-  --   populater = function(params, chunk, clipping)
-  --     local cx, cy = math.floor(chunk.width/2)+1, math.floor(chunk.height/2)+1
-  --   end,
-  -- }
-  -- graph:add_node(path_test)
-  
-  -- local lake = graph:new_node{
-  --   width = 10, height = 10,
-  --   shaper = function(params, chunk)
-  --     local cx, cy = chunk:get_center()
-  --     chunk:clear_rect(1, 1, chunk.width-1, chunk.height-1)
-  --   end,
-  --   populater = function(params, chunk)
-  --     local cx, cy = chunk:get_center()
-  --     local path = chunk:new_path()
-  --     for i = 0, 3 do
-  --       path:add_point(vec2(cx+i, cy+i))
-  --     end
-  
-  --     chunk:target_path(path, function(x, y)
-  --       chunk:insert_actor('Water', x, y)
-  --     end)
-  --   end,
-  -- }
-  -- graph:add_node(lake)
-  
-  --graph:connect_nodes({type = 'Join'}, start, path_test, finish)
-  
+
+  local Shop = require 'maps.chunks.shop'
+  local shop = graph:new_node(Shop)
+  graph:add_node(shop)
+
+  local Snip_farm = require 'maps.chunks.snip_farm'
+  local snip_farm = graph:new_node(Snip_farm)
+  graph:add_node(snip_farm)
+
+
+  local Filler = require 'maps.chunks.filler'
+  local Tunnel = require 'maps.chunks.tunnel'
   
   
   local encounters = {
@@ -432,57 +180,23 @@ function Level:create(callback)
   
   local filler_nodes = {}
   for i = 1, 4 do
-    filler_nodes[i] = graph:new_node{
-      width = love.math.random(4, 10), height = love.math.random(4, 10),
-      shaper = function(params, chunk)
-        chunk:clear_rect(1,1, chunk.width-1, chunk.height-1)
-      end,
-      populater = function(params, chunk, clipping)
-        local cx, cy = chunk:get_center()
-        --chunk:insert_actor('Sqeeto', cx, cy)
-      end,
-    }
+    filler_nodes[i] = graph:new_node(Filler)
     graph:add_node(filler_nodes[i])
     
     if i > 1 then
-      local tunnel = graph:new_node{
-        width = 15, height = 15,
-        shaper = function(params, chunk)
-          local cx, cy = chunk:get_center()
-          
-          local path = chunk:drunkWalk(cx, cy,
-          function(x, y, i, chunk)  
-            return (i > 10) or (x < 1 or x > chunk.width-1 or y < 1 or y > chunk.height-1)
-          end
-        )
-        
-        chunk:clear_path(path)
-        
-      end,
-      populater = function(params, chunk, clipping)
-        for i = 1, 1 do
-          local x, y
-          repeat
-            x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
-          until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-          if love.math.random(0, 1) == 1 then
-            chunk:insert_actor('Glowshroom_1', x, y)
-          else
-            chunk:insert_actor('Glowshroom_2', x, y)
-          end
-        end
-      end,
-    }
-    graph:add_node(tunnel)
+      local tunnel = graph:new_node(Tunnel)
+      graph:add_node(tunnel)
     
-    graph:connect_nodes(edge_join_river, filler_nodes[i], tunnel, filler_nodes[love.math.random(1, i-1)])
+      graph:connect_nodes(edge_join_river, filler_nodes[i], tunnel, filler_nodes[love.math.random(1, i-1)])
+    end
   end
-end
 
 graph:connect_nodes(edge_join_door, start, filler_nodes[love.math.random(1, #filler_nodes)])
 graph:connect_nodes(edge_join_door, finish, filler_nodes[love.math.random(1, #filler_nodes)])
 graph:connect_nodes(edge_join_breakable_wall, sqeeto_hive, filler_nodes[love.math.random(1, #filler_nodes)])
 graph:connect_nodes(edge_join_boss_door, spider_nest, filler_nodes[love.math.random(1, #filler_nodes)])
+graph:connect_nodes(edge_join_door, shop, filler_nodes[love.math.random(1, #filler_nodes)])
+graph:connect_nodes(edge_join_door, snip_farm, filler_nodes[love.math.random(1, #filler_nodes)])
 
 
 local merged_room_3 = Map:special_merge(graph)
