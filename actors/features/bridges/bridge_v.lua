@@ -1,11 +1,12 @@
 local Actor = require "actor"
 local Tiles = require "tiles"
 
-local actor = Actor:extend()
-actor.char = Tiles["bridge_v"]
-actor.name = "bridge"
-actor.color = { 128/255, 64/255, 0/255, 1}
+local Bridge = Actor:extend()
+Bridge.char = Tiles["bridge_v"]
+Bridge.name = "bridge"
+Bridge.color = { 128/255, 64/255, 0/255, 1}
+Bridge.remembered = true
 
-actor.components = {}
+Bridge.components = {}
 
-return actor
+return Bridge

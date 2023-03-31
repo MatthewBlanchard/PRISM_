@@ -3,13 +3,14 @@ local Tiles = require "tiles"
 local Vector2 = require "vector"
 
 
-local actor = Actor:extend()
-actor.name = "wall"
-actor.char = Tiles["wall_2"]
-actor.color = {0.8, 0.5, 0.1, 1}
-actor.opaque = true
+local BreakableWall = Actor:extend()
+BreakableWall.name = "wall"
+BreakableWall.char = Tiles["wall_2"]
+BreakableWall.color = {0.8, 0.5, 0.1, 1}
+BreakableWall.opaque = true
+BreakableWall.remembered = true
 
-actor.components = {
+BreakableWall.components = {
   components.Collideable_box(),
   components.Stats{
     maxHP = 1,
@@ -17,4 +18,4 @@ actor.components = {
   }
 }
 
-return actor
+return BreakableWall

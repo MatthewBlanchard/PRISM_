@@ -4,8 +4,8 @@ local function New(level, map)
   
   local function spawn_actor(actor, x, y, callback, unique_id)  
     actors_by_unique_id[unique_id] = actor
-    actor.position.x = x
-    actor.position.y = y
+    actor.position.x = x + 1
+    actor.position.y = y + 1
 
     if callback then
       local status = callback(actor, actors_by_unique_id)
