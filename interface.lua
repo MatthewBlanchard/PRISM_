@@ -98,7 +98,7 @@ function Interface:draw()
   end
 
   local lighting_system = game.level:getSystem("Lighting")
-  lighting_system:rebuildLighting(game.level, dt)
+  lighting_system:rebuildLighting(game.level, self.dt)
   local ambientValue = sight_component.darkvision / 31
 
   local viewX, viewY = game.viewDisplay.widthInChars, game.viewDisplay.heightInChars
@@ -106,7 +106,7 @@ function Interface:draw()
   for x = sx - viewX, sx + viewX do
     for y = sy - viewY, sy + viewY do
       if fov[x] and fov[x][y] then
-        local lightCol = lighting_system:getLightingAt(x, y, fov):to_rgb()
+        local lightCol = lighting_system:getLightingAt(x, y, fov, self.dt):to_rgb()
         -- okay we're gonna first establish our light color and then
         -- do a bit of blending to keep it in line with the ambient
         -- fog of war

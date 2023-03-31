@@ -57,7 +57,7 @@ loadItems("actors", actors, true)
 loadItems("systems", systems, true)
 Loot = require "loot"
 
-local Level = require "level"
+local Level = require "level.level"
 local Interface = require "interface"
 local Display = require "display.display"
 local Start = require "panels.start"
@@ -135,7 +135,6 @@ local updateCoroutine
 game.waiting = false
 local skipAnimation = false
 function love.update(dt)
-  print(dt)
   local effects = game.level:getSystem("Effects")
 
   game.music:update(dt)

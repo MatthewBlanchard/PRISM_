@@ -26,6 +26,10 @@ function LightColor:__call(r, g, b)
     return self
 end
 
+function LightColor:clone()
+    return LightColor:__call(self.r, self.g, self.b)
+end
+
 function LightColor:perceived_brightness()
     local r = self.r / 31
     local g = self.g / 31
