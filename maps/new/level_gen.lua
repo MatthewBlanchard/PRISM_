@@ -1,5 +1,5 @@
 --love.math.setRandomSeed(1)
-love.audio.setVolume(0)
+--love.audio.setVolume(0)
 
 local Map = require "maps.map"
 local Object = require "object"
