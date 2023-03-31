@@ -72,7 +72,6 @@ function Sqeeto:act(level)
     for y, _ in pairs(sight_component.fov[x]) do
       local local_lights = lights:get(x, y)
       for light, _ in pairs(local_lights) do
-        assert(light.color:is(LightColor), "light.color is not a LightColor")
         local value = light.color:average_brightness()
 
         if value > highest then

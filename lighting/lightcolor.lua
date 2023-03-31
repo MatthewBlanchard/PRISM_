@@ -1,18 +1,29 @@
 local Object = require "object"
+local ffi = require "ffi"
 
-local LightColor = Object:extend()
+local LightColor = {}
+
+ffi.cdef[[
+typedef struct {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+} LightColor;
+]]
+
+LightColor.__index = LightColor
 
 -- Constructor
-function LightColor:__new(r, g, b)
+function LightColor:__call(r, g, b)
     assert(type(r) == "number" and r >= 0 and r <= 31, "Red component must be an integer between 0 and 31.")
     assert(type(g) == "number" and g >= 0 and g <= 31, "Green component must be an integer between 0 and 31.")
     assert(type(b) == "number" and b >= 0 and b <= 31, "Blue component must be an integer between 0 and 31.")
 
-    assert(self:is(LightColor))
-
+    local self = ffi.new("LightColor")
     self.r = r
     self.g = g
     self.b = b
+    return self
 end
 
 function LightColor:perceived_brightness()
@@ -38,7 +49,7 @@ function LightColor:subtract_scalar(scalar)
     local g = math.floor(math.min(31, math.max(self.g - scalar, 0)))
     local b = math.floor(math.min(31, math.max(self.b - scalar, 0)))
 
-    return LightColor(r, g, b)
+    return  LightColor:__call(r, g, b)
 end
 
 -- Helper function to clamp values
@@ -51,7 +62,7 @@ function LightColor.__add(a, b)
     local r = clamp(a.r + b.r, 0, 31)
     local g = clamp(a.g + b.g, 0, 31)
     local b = clamp(a.b + b.b, 0, 31)
-    return LightColor(r, g, b)
+    return  LightColor:__call(r, g, b)
 end
 
 -- Subtraction
@@ -59,7 +70,7 @@ function LightColor.__sub(a, b)
     local r = clamp(a.r - b.r, 0, 31)
     local g = clamp(a.g - b.g, 0, 31)
     local b = clamp(a.b - b.b, 0, 31)
-    return LightColor(r, g, b)
+    return  LightColor:__call(r, g, b)
 end
 
 -- Multiplication
@@ -68,7 +79,7 @@ function LightColor.__mul(a, scalar)
     local r = math.floor(clamp(a.r * scalar, 0, 31))
     local g = math.floor(clamp(a.g * scalar, 0, 31))
     local b = math.floor(clamp(a.b * scalar, 0, 31))
-    return LightColor(r, g, b)
+    return LightColor:__call(r, g, b)
 end
 
 -- Multiplication
@@ -77,7 +88,7 @@ function LightColor.__div(a, scalar)
     local r = math.floor(clamp(a.r / scalar, 0, 31))
     local g = math.floor(clamp(a.g / scalar, 0, 31))
     local b = math.floor(clamp(a.b / scalar, 0, 31))
-    return LightColor(r, g, b)
+    return  LightColor:__call(r, g, b)
 end
 
 -- Equality
@@ -90,4 +101,4 @@ function LightColor.__tostring(a)
     return string.format("LightColor(%d, %d, %d)", a.r, a.g, a.b)
 end
 
-return LightColor
+return ffi.metatype("LightColor", LightColor)

@@ -295,16 +295,13 @@ end
 
 function Level:getActorsAtPosition(x, y)
   local actorsAtPosition = {}
-  for i = 1, #self.actors do
-    local actorPosition = self.actors[i].position
-
-    if actorPosition.x == x and actorPosition.y == y then
-      table.insert(actorsAtPosition, self.actors[i])
-    end
+  for actor, _ in pairs(self.sparseMap:get(x, y)) do
+    table.insert(actorsAtPosition, actor)
   end
 
   return actorsAtPosition
 end
+
 
 function Level:moveActor(actor, pos, skipSparseMap)
   assert(pos.is and pos:is(Vector2), "Expected a Vector2 for pos in Level:moveActor.")

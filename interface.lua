@@ -98,6 +98,7 @@ function Interface:draw()
   end
 
   local lighting_system = game.level:getSystem("Lighting")
+  lighting_system:rebuildLighting(game.level, dt)
   local ambientValue = sight_component.darkvision / 31
 
   local viewX, viewY = game.viewDisplay.widthInChars, game.viewDisplay.heightInChars

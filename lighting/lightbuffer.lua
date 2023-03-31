@@ -1,5 +1,6 @@
 local Object = require "object"
 local LightColor = require "lighting.lightcolor"
+local ffi = require "ffi"
 
 local LightBuffer = Object:extend()
 
@@ -7,23 +8,24 @@ function LightBuffer:__new(w, h)
     self.w = w
     self.h = h
 
-    self.r = Grid(w, h, 0)
-    self.g = Grid(w, h, 0)
-    self.b = Grid(w, h, 0)
+    self.buffer = ffi.new("LightColor[?]", w * h)
 end
 
-function LightBuffer:getChannel(channel)
-    return self[channel]
+function LightBuffer:getIndex(x, y)
+    return (y - 1) * self.w + (x - 1)
+end
+
+function LightBuffer:getChannel(channel, x, y)
+    return self.buffer[self:getIndex(x, y)][channel]
 end
 
 function LightBuffer:clear()
-    self.r:fill(0)
-    self.g:fill(0)
-    self.b:fill(0)
+    ffi.fill(self.buffer, ffi.sizeof("LightColor") * self.w * self.h)
 end
 
 function LightBuffer:getColor(x, y)
-    return LightColor(self.r:get(x, y), self.g:get(x, y), self.b:get(x, y))
+    local color = self.buffer[self:getIndex(x, y)]
+    return LightColor(color.r, color.g, color.b)
 end
 
 function LightBuffer:getLight(x, y)
@@ -31,31 +33,41 @@ function LightBuffer:getLight(x, y)
 end
 
 function LightBuffer:set(x, y, r, g, b)
-    self.r:set(x, y, r)
-    self.g:set(x, y, g)
-    self.b:set(x, y, b)
+    local color = self.buffer[self:getIndex(x, y)]
+    color.r, color.g, color.b = r, g, b
+end
+
+-- Function to set the color in the LightBuffer
+function LightBuffer:setWithFFIStruct(x, y, color)
+    local index = self:getIndex(x, y)
+    ffi.copy(self.buffer[index], color, ffi.sizeof("LightColor"))
 end
 
 function LightBuffer:accumulate_buffer(x, y, buffer)
     for i = 0, buffer.w - 1 do
         for j = 0, buffer.h - 1 do
-            if not (x + i < 1 or x + i > self.w or y + j < 1 or y + j > self.h) then
-                local r = math.max(0, math.min(31, self.r:get(x + i, y + j) + buffer.r:get(i + 1, j + 1)))
-                local g = math.max(0, math.min(31, self.g:get(x + i, y + j) + buffer.g:get(i + 1, j + 1)))
-                local b = math.max(0, math.min(31, self.b:get(x + i, y + j) + buffer.b:get(i + 1, j + 1)))
+            if not (x + i - 1 < 0 or x + i - 1 >= self.w or y + j - 1 < 0 or y + j - 1 >= self.h) then
+                local index = self:getIndex(x + i, y + j)
+                local bufIndex = buffer:getIndex(i + 1, j + 1)
 
-                self.r:set(x + i, y + j, r)
-                self.g:set(x + i, y + j, g)
-                self.b:set(x + i, y + j, b)
+                local r = math.max(0, math.min(31, self.buffer[index].r + buffer.buffer[bufIndex].r))
+                local g = math.max(0, math.min(31, self.buffer[index].g + buffer.buffer[bufIndex].g))
+                local b = math.max(0, math.min(31, self.buffer[index].b + buffer.buffer[bufIndex].b))
+
+                self.buffer[index].r = r
+                self.buffer[index].g = g
+                self.buffer[index].b = b
             end
         end
     end
 end
 
 function LightBuffer:fill(r, g, b)
-    self.r:fill(r)
-    self.g:fill(g)
-    self.b:fill(b)
+    for i = 0, self.w * self.h - 1 do
+        self.buffer[i].r = r
+        self.buffer[i].g = g
+        self.buffer[i].b = b
+    end
 end
 
 return LightBuffer

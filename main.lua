@@ -135,6 +135,7 @@ local updateCoroutine
 game.waiting = false
 local skipAnimation = false
 function love.update(dt)
+  print(dt)
   local effects = game.level:getSystem("Effects")
 
   game.music:update(dt)

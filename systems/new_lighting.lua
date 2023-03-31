@@ -68,8 +68,10 @@ function LightingSystem:getLightingAt(x, y, fov, seenActors)
 
     for i = -1, 1, 1 do
         for j = -1, 1, 1 do
-            if fov[x + i] and fov[x + i][y + j] and self.owner:getCellVisibility(x + i, y + j) then
-                table.insert(cols, self:getLight(x + i, y + j))
+            if not (i == 0 and j == 0) then
+                if fov[x + i] and fov[x + i][y + j] and self.owner:getCellVisibility(x + i, y + j) then
+                    table.insert(cols, self:getLight(x + i, y + j))
+                end
             end
         end
     end
@@ -202,8 +204,8 @@ end
 
 function LightingSystem:__rebuild(level, dt)
     self.rebuilt = true
-    self.__lightMap:fill(0, 0, 0)
-    self.__effectLightMap:fill(0, 0, 0)
+    self.__lightMap:clear()
+    --self.__effectLightMap:clear()
 
     if self.__needsUpdate == nil then
         for x, y, light in self.__lights:each() do
@@ -233,6 +235,9 @@ function LightingSystem:__getLightReduction(level, row, col)
     return level:getCell(row, col).lightReduction or 1
 end
 
+local rowDirections = {-1, 1, 0, 0, -1, -1, 1, 1}
+local colDirections = {0, 0, -1, 1, -1, 1, -1, 1}
+
 function LightingSystem:__spreadLight(level, row, col, offsetx, offsety, lightLevel, lightMap, falloffFactor)
     local queue = {{row, col, lightLevel, 0}}
     local visited = ROT.Type.Grid:new()
@@ -240,11 +245,8 @@ function LightingSystem:__spreadLight(level, row, col, offsetx, offsety, lightLe
     local function processCell(curRow, curCol, curLightLevel, depth)
         if self:__isOpaque(level, curRow + offsetx, curCol + offsety) or visited:getCell(curRow, curCol) then return end
 
-        lightMap:set(curRow, curCol, curLightLevel.r, curLightLevel.g, curLightLevel.b)
+        lightMap:setWithFFIStruct(curRow, curCol, curLightLevel)
         visited:setCell(curRow, curCol, true)
-
-        local rowDirections = {-1, 1, 0, 0, -1, -1, 1, 1}
-        local colDirections = {0, 0, -1, 1, -1, 1, -1, 1}
 
         for i = 1, 8 do
             local newRow = curRow + rowDirections[i]
@@ -254,7 +256,7 @@ function LightingSystem:__spreadLight(level, row, col, offsetx, offsety, lightLe
                     math.floor(depth * falloffFactor) + self:__getLightReduction(level, curRow + offsetx, curCol + offsety)
                 )
 
-                if reducedLightLevel:average_brightness() > 0 then
+                if reducedLightLevel.r > 0 or reducedLightLevel.g > 0 or reducedLightLevel.b > 0 then
                     table.insert(queue, {newRow, newCol, reducedLightLevel, depth + 1})
                 end
             end

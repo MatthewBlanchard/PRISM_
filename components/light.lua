@@ -47,11 +47,6 @@ Light.effects = {
 }
 
 function Light:__new(options)
-  assert(
-    options.color and options.color.is and options.color:is(LightColor),
-    "Light color must be a LightColor object"
-  )
-
   assert(options.intensity == nil)
 
   self.color = options.color
