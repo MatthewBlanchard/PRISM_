@@ -50,12 +50,11 @@ local function colorSwap(baseColor, secondaryColor, period, intensity)
     t = t + dt
 
     local r = math.sin(t / ( period * 2))
-    local clerped = clerp(baseColor, secondaryColor, math.abs(r)) 
+    local clerped = baseColor:lerp(secondaryColor, math.abs(r))
     
     r = math.sin(t / (period / 2)) * intensity
-    clerped[1] = clerped[1] + clerped[1] * r
-    clerped[2] = clerped[2] + clerped[2] * r
-    clerped[3] = clerped[3] + clerped[3] * r
+    clerped = clerped + clerped * r
+
     return clerped
   end
 end

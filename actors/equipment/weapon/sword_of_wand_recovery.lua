@@ -1,13 +1,12 @@
 local Actor = require "actor"
 local Tiles = require "tiles"
 local OnCrit = require "conditions.oncrit"
+local LightColor = require "lighting.lightcolor"
 
 local WandSword = Actor:extend()
 WandSword.char = Tiles["shortsword"]
 WandSword.name = "Sword of Wand Recovery"
 WandSword.color = { 0.627, 0.125, 0.941, 1}
-
-local lightEffect = components.Light.effects.pulse({ 0.627, 0.125, 0.941, 1}, 0.5, 0.2)
 
 --need to add an interface here to allow you to select a single wand to recharge
 local WandRecovery = OnCrit:extend()
@@ -31,9 +30,8 @@ WandSword.components = {
         effects = {WandRecovery()}
     },
     components.Light{
-        color = { 0.627, 0.125, 0.941, 1},
-        intensity = 3,
-        effect = lightEffect
+        color = LightColor(20, 4, 28),
+        effect = {components.Light.effects.pulse, {0.5, 0.2}}
     },
     components.Cost{rarity = "rare"}
 }

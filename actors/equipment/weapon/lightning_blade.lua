@@ -1,12 +1,11 @@
 local Actor = require "actor"
 local Tiles = require "tiles"
+local LightColor = require "lighting.lightcolor"
 
 local LightningBlade = Actor:extend()
 LightningBlade.char = Tiles["shortsword"]
 LightningBlade.name = "Lightning Blade"
 LightningBlade.color = { 1.0, 0.0141, 0.0, 1}
-
-local lightEffect = components.Light.effects.colorSwap({ 1.0, 0.0141, 0.0, 1}, { 0.198, 0.60, 0.831, 1}, 1.0, 0.3)
 
 LightningBlade.components = {
     components.Item(),
@@ -18,9 +17,8 @@ LightningBlade.components = {
         time = 75
     },
     components.Light{
-        color = { 1.0, 0.0141, 0.0, 1},
-        intensity = 3,
-        effect = lightEffect
+        color = LightColor(31, 10, 5),
+        effect = {components.Light.effects.colorSwap, {LightColor(6, 17, 26), 1.0, 0.5}},
     },
     components.Cost{rarity = "uncommon"}
 }
