@@ -1,5 +1,6 @@
 local Actor = require "actor"
 local Tiles = require "tiles"
+local LightColor = require "lighting.lightcolor"
 
 local Glowshroom = Actor:extend()
 Glowshroom.char = Tiles["glowshroom"]
@@ -8,8 +9,8 @@ Glowshroom.color = { 0.5, 0.9, 0.5, 1}
 
 Glowshroom.components = {
   components.Light{
-    color = { 0.4, 0.7, 0.4, 1},
-    intensity = 2
+    color = LightColor(8, 22, 10),
+    falloff = 0.7
   }
 }
 

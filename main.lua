@@ -57,7 +57,7 @@ loadItems("actors", actors, true)
 loadItems("systems", systems, true)
 Loot = require "loot"
 
-local Level = require "level"
+local Level = require "level.level"
 local Interface = require "interface"
 local Display = require "display.display"
 local Start = require "panels.start"
@@ -79,7 +79,7 @@ local function createLevel()
   level:addSystem(systems.Message())
   level:addSystem(systems.Inventory())
   level:addSystem(systems.Effects())
-  level:addSystem(systems.Lighting())
+  level:addSystem(systems.New_lighting())
   level:addSystem(systems.Sight())
   level:addSystem(systems.Equipment())
   level:addSystem(systems.Weapon())

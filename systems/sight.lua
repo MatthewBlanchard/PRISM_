@@ -107,7 +107,7 @@ function SightSystem:updateFOV(level, actor)
     sight_component.seenActors = {}
   
     local sightLimit = sight_component.sight
-    local darkvision = sight_component.darkvision
+    local darkvision = 0
     
     -- we have to check the actor's conditions to see if they modify their darkvision
     for _, condition in ipairs(actor:getConditions()) do
@@ -135,7 +135,8 @@ function SightSystem:updateFOV(level, actor)
         if light_system and sight_component.darkvision ~= 0 then 
             for x, _ in pairs(sight_component.fov) do
                 for y, _ in pairs(sight_component.fov[x]) do
-                local lightval = ROT.Color.value(light_system:getLightingAt(x, y, sight_component.fov))
+                    local fov = sight_component.fov
+                    local lightval = light_system:getLightingAt(x, y, fov):average_brightness()
                     if lightval < sight_component.darkvision and not (actor:getRange("box", Vector2(x, y)) <= 1) then
                         sight_component.fov[x][y] = nil
                     end

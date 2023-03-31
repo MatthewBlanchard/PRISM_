@@ -1,12 +1,11 @@
 local Actor = require "actor"
 local Tiles = require "tiles"
+local LightColor = require "lighting.lightcolor"
 
 local CrystalSword = Actor:extend()
 CrystalSword.char = Tiles["shortsword"]
 CrystalSword.name = "Crystal Sword"
 CrystalSword.color = { 0.498, 1.00, 0.831, 1}
-
-local lightEffect = components.Light.effects.pulse({ 0.498, 1.00, 0.831, 1}, 0.2, 0.2)
 
 CrystalSword.components = {
     components.Item(),
@@ -18,9 +17,8 @@ CrystalSword.components = {
         time = 100
     },
     components.Light{
-        color = { 0.498, 1.00, 0.831, 1},
-        intensity = 3,
-        effect = lightEffect
+        color = LightColor(15, 31, 25),
+        effect = {components.Light.effects.pulse, {0.2, 0.2}},
     },
     components.Cost{rarity = "uncommon"}
 }

@@ -2,7 +2,7 @@ local Actor = require "actor"
 local Action = require "action"
 local Condition = require "condition"
 local Tiles = require "tiles"
-
+local LightColor = require "lighting.lightcolor"
 -- The light actor
 -- Not super reusable so we define the light actor here.
 local Orb = Actor:extend()
@@ -11,8 +11,7 @@ Orb.name = "Orb of light"
 
 Orb.components = {
   components.Light{
-    color = { 0.8, 0.8, 0.866, 1 },
-    intensity = 5
+    color = LightColor(26, 26, 30),
   },
   components.Lifetime{ duration = 3000 }
 }

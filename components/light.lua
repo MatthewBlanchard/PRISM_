@@ -1,4 +1,5 @@
 local Component = require "component"
+local LightColor = require "lighting.lightcolor"
 
 local function randBiDirectional()
   return (math.random() - .5) * 2
@@ -6,16 +7,14 @@ end
 
 local function flicker(baseColor, period, intensity)
   local t = 0
-  local color = {baseColor[1], baseColor[2], baseColor[3], baseColor[4]}
+  local color = baseColor:clone()
   return function(dt)
     t = t + dt
 
     if t > period then
       t = 0
       local r = randBiDirectional() * intensity
-      color[1] = baseColor[1] - baseColor[1] * r
-      color[2] = baseColor[2] - baseColor[2] * r
-      color[3] = baseColor[3] - baseColor[3] * r
+      color = baseColor - baseColor * r
     end
 
     return color
@@ -34,15 +33,13 @@ end
 
 local function pulse(baseColor, period, intensity)
   local t = 0
-  local color = {baseColor[1], baseColor[2], baseColor[3], baseColor[4]}
+  local color = baseColor:clone()
   return function(dt)
     t = t + dt
 
     local r = math.sin(t / period) * intensity
-    color[1] = baseColor[1] + baseColor[1] * r
-    color[2] = baseColor[2] + baseColor[2] * r
-    color[3] = baseColor[3] + baseColor[3] * r
-
+    color = baseColor + baseColor * r
+    
     return color
   end
 end
@@ -73,21 +70,17 @@ Light.effects = {
 }
 
 function Light:__new(options)
+  assert(options.intensity == nil)
+
   self.color = options.color
-  self.intensity = options.intensity
-  self.effect = options.effect
+  if options.effect then
+    self.effect = options.effect[1](self.color, unpack(options.effect[2]))
+  end
+  self.falloff = options.falloff or 0.4
 end
 
 function Light:initialize(actor)
-  -- We clone the color table so that we can modify it without affecting the
-  -- original table in the parent object.
-  local color = {}
-
-  for k, v in pairs(self.color) do
-    color[k] = v
-  end
-
-  self.color = color
+  self.color = LightColor(self.color.r, self.color.g, self.color.b)
 end
 
 return Light

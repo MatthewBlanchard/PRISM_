@@ -4,6 +4,7 @@ local Tiles = require "tiles"
 local FeatsPanel = require "panels.feats"
 local SwirlPanel = require "panels.swirl"
 local ClassSelectPanel = require "panels.class_select"
+local LightColor = require "lighting.lightcolor"
 
 local Gaze = Action:extend()
 Gaze.name = "gaze"
@@ -60,13 +61,12 @@ Prism.name = "Prism of Enlightenment"
 Prism.color = {0.67, 0.78, 0.9, 1}
 Prism.emissive = true
 Prism.char = Tiles["prism"]
-Prism.lightEffect = components.Light.effects.pulse({ 0.4, 0.4, 0.6, 1 }, 0.2, 0.2)
 
 Prism.components = {
   components.Light{
-    color = { 0.4, 0.4, 0.6, 1},
-    intensity = 4,
-    effect = Prism.lightEffect
+    color = LightColor(16, 16, 26),
+    effect = {components.Light.effects.pulse, {0.2, 0.4}},
+    falloff = 0.2
   },
   components.Item(),
   components.Usable{Gaze}

@@ -12,7 +12,7 @@ function Read:perform(level)
   for x = 1, level.width do
 	for y = 1, level.height do
 	  if not self.owner.explored[x] then self.owner.explored[x] = {} end
-	  self.owner.explored[x][y] = level.map[x][y]
+	  self.owner.explored[x][y] = level.map:getCell(x, y)
 	end
   end
 end

@@ -6,7 +6,7 @@ Player.name = "Player"
 
 Player.components = {
   components.Collideable_box(),
-  components.Sight{ range = 30, fov = true, explored = true },
+  components.Sight{ range = 30, fov = true, explored = true},
   components.Message(),
   components.Move{ speed = 100 },
   components.Inventory(),
@@ -46,4 +46,5 @@ Player.components = {
   components.Animated(),
   components.Faction{ "player", "warmblooded" }
 }
+
 return Player

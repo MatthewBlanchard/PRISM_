@@ -1,6 +1,7 @@
 local Actor = require "actor"
 local Tiles = require "tiles"
 local Condition = require "condition"
+local LightColor = require "lighting.lightcolor"
 
 local onkill_messages = {
     "Well done, old sport! That's one less spider to ruin a perfectly good afternoon tea.",
@@ -55,8 +56,7 @@ SpidersBane.name = "Phinneas, Spider's Bane"
 SpidersBane.components = {
     components.Item(),
     components.Light{
-        color = { 1.0, 1.0, 1.0, 1},
-        intensity = 1,
+        color = LightColor(22, 22, 22),
     }, 
     components.Weapon{
         stat = "ATK",

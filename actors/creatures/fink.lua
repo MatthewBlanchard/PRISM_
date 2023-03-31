@@ -12,7 +12,7 @@ Fink.color = {0.596, 0.462, 0.329}
 
 Fink.components = {
   components.Collideable_box(),
-  components.Sight{ range = 12, fov = true, explored = false, darkvision = 0.1 },
+  components.Sight{ range = 12, fov = true, explored = false, darkvision = 5 },
   components.Move{ speed = 100 },
   components.Stats{
     ATK = 1,
