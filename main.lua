@@ -57,7 +57,7 @@ loadItems("actors", actors, true)
 loadItems("systems", systems, true)
 Loot = require "loot"
 
-local Level = require "level.level"
+local Level = require "level"
 local Interface = require "interface"
 local Display = require "display.display"
 local Start = require "panels.start"
