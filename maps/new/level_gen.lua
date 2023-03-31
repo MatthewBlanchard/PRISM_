@@ -18,28 +18,22 @@ function Level:create(callback)
   local map = self._map
   
   local graph = {
-    nodes = {}
+    nodes = {},
+    edges = {}
   }
-  graph.new_node = function (self, parameters)
+  function graph:add_node(parameters)
     local node = {
       parameters = parameters,
-      room = nil,
+      chunk = nil,
       edges = {}
     }
-    
-    return node
-  end
-  graph.add_node = function (self, node)
+
     table.insert(self.nodes, node)
     self.nodes[node] = #self.nodes
     
     return node
   end
-  local edge_type = {"Join", "Overlay", "Weak"}
-  -- path qualites
-  -- Join offset, "Butt", join qualities
-  -- Join preferences
-  graph.connect_nodes = function (self, meta, ...)
+  function graph:connect_nodes(meta, ...)
     local nodes = {...}
     for i = 1, #nodes-1 do
       table.insert(nodes[i].edges, {meta = meta, node = nodes[i+1]})
@@ -76,25 +70,14 @@ function Level:create(callback)
   local Start = chunks.Start
   Start.key_id = id_generator()
   boss_key_uuid = Start.key_id
-  local start = graph:new_node(Start)
-  graph:add_node(start)
+  local start = graph:add_node(Start)
 
 
-  local finish = graph:new_node(chunks.Finish)
-  graph:add_node(finish)
-
-  local sqeeto_hive = graph:new_node(chunks.Sqeeto_hive)
-  graph:add_node(sqeeto_hive)
-  
-  local spider_nest = graph:new_node(chunks.Spider_nest)
-  graph:add_node(spider_nest)
-
-  local shop = graph:new_node(chunks.Shop)
-  graph:add_node(shop)
-
-  local snip_farm = graph:new_node(chunks.Snip_farm)
-  graph:add_node(snip_farm)
-  
+  local finish = graph:add_node(chunks.Finish)
+  local sqeeto_hive = graph:add_node(chunks.Sqeeto_hive)  
+  local spider_nest = graph:add_node(chunks.Spider_nest)
+  local shop = graph:add_node(chunks.Shop)
+  local snip_farm = graph:add_node(chunks.Snip_farm)  
   
   local encounters = {
     {cr = 1, actors = {"sqeeto"}},
@@ -189,12 +172,10 @@ function Level:create(callback)
   
   local filler_nodes = {}
   for i = 1, 4 do
-    filler_nodes[i] = graph:new_node(chunks.Filler)
-    graph:add_node(filler_nodes[i])
+    filler_nodes[i] = graph:add_node(chunks.Filler)
     
     if i > 1 then
-      local tunnel = graph:new_node(chunks.Tunnel)
-      graph:add_node(tunnel)
+      local tunnel = graph:add_node(chunks.Tunnel)
     
       graph:connect_nodes(edge_join_river, filler_nodes[i], tunnel, filler_nodes[love.math.random(1, i-1)])
     end

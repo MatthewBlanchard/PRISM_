@@ -97,9 +97,9 @@ function Map:special_merge(graph)
   local edges = {}
   local paths = {}
   for _, v in ipairs(graph.nodes) do
-    v.room = new_chunk(v.parameters)
+    v.chunk = new_chunk(v.parameters)
     
-    local outline = v.room:new_from_outline_strict()
+    local outline = v.chunk:new_from_outline_strict()
     table.insert(strict_outlines, outline)
     
     local edge = outline:find_edges()
@@ -122,7 +122,7 @@ function Map:special_merge(graph)
     end
     table.insert(paths, path)
     
-    v.parameters.populater(v.parameters, v.room, path)
+    v.parameters.populater(v.parameters, v.chunk, path)
   end
   
   local function get_matching_edges(edges1, edges2)
@@ -327,14 +327,14 @@ function Map:special_merge(graph)
   
   local clip_width_sum, clip_height_sum = 0, 0
   for i, v in ipairs(graph.nodes) do
-    clip_width_sum = clip_width_sum + v.room.width
-    clip_height_sum = clip_height_sum + v.room.height
+    clip_width_sum = clip_width_sum + v.chunk.width
+    clip_height_sum = clip_height_sum + v.chunk.height
   end
   local clip_dimension_sum = vec2(clip_width_sum, clip_height_sum)
   
   local map = Map:new(clip_width_sum*2, clip_height_sum*2, 0)
   
-  map:copy_map_onto_self_at_position(matches[match_index][1].room, clip_width_sum, clip_height_sum, false)
+  map:copy_map_onto_self_at_position(matches[match_index][1].chunk, clip_width_sum, clip_height_sum, false)
   for i = 2, #matches[match_index] do
     local match = matches[match_index][i]
     local segment_index_1 = match.segment_index_1
@@ -359,7 +359,7 @@ function Map:special_merge(graph)
       vec = vec,
       edge_meta_info = match.edge_meta_info,
     })
-    map:copy_map_onto_self_at_position(graph.nodes[match[5]].room, offset.x+clip_width_sum, offset.y+clip_height_sum, false)
+    map:copy_map_onto_self_at_position(graph.nodes[match[5]].chunk, offset.x+clip_width_sum, offset.y+clip_height_sum, false)
   end
   
   for i, v in ipairs(connections) do
