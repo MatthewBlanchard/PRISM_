@@ -57,7 +57,6 @@ function LightingSystem:onActorRemoved(level, actor) self:rebuildLighting(level)
 function LightingSystem:getLight(x, y, dt)
     local lightMap = self.__lightMap
     if dt then
-        print "YEET"
         lightMap = self.__effectLightMap
     end
 
