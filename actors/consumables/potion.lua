@@ -12,7 +12,7 @@ function Drink:perform(level)
   actions.Drink.perform(self, level)
 
   local heal = self.owner:getReaction(reactions.Heal)
-  level:performAction(heal(self.owner, {self.owner}, 5))
+  level:performAction(heal(self.owner, {}, 5))
 end
 
 local Potion = Actor:extend()

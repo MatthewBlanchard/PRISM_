@@ -53,7 +53,7 @@ local function New(level, map)
   spawn_actors()
 
   for i, v in ipairs(callback_queue) do
-    callback_queue()
+    v()
   end
 
   return map

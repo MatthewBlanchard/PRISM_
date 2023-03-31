@@ -1,9 +1,9 @@
 local Actor = require "actor"
 local LizBop = Actor:extend()
-local tiles = require "tiles"
+local Tiles = require "tiles"
 
 LizBop.name = "Lizard"
-LizBop.char = tiles.lizbop
+LizBop.char = Tiles["lizbop_1"]
 LizBop.color = {0.0, 1.0, 0.0}
 
 LizBop.actions = {
@@ -32,7 +32,9 @@ LizBop.components = {
         dice = "1d2",
       }
   },
-  components.Animated(),
+  components.Animated{
+    sheet = {Tiles["lizbop_1"], Tiles["lizbop_2"]}
+  },
   components.Faction{ "reptile" }
 }
 

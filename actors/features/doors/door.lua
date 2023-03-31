@@ -16,7 +16,7 @@ function Open:perform(level)
   local door = self.targetActors[1]
 
   local collideable = door:hasComponent(components.Collideable)
-  door.char = not collideable and Tiles["door_closed"] or Tiles["door_open"]
+  door.char = not collideable and Tiles["door_2"] or Tiles["door_1"]
 
   if collideable then
     door:removeComponent(components.Collideable)
@@ -24,14 +24,14 @@ function Open:perform(level)
     door:addComponent(components.Collideable_box())
   end
 
-  door.blocksVision = not collideable
+  door.opaque = not collideable
 end
 
 local Door = Actor:extend()
 
-Door.char = Tiles["door_closed"]
+Door.char = Tiles["door_2"]
 Door.name = "door"
-Door.blocksVision = true
+Door.opaque = true
 Door.remembered = true
 
 Door.components = {

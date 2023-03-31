@@ -2,13 +2,9 @@
 -- A Code Page 437 terminal emulator based on AsciiPanel.
 local Display = {}
 local util = require 'display.util'
-Display.defaultTileset = {
-   path = 'display/cp437_15x15.png',
-   perRow = 16,
-   perColumn = 24,
-   charWidth = 15,
-   charHeight = 15,
-}
+local Tiles = require('tiles')
+local json = require 'lib.json'
+Display.defaultTileset = 'display/atlas'
 
 --- Constructor.
 -- The display constructor.
@@ -56,10 +52,13 @@ function Display:new(w, h, scale, dfg, dbg, fullOrFlags, tilesetInfo, window)
 
    t.canvas = t.graphics.newCanvas(t.charWidth * t.widthInChars, t.charHeight * t.heightInChars)
 
+
    for i = 1, t.widthInChars do
       t.chars[i]               = {}
       t.backgroundColors[i]    = {}
-      t.foregroundColors[i]    = {}
+      t
+      
+        .foregroundColors[i]    = {}
       t.oldChars[i]            = {}
       t.oldBackgroundColors[i] = {}
       t.oldForegroundColors[i] = {}
@@ -115,21 +114,28 @@ end
 --- Change the tileset.
 -- Accepts the same table format as the one passed to the constructor.
 function Display:setTileset(tilesetInfo)
-   self.imageCharWidth = tilesetInfo.charWidth
-   self.imageCharHeight = tilesetInfo.charHeight
+   local atlas = json.decode(love.filesystem.read(tilesetInfo..'.json'))
+
+   self.imageCharWidth = atlas.grid_width
+   self.imageCharHeight = atlas.grid_height
    self.charWidth = self.imageCharWidth * self.scale
    self.charHeight = self.imageCharHeight * self.scale
-   self.glyphSprite = self.graphics.newImage(tilesetInfo.path)
+   self.glyphSprite = self.graphics.newImage(tilesetInfo..'.png')
 
-   local i = 0
-   for y = 0, tilesetInfo.perColumn - 1 do
-      local sy = y * self.imageCharHeight
-      for x = 0, tilesetInfo.perRow - 1 do
-         local sx = x * self.imageCharWidth
-         self.glyphs[i] = self.graphics.newQuad(sx, sy, self.imageCharWidth, self.imageCharHeight,
-            self.glyphSprite:getWidth(), self.glyphSprite:getHeight())
-         i = i + 1
-      end
+
+   local sorted = {}
+   for i, v in ipairs(atlas.regions) do
+      sorted[v.idx] = v
+   end
+
+   for i = 0, #sorted do
+      local v = sorted[i]
+      local x, y = v.rect[1], v.rect[2]
+      local width, height = v.rect[3], v.rect[4]
+
+      self.glyphs[i] = self.graphics.newQuad(x, y, width, height,
+         atlas.width, atlas.height
+      )
    end
 
    self.tilesetChanged = true
@@ -316,7 +322,7 @@ function Display:_writeValidatedString(s, x, y, fg, bg)
    for i = 1, #s do
       self.backgroundColors[x + i - 1][y]= bg
       self.foregroundColors[x + i - 1][y]= fg
-      self.chars[x + i - 1][y]        = s:byte(i)
+      self.chars[x + i - 1][y]        = Tiles[tostring(s:byte(i))]
    end
 end
 
@@ -385,7 +391,7 @@ function Display:drawText(x, y, text, maxWidth)
       if token.type == util.TYPE_TEXT then
          local isSpace, isPrevSpace, isFullWidth, isPrevFullWidth
          for i = 1, #token.value do
-            local cc = token.value:byte(i)
+            local cc = Tiles[tostring(token.value:byte(i))]--token.value:byte(i)
             local c = token.value:sub(i, i)
             -- TODO: chars will never be full-width without special handling
             -- TODO: ... so the next 15 lines or so do some pointless stuff

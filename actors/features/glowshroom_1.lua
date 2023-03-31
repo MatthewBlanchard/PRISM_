@@ -3,7 +3,7 @@ local Tiles = require "tiles"
 local LightColor = require "lighting.lightcolor"
 
 local Glowshroom = Actor:extend()
-Glowshroom.char = Tiles["glowshroom"]
+Glowshroom.char = Tiles["mushroom_1"]
 Glowshroom.name = "Glowshroom"
 Glowshroom.color = { 0.5, 0.9, 0.5, 1}
 

@@ -5,7 +5,7 @@ local LightColor = require "lighting.lightcolor"
 
 local Sqeeto = Actor:extend()
 
-Sqeeto.char = Tiles["sqeeto"]
+Sqeeto.char = Tiles["sqeeto_1"]
 Sqeeto.name = "sqeeter"
 Sqeeto.color = {0.8, 0.7, 0.09}
 
@@ -32,7 +32,9 @@ Sqeeto.components = {
   },
 
   components.Aicontroller(),
-  components.Animated(),
+  components.Animated{
+    sheet = {Tiles["sqeeto_1"], Tiles["sqeeto_2"]}
+  },
   components.Faction{ "sqeeter" }
 }
 

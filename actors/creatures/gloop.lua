@@ -36,7 +36,7 @@ Explode:afterAction(actions.Throw,
 
 local Gloop = Actor:extend()
 
-Gloop.char = Tiles["gloop"]
+Gloop.char = Tiles["gloop_1"]
 Gloop.name = "gloop"
 Gloop.color = {90 / 230, 161 / 230, 74 / 230}
 
@@ -53,7 +53,9 @@ Gloop.components = {
   },
   components.Item{stackable = true},
   components.Aicontroller(),
-  components.Animated(),
+  components.Animated{
+    sheet = {Tiles["gloop_1"], Tiles["gloop_2"]}
+  },
   components.Faction{ "critter" }
 }
 

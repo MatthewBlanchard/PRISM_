@@ -27,7 +27,7 @@ end
 function SightSystem:beforeAction(level, actor, action)
     for actor in level:eachActor() do
         self.__visibilityCheck[actor] = actor:isVisible()
-        self.__opaqueCheck[actor] = actor.blocksVision
+        self.__opaqueCheck[actor] = actor.opaque
     end
 end
 
@@ -44,7 +44,7 @@ function SightSystem:afterAction(level, actor, action)
             self.__visibilityCheck[actor] = nil
         end
 
-        if self.__opaqueCheck[actor] ~= actor.blocksVision then
+        if self.__opaqueCheck[actor] ~= actor.opaque then
             should_rebuild_fov = true
             self.__opaqueCheck[actor] = nil
         end
@@ -72,7 +72,7 @@ function SightSystem:onMove(level, actor, from, to)
     local lighting_system = level:getSystem("Lighting")
     for other_actor in level:eachActor() do
         if other_actor ~= actor then
-            if actor.blocksVision or (lighting_system and lighting_system.rebuilt) then
+            if actor.opaque or (lighting_system and lighting_system.rebuilt) then
                 self:updateFOV(level, other_actor)
             else
                 self:updateSeenActors(level, other_actor)

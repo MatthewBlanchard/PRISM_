@@ -6,7 +6,7 @@ local Shard = require "actors.other.shard"
 
 local Fink = Actor:extend()
 
-Fink.char = Tiles["fink"]
+Fink.char = Tiles["fink_1"]
 Fink.name = "fink"
 Fink.color = {0.596, 0.462, 0.329}
 
@@ -34,7 +34,9 @@ Fink.components = {
 
   components.Inventory(),
   components.Aicontroller(),
-  components.Animated(),
+  components.Animated{
+    sheet = {Tiles["fink_1"], Tiles["fink_2"]}
+  },
   components.Faction{ "fink", "warmblooded" }
 }
 

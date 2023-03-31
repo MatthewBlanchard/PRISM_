@@ -3,18 +3,14 @@ local Map = Object:extend()
 
 local vec2 = require "vector"
 
-local lib_path = love.filesystem.getWorkingDirectory() .. '/maps/clipper'
+local lib_path = love.filesystem.getSource() .. '/maps/clipper'
 local extension = jit.os == 'Windows' and 'dll' or jit.os == 'Linux' and 'so' or jit.os == 'OSX' and 'dylib'
 package.cpath = string.format('%s;%s/?.%s', package.cpath, lib_path, extension)
 local Clipper = require('maps.clipper.clipper')
 
 local tablex = require 'lib.batteries.tablex'
 
-local id_generator_index = 0
-local id_generator = function()
-  id_generator_index = id_generator_index + 1
-  return id_generator_index
-end
+local id_generator = require 'maps.uuid'
 
 function Map:new(width, height, value)
   local o = {}
@@ -43,20 +39,38 @@ function Map:init(width, height, value)
   self.height = height
 end
 
-function Map:insert_actor(actor_id, x, y, callback)
+function Map:insert_actor(actor_id, x, y, callback, unique_id)
   local position = vec2(x, y)
-  local unique_id = id_generator()
+  local unique_id = unique_id or id_generator()
   table.insert(self.actors.list, {id = actor_id, unique_id = unique_id, pos = position, callback = callback})
   
   return self, unique_id
+end
+
+function Map:for_cells()
+  local x = 0
+  local y = -1
+  
+  return function ()
+    if y < self.height then
+      y = y + 1
+    elseif y == self.height then
+      y = 0
+      x = x + 1
+    end
+    
+    if x <= self.width then
+      return x, y, self.cells[x][y]
+    end
+  end
 end
 
 -- Merging
 function Map:copy_map_onto_self_at_position(map, x, y, is_destructive)
   for i = x, x+map.width do
     for i2 = y, y+map.height do
-      if (is_destructive) or (self.cells[i][i2] == 0) then
-        self.cells[i][i2] = map.cells[i-x][i2-y]
+      if (is_destructive) or (self:get_cell(i, i2) == 0) then
+        self:set_cell(i, i2, map:get_cell(i-x, i2-y))
       end
     end
   end
@@ -71,37 +85,28 @@ end
 
 function Map:special_merge(graph)
   local function new_chunk(params)
-    local width = params.width or 4
-    local height = params.height or 4
-    local actors = params.actors or {}
-    local shaper = params.shaper or function(params, chunk) chunk:clear_rect(1,1, chunk.width-1, chunk.height-1) end
-
-    local chunk = Map:new(width, height, 1)
+    params:parameters()
+    local chunk = Map:new(params.width, params.height, 1)
     
-    shaper(params, chunk)
-
+    params:shaper(chunk)
+    
     return chunk:new_from_outline()
   end
-  for _, v in ipairs(graph.nodes) do
-    v.room = new_chunk(v.parameters)
-  end
-
+  
   local strict_outlines = {}
-  for _, v in ipairs(graph.nodes) do
-    local outline = v.room:new_from_outline_strict()
-    table.insert(strict_outlines, outline)
-  end
-  
   local edges = {}
-  for _, v in ipairs(strict_outlines) do
-    local edge = v:find_edges()
-    table.insert(edges, edge)
-  end
-  
   local paths = {}
-  for i, v in ipairs(edges) do
+  for _, v in ipairs(graph.nodes) do
+    v.chunk = new_chunk(v.parameters)
+    
+    local outline = v.chunk:new_from_outline_strict()
+    table.insert(strict_outlines, outline)
+    
+    local edge = outline:find_edges()
+    table.insert(edges, edge)
+    
     local num_of_points = 0
-    for _, v2 in ipairs(v) do
+    for _, v2 in ipairs(edge) do
       for _, v3 in ipairs(v2) do
         num_of_points = num_of_points + 1
       end
@@ -109,37 +114,30 @@ function Map:special_merge(graph)
     
     local path = Clipper.Path(num_of_points)
     local i = 0
-    for _, v2 in ipairs(v) do
+    for _, v2 in ipairs(edge) do
       for _, v3 in ipairs(v2) do
         path[i] = Clipper.IntPoint(v3.x, v3.y)
         i = i + 1
       end
     end
     table.insert(paths, path)
-  end
-
-  -- populater
-  for _, v in ipairs(graph.nodes) do
-    if v.parameters.populater then v.parameters.populater(v.parameters, v.room, paths[graph.nodes[v]]) end
+    
+    v.parameters.populater(v.parameters, v.chunk, path)
   end
   
-  local function getMatches(lines1, lines2)
-    function sign(n) return n>0 and 1 or n<0 and -1 or 0 end
-    
+  local function get_matching_edges(edges1, edges2)
     local matches = {}
-    for i, v in ipairs(lines1) do
-      
-      local p1, q1 = v[1], v[#v]
-      
-      for i2, v2 in ipairs(lines2) do
-        local p2, q2 = v2[1], v2[#v2]
+    for _, edge1 in ipairs(edges1) do
+      for _, edge2 in ipairs(edges2) do
+        local p1, q1 = edge1[1], edge1[#edge1]
+        local p2, q2 = edge2[1], edge2[#edge2]
         
-        local dx1, dy1 = p1.x-q1.x, p1.y-q1.y
-        local dx2, dy2 = p2.x-q2.x, p2.y-q2.y
+        local dx1, dy1 = p1.x - q1.x, p1.y - q1.y
+        local dx2, dy2 = p2.x - q2.x, p2.y - q2.y
         
-        if (sign(dx1) == sign(dx2) * -1) and (sign(dy1) == sign(dy2)*-1) then
-          if (#v > 2) and (#v2 > 2) then
-            table.insert(matches, {v, v2})
+        if math.sign(dx1) == -math.sign(dx2) and math.sign(dy1) == -math.sign(dy2) then
+          if #edge1 > 2 and #edge2 > 2 then
+            table.insert(matches, {edge1, edge2})
           end
         end
       end
@@ -165,7 +163,7 @@ function Map:special_merge(graph)
     return is_intersect, offset_clip
   end
   local function find_valid_matches(node_index1, node_index2, edge_meta_info)
-    local matches = getMatches(edges[node_index1], edges[node_index2])
+    local matches = get_matching_edges(edges[node_index1], edges[node_index2])
     local matches_without_intersections = {}
     
     local num_of_points = 0
@@ -178,8 +176,6 @@ function Map:special_merge(graph)
     for _, v in ipairs(matches) do
       for i = 2, #v[1]-1 do
         for i2 = 2, #v[2]-1 do
-          if i ~= math.floor((#v[1]+1)/2) or i2 ~= math.floor((#v[2]+1)/2) then goto continue end -- limiter
-          
           local segment_index_1 = i
           local segment_index_2 = i2
           
@@ -191,6 +187,9 @@ function Map:special_merge(graph)
             table.insert(matches_without_intersections, {
               v, segment_index_1, segment_index_2, offset_clip, node_index2, offset, num_of_points, connection_point_1, connection_point_2,
               
+              segment_index_1 = segment_index_1,
+              segment_index_2 = segment_index_2,
+              
               offset = offset,
               offset_clip = offset_clip,
               clip = paths[node_index2],
@@ -200,7 +199,7 @@ function Map:special_merge(graph)
             })
           end
           
-          ::continue::
+          --::continue::
         end
       end
     end
@@ -211,291 +210,162 @@ function Map:special_merge(graph)
   end
   
   local function solve_for_room_positions()
-
-
-    -- local function loop_checker()
-    --   local function analyze_graph(graph)
-    --     local subgraphs = {}
-    --     local cycles = {}
-    
-    --     local travelled = {[graph.nodes[1]] = true}
-    --     local matches = {}
-    --     local parent_node_link = {parent = nil, self = graph.nodes[1]}
-    --     local queue = {parent_node_link}
-    --     local queue_items = {[graph.nodes[1]] = parent_node_link}
-        
-    --     local last_node_stack = {}
-    --     local function recursion(node)
-    --       for i, v in ipairs(node.edges) do
-    --         if v.node ~= last_node_stack[#last_node_stack] then -- not backflow
-    --           if travelled[v.node] then
-    --             if v.node ~= queue[#queue].self then -- backedge
-    --               matches[tostring(node)..' '..tostring(v.node)] = find_valid_matches(graph.nodes[node], graph.nodes[v.node], v.meta)
-    --               local parent_node_link = {parent = node, self = v.node}
-    --               queue_items[v.node] = parent_node_link
-  
-    --               local cycle = {parent_node_link}
-    --               while true do
-    --                 local front = cycle[1]
-    --                 local back = cycle[#cycle]
-
-    --                 if front.self == back.parent then
-    --                   --print('wow')
-    --                   break
-    --                 else
-    --                   --print('eee')
-    --                   local parent_node_link = queue_items[queue_items[back.self].parent]
-    --                   table.insert(cycle, parent_node_link)
-    --                 end
-    --               end
-    --               table.insert(cycles, cycle)
-    --             end
-    --           else
-    --             table.insert(last_node_stack, node)
-    --             travelled[v.node] = true
-  
-    --             matches[tostring(node)..' '..tostring(v.node)] = find_valid_matches(graph.nodes[node], graph.nodes[v.node], v.meta)
-  
-    --             local parent_node_link = {parent = node, self = v.node}
-    --             table.insert(queue, parent_node_link)
-    --             queue_items[v.node] = parent_node_link
-  
-    --             recursion(v.node)
-    --           end
-    --         end
-  
-    --       end
-    --       table.remove(last_node_stack)
-    --     end
-    --     recursion(graph.nodes[1])
-
-    --     local copy = tablex.copy(cycles[1])
-    --     for i = 2, #cycles[1] do
-    --       copy[i] = cycles[1][#cycles[1]+2-i]
-    --     end
-    --     cycles[1] = copy
-
-    --     cycles[1][1].parent = nil
-  
-    --     return cycles[1], matches
-    --   end
-
-    --   local function build_clip_sets(queue, matches)
-    --     local offsets = {}
-    --     local clip_buffer = {}
-    --     local input_matches = {}
-        
-    --     local function recursion(n)
-    --       if n ~= #queue+1 then
-    --         local node, parent = queue[n].self, queue[n].parent
-    --         local parent_offset = offsets[parent] or vec2(0, 0)
-    --         local match = {}
-    --         if parent ~= nil then
-    --           match = matches[tostring(parent)..' '..tostring(node)]
-    --         else
-    --           clip_buffer[n] = node
-    --           recursion(n+1)
-    --         end
-
-    --         for i2, v2 in ipairs(match) do
-    --           local clip = tablex.copy(v2)
-              
-    --           clip.offset_clip = Clipper.Path(clip.num_of_points)
-              
-    --           local offset = parent_offset
-    --           clip.offset, offset = clip.offset + offset, offset + clip.offset
-    --           offsets[node] = offset
-    --           for i3 = 0, clip.num_of_points-1 do
-    --             clip.offset_clip[i3] = Clipper.IntPoint(clip.clip[i3].X + offset.x, clip.clip[i3].Y + offset.y)
-    --           end
-    --           clip_buffer[n] = clip
-
-
-    --           local clips = clip_buffer
-    --           local clipper = Clipper.Clipper()
-    --           local subject = paths[graph.nodes[clips[1]]]
-    --           clipper:AddPath(subject, Clipper.ptSubject, true)
-    --           for i = 2, n do
-    --             clipper:AddPath(clips[i].offset_clip, Clipper.ptClip, true)
-    --           end
-    --           local solution = Clipper.Paths(1)
-    --           clipper:Execute(Clipper.ctUnion, solution)
-              
-    --           local sum = Clipper.Area(subject)
-    --           for i = 2, n do
-    --             sum = sum + Clipper.Area(clips[i].offset_clip)
-    --           end
-
-    --           if Clipper.Area(solution[0]) == sum then
-    --             recursion(n+1)
-    --           end
-    --         end
-    --       else
-    --         table.insert(input_matches, tablex.copy(clip_buffer))
-    --       end
-    --     end
-    --     recursion(1)
-
-    --     local final_matches = {}
-    --     local loop_points = {}
-    --     for i, v in ipairs(input_matches) do
-    --       local front = paths[graph.nodes[ v[1] ]]
-    --       local connection_point = v[#v][8]
-    --       local offset = v[#v].offset
-    --       local back = v[#v].offset_clip
-
-    --       -- -1 = isOn
-    --       -- 0 = isOutside
-    --       -- 1 = isInside
-
-    --       local point = Clipper.IntPoint(offset.x+connection_point.y, offset.y+connection_point.x)
-
-    --       if 
-    --         ( Clipper.PointInPolygon(point, front) == -1 )
-    --       then
-    --         table.insert(final_matches, v)
-    --         table.insert(loop_points, vec2(offset.x+connection_point.y, offset.y+connection_point.x))
-    --       end
-    --     end
-
-    --     return final_matches, loop_points
-    --   end
-
-    --   return build_clip_sets(analyze_graph(graph))
-    -- end
-
-    local function part_a()
+    local function build_queue_and_matches()
+      local travelled = {[graph.nodes[1]] = true}
+      local matches = {}
+      local queue = {{parent = nil, self = graph.nodes[1]}}
       
-      local function build_queue_and_matches()
-        local travelled = {[graph.nodes[1]] = true}
-        local matches = {}
-        local queue = {{parent = nil, self = graph.nodes[1]}}
-        
-        local function recursion(node)
-          for i, v in ipairs(node.edges) do
-            if (not travelled[v.node]) and v.meta.type == 'Join' then
-              travelled[v.node] = true
-              table.insert(queue, {parent = node, self = v.node})
-              matches[tostring(node)..' '..tostring(v.node)] = find_valid_matches(graph.nodes[node], graph.nodes[v.node], v.meta)
-              recursion(v.node)
-            end
+      local function recursion(node)
+        for i, v in ipairs(node.edges) do
+          if (not travelled[v.node]) and v.meta.type == 'Join' then
+            travelled[v.node] = true
+            table.insert(queue, {parent = node, self = v.node})
+            matches[tostring(node)..' '..tostring(v.node)] = find_valid_matches(graph.nodes[node], graph.nodes[v.node], v.meta)
+            recursion(v.node)
           end
         end
-        recursion(graph.nodes[1])
-        
-        return queue, matches
       end
+      recursion(graph.nodes[1])
       
-      local function build_clip_sets(queue, matches)
-        local offsets = {}
-        local clip_buffer = {}
-        local input_matches = {}
-        
-        local function recursion(n)
-          if n ~= #queue+1 then
-            local node, parent = queue[n].self, queue[n].parent
-            local parent_offset = offsets[parent] or vec2(0, 0)
-            local match = {}
-            if parent ~= nil then
-              match = matches[tostring(parent)..' '..tostring(node)]
-            else
-              clip_buffer[n] = node
-              recursion(n+1)
-            end
-
-            for i2, v2 in ipairs(match) do
-              local clip = tablex.copy(v2)
-              
-              clip.offset_clip = Clipper.Path(clip.num_of_points)
-              
-              local offset = parent_offset
-              clip.offset, offset = clip.offset + offset, offset + clip.offset
-              offsets[node] = offset
-              for i3 = 0, clip.num_of_points-1 do
-                clip.offset_clip[i3] = Clipper.IntPoint(clip.clip[i3].X + offset.x, clip.clip[i3].Y + offset.y)
-              end
-              clip_buffer[n] = clip
-
-
-              local clips = clip_buffer
-              local clipper = Clipper.Clipper()
-              local subject = paths[graph.nodes[clips[1]]]
-              clipper:AddPath(subject, Clipper.ptSubject, true)
-              for i = 2, n do
-                clipper:AddPath(clips[i].offset_clip, Clipper.ptClip, true)
-              end
-              local solution = Clipper.Paths(1)
-              clipper:Execute(Clipper.ctUnion, solution)
-              
-              local sum = Clipper.Area(subject)
-              for i = 2, n do
-                sum = sum + Clipper.Area(clips[i].offset_clip)
-              end
-
-              if Clipper.Area(solution[0]) == sum then
-                recursion(n+1)
-              end
-            end
-          else
-            table.insert(input_matches, tablex.copy(clip_buffer))
-          end
-        end
-        recursion(1)
-
-        return input_matches
-      end
-      
-      return build_clip_sets(build_queue_and_matches())
+      return queue, matches
     end
     
-    return part_a()
+    local function build_clip_sets(queue, matches)
+      local offsets = {}
+      local clip_buffer = {}
+      local input_matches = {}
+      
+      local exit = false
+      
+      local cycles = 0
+      local function recursion(n)
+        if exit then goto exit end
+        if n ~= #queue+1 then
+          --cycles = cycles + 1
+          --print(cycles, n)
+          local node, parent = queue[n].self, queue[n].parent
+          local parent_offset = offsets[parent] or vec2(0, 0)
+          local match = {}
+          if parent ~= nil then
+            match = matches[tostring(parent)..' '..tostring(node)]
+          else
+            clip_buffer[n] = node
+            recursion(n+1)
+          end
+          
+          local function rpairs(t)
+            local total = #t
+            
+            return function()
+              if total > 0 then
+                local r = math.random(total)
+                local v = t[r]
+                
+                t[r], t[total] = t[total], t[r]
+                total = total - 1
+                
+                return v
+              end
+            end
+          end
+          
+          for v2 in rpairs(match) do
+            local clip = tablex.copy(v2)
+            
+            clip.offset_clip = Clipper.Path(clip.num_of_points)
+            
+            local offset = parent_offset
+            clip.offset, offset = clip.offset + offset, offset + clip.offset
+            offsets[node] = offset
+            for i3 = 0, clip.num_of_points-1 do
+              clip.offset_clip[i3] = Clipper.IntPoint(clip.clip[i3].X + offset.x, clip.clip[i3].Y + offset.y)
+            end
+            clip_buffer[n] = clip
+            
+            
+            local clips = clip_buffer
+            local clipper = Clipper.Clipper()
+            local subject = paths[graph.nodes[clips[1]]]
+            clipper:AddPath(subject, Clipper.ptSubject, true)
+            for i = 2, n do
+              clipper:AddPath(clips[i].offset_clip, Clipper.ptClip, true)
+            end
+            local solution = Clipper.Paths(1)
+            clipper:Execute(Clipper.ctUnion, solution)
+            
+            local sum = Clipper.Area(subject)
+            for i = 2, n do
+              sum = sum + Clipper.Area(clips[i].offset_clip)
+            end
+            
+            if Clipper.Area(solution[0]) == sum then
+              recursion(n+1)
+            end
+          end
+        else
+          table.insert(input_matches, tablex.copy(clip_buffer))
+          exit = true
+        end
+        
+        ::exit::
+      end
+      recursion(1)
+      
+      return input_matches
+    end
+    
+    return build_clip_sets(build_queue_and_matches())
   end
+
   local start = love.timer.getTime()
   local matches, loop_points = solve_for_room_positions()
-  local match_index = love.math.random(1, #matches)
+  local match_index = 1
   local connections = {}
   assert(#matches > 0, 'no complex matches!')
-
+  
   print((love.timer.getTime() - start) * 100)
   
   local clip_width_sum, clip_height_sum = 0, 0
   for i, v in ipairs(graph.nodes) do
-    clip_width_sum = clip_width_sum + v.room.width
-    clip_height_sum = clip_height_sum + v.room.height
+    clip_width_sum = clip_width_sum + v.chunk.width
+    clip_height_sum = clip_height_sum + v.chunk.height
   end
+  local clip_dimension_sum = vec2(clip_width_sum, clip_height_sum)
   
   local map = Map:new(clip_width_sum*2, clip_height_sum*2, 0)
-
-  map:copy_map_onto_self_at_position(matches[match_index][1].room, clip_width_sum, clip_height_sum, false)
+  
+  map:copy_map_onto_self_at_position(matches[match_index][1].chunk, clip_width_sum, clip_height_sum, false)
   for i = 2, #matches[match_index] do
     local match = matches[match_index][i]
-    local segment_index_1 = match[2]
-    local segment_index_2 = match[3]
+    local segment_index_1 = match.segment_index_1
+    local segment_index_2 = match.segment_index_2
     local vec = match[1][1].vec
     local offset = match.offset
     local connection_point = match[8]
-    local x2, y2 = offset.x, offset.y
-    local x1, y1 = offset.x + match[1][2][segment_index_2].x, offset.y + match[1][2][segment_index_2].y
-    table.insert(connections, {x1, y1, x2, y2, vec, match.edge_meta_info})
-    map:copy_map_onto_self_at_position(graph.nodes[match[5]].room, x2+clip_width_sum, y2+clip_height_sum, false)
+    
+    table.insert(connections, {
+      segment_1 = match[1][1],
+      segment_2 = match[1][2],
+      
+      segment_index_1 = segment_index_1,
+      segment_index_2 = segment_index_2,
+      
+      match_point_1 = match[1][1][segment_index_1],
+      match_point_2 = match[1][2][segment_index_2],
+      
+      offset = vec2(offset.x, offset.y),
+      clip_dimension_sum = clip_dimension_sum,
+      
+      vec = vec,
+      edge_meta_info = match.edge_meta_info,
+    })
+    map:copy_map_onto_self_at_position(graph.nodes[match[5]].chunk, offset.x+clip_width_sum, offset.y+clip_height_sum, false)
   end
   
   for i, v in ipairs(connections) do
-    local x, y = v[1] + clip_width_sum, v[2] + clip_height_sum
-    local vec = v[5]
-    map:clear_cell(x, y)
-    :clear_cell(x+vec[2], y+vec[1])
-    :clear_cell(x-vec[2], y-vec[1])
-    :insert_actor('Door', x, y)
+    v.edge_meta_info.callback(map, v)
   end
 
-  -- do
-  --   local point = loop_points[match_index]
-  --   local x, y = point.x + clip_width_sum, point.y + clip_height_sum
-  --   map:clear_cell(x, y)
-  --   :insert_actor('Door', x, y)
-  -- end
-  
   return map
 end
 
@@ -506,7 +376,7 @@ function Map:get_padding()
   for x = 0, self.width do
     local binary = false
     for y = 0, self.height do
-      if self.cells[x][y] == 1 then
+      if self:get_cell(x, y) == 1 then
         binary = true
         break
       end
@@ -520,7 +390,7 @@ function Map:get_padding()
   for x = self.width, 0, -1 do
     local binary = false
     for y = 0, self.height do
-      if self.cells[x][y] == 1 then
+      if self:get_cell(x, y) == 1 then
         binary = true
         break
       end
@@ -534,7 +404,7 @@ function Map:get_padding()
   for y = 0, self.height do
     local binary = false
     for x = 0, self.width do
-      if self.cells[x][y] == 1 then
+      if self:get_cell(x, y) == 1 then
         binary = true
         break
       end
@@ -548,7 +418,7 @@ function Map:get_padding()
   for y = self.height, 0, -1 do
     local binary = false
     for x = 0, self.width do
-      if self.cells[x][y] == 1 then
+      if self:get_cell(x, y) == 1 then
         binary = true
         break
       end
@@ -567,7 +437,7 @@ function Map:new_from_trim_edges(left, right, top, bottom)
   
   for x = left, self.width-right do
     for y = top, self.height-bottom do
-      map.cells[x-left][y-top] = self.cells[x][y]
+      map:set_cell(x-left, y-top, self:get_cell(x, y))
     end
   end
   
@@ -586,28 +456,24 @@ function Map:new_from_outline()
   local outline_map = Map:new(self.width+padding*2, self.height+padding*2, 1)
   :copy_map_onto_self_at_position(self, padding, padding, true)
   
-  for x = 0, outline_map.width do
-    for y = 0, outline_map.height do
-      local is_adjacent_to_air = false
-      
-      for k, v in pairs(Map:getNeighborhood('moore')) do
-        if outline_map.cells[x+v[1]] and outline_map.cells[x+v[1]][y+v[2]] == 0 then
-          is_adjacent_to_air = true
-          break
-        end
+  
+  for x, y in outline_map:for_cells() do
+    local is_adjacent_to_air = false
+    for k, v in pairs(Map:getNeighborhood('moore')) do
+      if outline_map:get_cell(x+v[1], y+v[2]) == 0 then
+        is_adjacent_to_air = true
+        break
       end
-      
-      if not is_adjacent_to_air then
-        outline_map.cells[x][y] = 999 -- dummy value
-      end
+    end
+    
+    if not is_adjacent_to_air then
+      outline_map:set_cell(x, y, 999) -- dummy value
     end
   end
   
-  for x = 0, outline_map.width do
-    for y = 0, outline_map.height do
-      if outline_map.cells[x][y] == 999 then
-        outline_map.cells[x][y] = 0
-      end
+  for x, y in outline_map:for_cells() do
+    if outline_map:get_cell(x, y) == 999 then
+      outline_map:set_cell(x, y, 0)
     end
   end
   
@@ -625,19 +491,13 @@ function Map:new_from_outline_strict()
     local x, y = current_tile[1], current_tile[2]
     
     for k, v in pairs(Map:getNeighborhood('moore')) do
-      local x, y = x+v[1], y+v[2]
-      
-      if self.cells[x] then
-        
-        if not checked[tostring(x)..','..tostring(y)] then
-          if self.cells[x][y] == 0 then
-            table.insert(to_check, {x, y})
-          elseif self.cells[x][y] == 1 then
-            outline_map.cells[x][y] = 1
-          end
+      local x, y = x+v[1], y+v[2]    
+      if not checked[tostring(x)..','..tostring(y)] then
+        if self:get_cell(x, y) == 0 then
+          table.insert(to_check, {x, y})
+        elseif self:get_cell(x, y) == 1 then
+          outline_map:fill_cell(x, y)
         end
-        
-        
       end
     end
     
@@ -655,11 +515,9 @@ end
 function Map:find_edges()
   
   local startPos
-  for x = 0, self.width do
-    for y = 0, self.height do
-      if self.cells[x][y] == 1 then
-        startPos = {x=x, y=y}
-      end
+  for x, y in self:for_cells() do
+    if self:get_cell(x, y) == 1 then
+      startPos = {x=x, y=y}
     end
   end
   
@@ -677,9 +535,8 @@ function Map:find_edges()
       if #edges == 1 or -- If there's only one edge
       not ( (v[1] == edges[#edges-1].vec[1] * -1) and (v[2] == edges[#edges-1].vec[2] * -1)) -- if not the direction we came from
       then
-        
         local x, y = start.x+v[1], start.y+v[2] -- Check from the starting point + a neighbor
-        if self.cells[x] and self.cells[x][y] == 1 then -- If that pos is a wall
+        if self:get_cell(x, y) == 1 then -- If that pos is a wall
           edge.vec = {v[1],v[2]} -- Define the edges vector as the neighbor direction
           table.insert(edge, {x=x,y=y}) -- insert the position
           break
@@ -691,10 +548,10 @@ function Map:find_edges()
     local x = edge[#edge].x + edge.vec[1]
     local y = edge[#edge].y + edge.vec[2]
     
-    if self.cells[x] and self.cells[x][y] == 1 then
+    if self:get_cell(x, y) == 1 then
       table.insert(edge, {x=x,y=y})
     end
-  until (not self.cells[x]) or (self.cells[x][y] ~= 1)
+  until self:get_cell(x, y) ~= 1 
   
   if -- if you reach the starting position you've done a full loop
   edge[#edge].x == startPos.x and
@@ -714,6 +571,15 @@ end
 
 function Map:get_center()
   return math.floor(self.width/2), math.floor(self.height/2)
+end
+function Map:is_cell_in_map(x, y)
+  
+end
+function Map:get_cell(x, y)
+  return self.cells[x] and self.cells[x][y] or nil
+end
+function Map:set_cell(x, y, v)
+  self.cells[x][y] = v
 end
 
 --Space
@@ -753,7 +619,7 @@ function Map:fill_rect(x1,y1, x2,y2)
   self:target_rect(
   x1,y1, x2,y2,
   function(x,y)
-    self:fillPoint(x,y)
+    self:fill_cell(x,y)
   end
 )
 
@@ -770,6 +636,8 @@ function Map:target_perimeter(x1,y1, x2,y2, func)
     end
   end
 )
+
+return self
 end
 function Map:clear_perimeter(x1,y1, x2,y2)
   Map:target_perimeter(
@@ -778,6 +646,8 @@ function Map:clear_perimeter(x1,y1, x2,y2)
     self:clear_cell(x, y)
   end
 )
+
+return self
 end
 function Map:fill_perimeter(x1,y1, x2,y2)
   Map:target_perimeter(
@@ -786,6 +656,8 @@ function Map:fill_perimeter(x1,y1, x2,y2)
     self:fill_cell(x, y)
   end
 )
+
+return self
 end
 
 -- Ellipse
@@ -797,27 +669,31 @@ function Map:target_ellipse(cx, cy, radx, rady, func)
       if dx/(radx^2) + dy/(rady)^2 <= 1 then
         func(x, y)
       end
-
+      
     end
   end
-
+  
   return self
 end
 function Map:clear_ellipse(cx, cy, radx, rady)
   self:target_ellipse(
-    cx, cy, radx, rady,
+  cx, cy, radx, rady,
   function(x,y)
     self:clear_cell(x,y)
   end
 )
+
+return self
 end
 function Map:fill_ellipse(cx, cy, radx, rady)
   self:target_ellipse(
-    cx, cy, radx, rady,
+  cx, cy, radx, rady,
   function(x,y)
     self:fill_cell(x,y)
   end
 )
+
+return self
 end
 
 -- Circumference
@@ -830,77 +706,69 @@ function Map:target_circumference(cx, cy, radx, rady, func)
       func(x, y)
     end
   end)
-
+  
   return self
 end
 function Map:clear_circumference(cx, cy, radx, rady)
   self:target_circumference(
-    cx, cy, radx, rady,
+  cx, cy, radx, rady,
   function(x,y)
     self:clear_cell(x,y)
   end
 )
+
+return self
 end
 function Map:fill_circumference(cx, cy, radx, rady)
   self:target_circumference(
-    cx, cy, radx, rady,
+  cx, cy, radx, rady,
   function(x,y)
     self:clear_cell(x,y)
   end
 )
+
+return self
 end
 
 -- Path
-
---Designation
-function Map:newZoneMap()
-  local map = self:newMap(nil)
-  return map
-end
-
-function Map:designateZoning(x, y, width, height, identifier)
-  local width, height = width, height
-  local centerX = x + math.floor(width/2)
-  local centerY = y + math.floor(height/2)
-  local x1, y1 = x, y
-  local x2, y2 = x1 + width - 1, y1 + height - 1
-  local identifier = identifier or (#self.rooms + 1)
-  
-  self.rooms[identifier] = {
-    width = width, height = height,
-    centerX = centerX, centerY = centerY,
-    x1 = x1, y1 = y1,
-    x2 = x2, y2 = y2,
+function Map:new_path()
+  local path = {
+    points = {}
   }
-  
-  for x = x1, x2 do
-    for y = y1, y2 do
-      self.zoneMap[x][y] = identifier
-    end
+  function path:add_point(vec)
+    table.insert(self.points, vec)
   end
-end
-
-function Map:newMarkedMap()
-  local map = {}
-  for x = 1, self.width do
-    map[x] = {}
-    for y = 1, self.height do
-      map[x][y] = "blank"
-    end
-  end
-  return map
-end
-function Map:markSpace(x, y, thingStr)
-  local markers = self.markers
-  markers[thingStr] = markers[thingStr] or {}
   
-  self.markedMap[x][y] = thingStr
-  table.insert(markers[thingStr], {x=x, y=y})
+  return path
 end
-
+function Map:target_path(path, func)
+  for i = 1, #path.points do
+    local x, y = path.points[i].x, path.points[i].y
+    func(x, y)
+  end
+  
+  return self
+end
+function Map:clear_path(path)
+  self:target_path(
+  path,
+  function(x,y)
+    self:clear_cell(x,y)
+  end
+)
+return self
+end
+function Map:fill_path(path)
+  self:target_path(
+  path,
+  function(x,y)
+    self:fill_cell(x,y)
+  end
+)
+return self
+end
 
 --ProcMap
-
 function Map:rollGrowthPotential(cell, probability, max, min)
   local size = min or 1
   
@@ -966,7 +834,7 @@ function Map:dijkstra(start, neighborhood)
   local map = Map:new(self.width, self.height, 999)
   
   for i, v in ipairs(start) do
-    map.cells[v.x][v.y] = 0
+    map:set_cell(v.x, v.y, 0)
   end
   
   local to_check = start
@@ -975,18 +843,17 @@ function Map:dijkstra(start, neighborhood)
   while true do 
     local current_tile = table.remove(to_check)
     local x, y = current_tile.x, current_tile.y
-    local minimum_distance_value = map.cells[x][y]
+    local minimum_distance_value = map:get_cell(x, y)
     
     for k, v in pairs(neighbors) do
       local x, y = x+v[1], y+v[2]
       
-      if self.cells[x] and self.cells[x][y] then
+      if self:get_cell(x, y) then
         
         if not checked[tostring(x)..','..tostring(y)] then
-          if self.cells[x][y] ~= 1 then
+          if self:get_cell(x, y) ~= 1 then
             table.insert(to_check, {x=x, y=y})
-            minimum_distance_value = math.min(minimum_distance_value, map.cells[x][y]+1)
-            map.cells[x][y] = math.min(minimum_distance_value + 1, map.cells[x][y])
+            map:set_cell(x, y, math.min(minimum_distance_value + 1, map:get_cell(x, y)))
           end
         end
         
@@ -994,7 +861,7 @@ function Map:dijkstra(start, neighborhood)
       end
     end
     
-    map.cells[x][y] = minimum_distance_value
+    map:set_cell(x, y, minimum_distance_value)
     
     checked[tostring(x)..','..tostring(y)] = true
     
@@ -1270,8 +1137,8 @@ function Map:DLA()
   repeat
     x1 = math.random(2, self.width-2)
     y1 = math.random(2, self.height-2)
-  until self.cells[x1][y1] == 1
-
+  until self:get_cell(x1, y1) == 1
+  
   local function clamp(n, min, max)
     local n = math.max(math.min(n, max), min)
     return n
@@ -1280,37 +1147,41 @@ function Map:DLA()
   local x2, y2 = nil, nil
   repeat
     x2,y2 = x1,y1
-
+    
     local vec = math.random(1, 4)
     x1 = clamp(x1 + neighbors[vec][1], 2, self.width-2)
     y1 = clamp(y1 + neighbors[vec][2], 2, self.height-2)
-  until self.cells[x1][y1] == 0
-
-  self.cells[x2][y2] = 0
+  until self:get_cell(x1, y1) == 0
+  
+  self:clear_cell(x2, y2) 
 end
 
 function Map:drunkWalk(x, y, exitFunc)
-  self.cells[x][y] = 0
+  local path = Map:new_path()
+  path:add_point(vec2(x, y))
+  
   local neighbors = {{1,0},{-1,0},{0,1},{0,-1}}
   local function clamp(n, min, max)
     local n = math.max(math.min(n, max), min)
     return n
   end
-
+  
   local i = 0
   repeat
     i = i + 1
     local vec = love.math.random(1, 4)
     x = clamp(x + neighbors[vec][1], 1, self.width-1)
     y = clamp(y + neighbors[vec][2], 1, self.height-1)
-
-    self.cells[x][y] = 0
+    
+    path:add_point(vec2(x,y))
   until exitFunc(x, y, i, self) == true
+  
+  return path
 end
 
 function Map:guidedDrunkWalk(x1, y1, x2, y2, map, limit)
   local x, y = x1, y1
-
+  
   local neighbors = {}
   if math.max(x1, x2) == x2 then
     table.insert(neighbors, {1,0})
@@ -1322,20 +1193,20 @@ function Map:guidedDrunkWalk(x1, y1, x2, y2, map, limit)
   else
     table.insert(neighbors, {0,-1})
   end
-
-
+  
+  
   local function clamp(n, min, max)
     local n = math.max(math.min(n, max), min)
     return n
   end
-
+  
   repeat
     self:clear_cell(x, y)
     local vec = math.random(1, 2)
     x = clamp(x + neighbors[vec][1], math.min(x1, x2), math.max(x1, x2))
     y = clamp(y + neighbors[vec][2], math.min(y1, y2), math.max(y1, y2))
   until map[x][y] == limit
-
+  
 end
 
 return Map
