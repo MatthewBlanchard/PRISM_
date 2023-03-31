@@ -1,7 +1,7 @@
 local Chunk = require 'maps.chunk'
 local Clipper = require 'maps.clipper.clipper'
 
-local tunnel = Chunk:new()
+local tunnel = Chunk:extend()
 function tunnel:parameters()
   self.width, self.height = 15, 15
 end

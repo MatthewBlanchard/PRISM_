@@ -1,6 +1,6 @@
 local Chunk = require 'maps.chunk'
 
-local shop = Chunk:new()
+local shop = Chunk:extend()
 function shop:parameters()
   self.width, self.height = 8, 8
 end

@@ -1,6 +1,6 @@
 local Chunk = require 'maps.chunk'
 
-local snip_farm = Chunk:new()
+local snip_farm = Chunk:extend()
 function snip_farm:parameters()
   self.width, self.height = 10, 10
 end
