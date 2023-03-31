@@ -406,9 +406,12 @@ function Map:special_merge(graph)
         
         local exit = false
 
+        local cycles = 0
         local function recursion(n)
           if exit then goto exit end
           if n ~= #queue+1 then
+            cycles = cycles + 1
+            print(cycles, n)
             local node, parent = queue[n].self, queue[n].parent
             local parent_offset = offsets[parent] or vec2(0, 0)
             local match = {}

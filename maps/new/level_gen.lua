@@ -52,39 +52,48 @@ function Level:create(callback)
 
   local boss_key_uuid
 
-  local Start = require 'maps.chunks.start'
+  local chunks = {}
+  local function loadItems(directoryName, items, recurse)
+    local info = {}
+  
+    for k, item in pairs(love.filesystem.getDirectoryItems(directoryName)) do
+      local fileName = directoryName .. "/" .. item
+      love.filesystem.getInfo(fileName, info)
+      if info.type == "file" then
+        fileName = string.gsub(fileName, ".lua", "")
+        fileName = string.gsub(fileName, "/", ".")
+        local name = string.gsub(item:sub(1, 1):upper() .. item:sub(2), ".lua", "")
+  
+        items[name] = require(fileName)
+      elseif info.type == "directory" and recurse then
+        loadItems(fileName, items, recurse)
+      end
+    end
+  end
+  loadItems("maps/chunks", chunks, false)
+  
+
+  local Start = chunks.Start
   Start.key_id = id_generator()
   boss_key_uuid = Start.key_id
-  print(boss_key_uuid)
   local start = graph:new_node(Start)
   graph:add_node(start)
 
 
-  local Finish = require 'maps.chunks.finish'
-  local finish = graph:new_node(Finish)
+  local finish = graph:new_node(chunks.Finish)
   graph:add_node(finish)
-  
 
-  local Sqeeto_hive = require 'maps.chunks.sqeeto_hive'
-  local sqeeto_hive = graph:new_node(Sqeeto_hive)
+  local sqeeto_hive = graph:new_node(chunks.Sqeeto_hive)
   graph:add_node(sqeeto_hive)
-
   
-  local Spider_nest = require 'maps.chunks.spider_nest'
-  local spider_nest = graph:new_node(Spider_nest)
+  local spider_nest = graph:new_node(chunks.Spider_nest)
   graph:add_node(spider_nest)
 
-  local Shop = require 'maps.chunks.shop'
-  local shop = graph:new_node(Shop)
+  local shop = graph:new_node(chunks.Shop)
   graph:add_node(shop)
 
-  local Snip_farm = require 'maps.chunks.snip_farm'
-  local snip_farm = graph:new_node(Snip_farm)
+  local snip_farm = graph:new_node(chunks.Snip_farm)
   graph:add_node(snip_farm)
-
-
-  local Filler = require 'maps.chunks.filler'
-  local Tunnel = require 'maps.chunks.tunnel'
   
   
   local encounters = {
@@ -180,11 +189,11 @@ function Level:create(callback)
   
   local filler_nodes = {}
   for i = 1, 4 do
-    filler_nodes[i] = graph:new_node(Filler)
+    filler_nodes[i] = graph:new_node(chunks.Filler)
     graph:add_node(filler_nodes[i])
     
     if i > 1 then
-      local tunnel = graph:new_node(Tunnel)
+      local tunnel = graph:new_node(chunks.Tunnel)
       graph:add_node(tunnel)
     
       graph:connect_nodes(edge_join_river, filler_nodes[i], tunnel, filler_nodes[love.math.random(1, i-1)])
