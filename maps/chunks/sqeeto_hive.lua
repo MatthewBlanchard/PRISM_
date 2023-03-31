@@ -1,7 +1,7 @@
 local Chunk = require 'maps.chunk'
 local Clipper = require('maps.clipper.clipper')
 
-local sqeeto_hive = Chunk:new(20, 20)
+local sqeeto_hive = Chunk:extend()
 function sqeeto_hive:parameters()
   self.width, self.height = 20, 20
 end

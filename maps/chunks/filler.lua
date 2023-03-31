@@ -1,6 +1,6 @@
 local Chunk = require 'maps.chunk'
 
-local filler = Chunk:new()
+local filler = Chunk:extend()
 function filler:parameters()
   self.width = love.math.random(4, 10)
   self.height = love.math.random(4, 10)

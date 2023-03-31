@@ -1,8 +1,7 @@
-local Chunk = {}
-function Chunk:new(width, height)
-  local o = {}
-  setmetatable(o, self)
-  self.__index = self
+local Object = require 'object'
+
+local Chunk = Object:extend()
+function Chunk:__new(width, height)
   o:init(width, height, value)
   return o
 end

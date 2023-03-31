@@ -1,6 +1,6 @@
 local Chunk = require 'maps.chunk'
 
-local finish = Chunk:new(4, 4)
+local finish = Chunk:extend()
 function finish:parameters()
   self.width, self.height = 4, 4
 end
