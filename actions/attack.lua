@@ -33,6 +33,7 @@ function Attack:perform(level)
   if roll >= defender:getAC() or critical then
     self.hit = true
     if critical then
+      self.crit = true
       dmg = dmg * 2
       effects_system:addEffect(effects.CritEffect(defender))
     end

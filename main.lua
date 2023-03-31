@@ -74,7 +74,7 @@ game = {}
 
 local function createLevel()
   local map, populater = ROT.Map.Brogue(50, 50), require "populater" -- Brogue Gen
-  --ocal map, populater = require "maps.new.level_gen"(), require "maps.new.populater" -- Dim Gen
+  --local map, populater = require "maps.new.level_gen"(), require "maps.new.populater" -- Dim Gen
   local level = Level(map, populater)
   level:addSystem(systems.Message())
   level:addSystem(systems.Inventory())
@@ -116,7 +116,6 @@ function love.load()
 
   local torch = actors.Torch()
   table.insert(player:getComponent(components.Inventory).inventory, torch)
-  table.insert(player:getComponent(components.Inventory).inventory, actors.Tiara_of_telepathy())
 
   love.keyboard.setKeyRepeat(true)
 end

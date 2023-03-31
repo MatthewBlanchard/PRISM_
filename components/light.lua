@@ -21,6 +21,16 @@ local function flicker(baseColor, period, intensity)
   end
 end
 
+local function clerp(start, finish, t)
+  local c = {}
+  for i = 1, 4 do
+    if not start[i] or not finish[i] then break end
+    c[i] = (1 - t) * start[i] + t * finish[i]
+  end
+
+  return c
+end
+
 local function pulse(baseColor, period, intensity)
   local t = 0
   local color = baseColor:clone()
@@ -34,12 +44,29 @@ local function pulse(baseColor, period, intensity)
   end
 end
 
+local function colorSwap(baseColor, secondaryColor, period, intensity)
+  local t = 0
+  return function(dt)
+    t = t + dt
+
+    local r = math.sin(t / ( period * 2))
+    local clerped = clerp(baseColor, secondaryColor, math.abs(r)) 
+    
+    r = math.sin(t / (period / 2)) * intensity
+    clerped[1] = clerped[1] + clerped[1] * r
+    clerped[2] = clerped[2] + clerped[2] * r
+    clerped[3] = clerped[3] + clerped[3] * r
+    return clerped
+  end
+end
+
 local Light = Component:extend()
 Light.name = "Light"
 
 Light.effects = {
   flicker = flicker,
-  pulse = pulse
+  pulse = pulse,
+  colorSwap = colorSwap
 }
 
 function Light:__new(options)
