@@ -2,17 +2,17 @@ local Actor = require "actor"
 local Action = require "action"
 local Tiles = require "tiles"
 
-local actor = Actor:extend()
+local Gate = Actor:extend()
 
-actor.char = Tiles["door_3"]
-actor.name = "gate"
-actor.opaque = false
-actor.remembered = true
+Gate.char = Tiles["door_3"]
+Gate.name = "gate"
+Gate.opaque = false
+Gate.remembered = true
 
 local targetDoor = targets.Actor:extend()
 
-function targetDoor:validate(owner, actor)
-  return actor:is(actors.Gate)
+function targetDoor:validate(owner, Gate)
+  return Gate:is(Gates.Gate)
 end
 
 local Open = Action:extend()
@@ -36,7 +36,7 @@ end
 
 
 
-actor.components = {
+Gate.components = {
   components.Collideable_box(),
   components.Usable({Open}, Open),
   components.Stats{
@@ -45,4 +45,4 @@ actor.components = {
   }
 }
 
-return actor
+return Gate

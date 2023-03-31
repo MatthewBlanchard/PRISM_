@@ -1,11 +1,12 @@
 local Actor = require "actor"
 local Tiles = require "tiles"
 
-local actor = Actor:extend()
-actor.char = Tiles["bones_2"]
-actor.name = "bones"
-actor.color = { 1.0, 1.0, 1.0, 1}
+local Bones = Actor:extend()
+Bones.char = Tiles["bones_2"]
+Bones.name = "bones"
+Bones.color = { 1.0, 1.0, 1.0, 1}
+Bones.remembered = true
 
-actor.components = {}
+Bones.components = {}
 
-return actor
+return Bones

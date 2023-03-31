@@ -1,10 +1,11 @@
 local Object = require 'object'
 
 local Chunk = Object:extend()
+
 function Chunk:__new(width, height)
-  o:init(width, height, value)
-  return o
+  self:init(width, height, value)
 end
+
 function Chunk:init(width, height)
   function self:parameters()
     self.width = 4

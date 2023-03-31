@@ -28,9 +28,9 @@ function Level:__new(map, populater)
 
   -- let's create our map and fill it with the info from the supplied
   -- rotLove map
-  self.map = Grid(map._width, map._height, Wall())
-  self.width = map._width
-  self.height = map._height
+  self.map = Grid(map._width + 1, map._height + 1, Wall())
+  self.width = map._width + 1
+  self.height = map._height + 1
   self.__map = map
   self.populater = populater
 end
@@ -572,9 +572,9 @@ end
 function Level:getMapCallback()
   return function(x, y, val)    
     if val == 0 then
-      self.map:set(x, y, Cell())
+      self.map:set(x + 1, y + 1, Cell())
     else
-      self.map:set(x, y, Wall())
+      self.map:set(x + 1, y + 1, Wall())
     end
   end
 end

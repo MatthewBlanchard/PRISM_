@@ -58,6 +58,7 @@ Chest.char = Tiles["chest"]
 Chest.color = {0.8, 0.8, 0.1, 1}
 Chest.name = "chest"
 Chest.opaque = false
+Chest.remembered = true
 
 Chest.components = {
   components.Collideable_box(),
