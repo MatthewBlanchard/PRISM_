@@ -21,7 +21,7 @@ Webweaver.components = {
     MGK = 0,
     PR = 0,
     MR = 0,
-    maxHP = 12,
+    maxHP = 8,
     AC = 2
   },
 
@@ -53,9 +53,11 @@ function Webweaver:act(level)
     target = threat
   end
 
+  
   local effects_system = level:getSystem("Effects")
   if target and self._lastTarget ~= target and effects_system then
-    if target:is(actors.Sqeeto) then
+    local targetFaction = target:getComponent(components.Faction)
+    if targetFaction:has{ "sqeeter" } then
       effects_system:addEffectAfterAction(effects.CharacterDynamic(self, 0, -1, Tiles["bubble_food"], {1, 1, 1}, .5))
     elseif target:is(actors.Player) then
       effects_system:addEffectAfterAction(effects.CharacterDynamic(self, 0, -1, Tiles["bubble_angry"], {1, 1, 1}, .5))

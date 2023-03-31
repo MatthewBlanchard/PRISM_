@@ -13,7 +13,7 @@ LizBop.actions = {
 LizBop.components = {
   components.Collideable_box(),
   components.Sight {fov = true, range = 6, expored = false},
-  components.Move {speed = 90},
+  components.Move {speed = 110},
   components.Stats {
       ATK = 1,
       MGK = 0,
@@ -43,18 +43,17 @@ local actUtil = components.Aicontroller
 function LizBop:act(level)
   local target
   local sqeeter = actUtil.closestSeenActorByType(self, actors.Sqeeto)
+  local wasp = actUtil.closestSeenActorByType(self, actors.Wasp)
   local webweaver = actUtil.closestSeenActorByType(self, actors.Webweaver)
   local player = actUtil.closestSeenActorByType(self, actors.Player)
 
   if webweaver then
     target = webweaver
+  elseif wasp then
+    target = wasp
   elseif sqeeter then
     target = sqeeter
   end
-
-  if player and player:getRange("box", self) == 1 then
-    return self:getAction(actions.Attack)(self, player)
-    end
 
   if target then
     local targetRange = target:getRange("box", self)
@@ -65,6 +64,10 @@ function LizBop:act(level)
     elseif targetRange >= 5 then
       return actUtil.moveToward(self, target)
     end
+  elseif player and player:getRange("box", self) == 1 then
+    return self:getAction(actions.Attack)(self, player)
+  elseif player and player:getRange("box", self) > 1 and player:getRange("box", self) < 4 then
+    return actUtil.moveToward(self, player)
   end
   
   return actUtil.randomMove(level, self)

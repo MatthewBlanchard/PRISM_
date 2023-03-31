@@ -137,10 +137,10 @@ function Populater(level, map)
     spawnActor(room, game.Player)
     spawnActor(room, actors.Box())
     spawnActor(room, actors.Snip())
-    spawnActor(room, actors.Gelatinous_cube())
+    --spawnActor(room, actors.Gelatinous_cube())
     --spawnActor(room, actors.Lizbop())
     --spawnActor(room, actors.Webweaver())
-  --  spawnActor(room, actors.Gazer())
+    --spawnActor(room, actors.Gazer())
     spawnActor(room, actors.Rusty_shortsword())
   end
 
@@ -153,7 +153,11 @@ function Populater(level, map)
     actors.Wand_of_swapping,
     actors.Wand_of_fireball,
     actors.Wand_of_displacement,
-    actors.Dagger_of_venom
+    actors.Wand_of_lightning,
+    actors.Dagger_of_venom,
+    actors.Crystal_sword,
+    actors.Lightning_blade,
+    actors.Sword_of_wand_recovery
   }
 
   local function populateShopRoom(room)
@@ -262,6 +266,7 @@ function Populater(level, map)
   table.insert(toSpawn, actors.Stairs())
   table.insert(toSpawn, actors.Webweaver())
   table.insert(toSpawn, actors.Lizbop())
+  table.insert(toSpawn, actors.Stingboy())
 
   local startRoom = table.remove(map._rooms, love.math.random(1, #map._rooms))
 
