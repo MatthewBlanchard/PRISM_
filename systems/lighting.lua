@@ -201,7 +201,6 @@ end
 -- Takes a fov because wall lighting uses the fov to determine how to light the walls
 function LightingSystem:getLightingAt(x, y, fov, light)
   local light = light or self.__lightMap
-  print(self.owner:getCellVisibility(x, y))
   if fov[x] and fov[x][y] and self.owner:getCellVisibility(x, y) then
     if light[x] and light[x][y] then
       return light[x][y]

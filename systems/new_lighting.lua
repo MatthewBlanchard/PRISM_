@@ -19,8 +19,8 @@ function LightingSystem:__new(level)
 end
 
 function LightingSystem:initialize(level)
-    self.__lightMap = LightBuffer(#level.map, #level.map[1])
-    self.__effectLightMap = Grid(#level.map, #level.map[1], 0)
+    self.__lightMap = LightBuffer(level.width, level.height)
+    self.__effectLightMap = LightBuffer(level.width, level.height)
     self.__fov = ROT.FOV.Recursive(self:createVisibilityClosure(level))
     self:forceRebuildLighting(level)
 end
@@ -54,14 +54,21 @@ function LightingSystem:onActorAdded(level, actor) self:rebuildLighting(level) e
 
 function LightingSystem:onActorRemoved(level, actor) self:rebuildLighting(level) end
 
-function LightingSystem:getLight(x, y) return self.__lightMap:getLight(x, y) end
+function LightingSystem:getLight(x, y, dt)
+    local lightMap = self.__lightMap
+    if dt then
+        print "YEET"
+        lightMap = self.__effectLightMap
+    end
 
-function LightingSystem:getLightingAt(x, y, fov, seenActors)
-    assert(not seenActors)
+    return lightMap:getLight(x, y)
+end
+
+function LightingSystem:getLightingAt(x, y, fov, dt)
     local foundOpaqueActor = false
 
     if fov[x] and fov[x][y] and self.owner:getCellVisibility(x, y) then
-        return self:getLight(x, y)
+        return self:getLight(x, y, dt)
     end
 
     local cols = {}
@@ -70,7 +77,7 @@ function LightingSystem:getLightingAt(x, y, fov, seenActors)
         for j = -1, 1, 1 do
             if not (i == 0 and j == 0) then
                 if fov[x + i] and fov[x + i][y + j] and self.owner:getCellVisibility(x + i, y + j) then
-                    table.insert(cols, self:getLight(x + i, y + j))
+                    table.insert(cols, self:getLight(x + i, y + j, dt))
                 end
             end
         end
@@ -108,31 +115,6 @@ end
 -- Returns the actual lights that are in the level not the lightmap which holds post-spread light values.
 function LightingSystem:getLights(level) return self.__lights end
 
-function LightingSystem:rebuildLighting(level, dt)
-    local candidate = self:__buildLightList(level)
-    self.__needsUpdate = nil
-
-    -- if our light list hasn't changed, we don't need to rebuild the lighting
-    -- looping through the qctors and building a list is way cheaper than rebuilding the lighting
-    -- so we do this check first.
-    local should_update, needs_update = self:__checkLightList(candidate)
-    if not should_update and not dt then
-        self.rebuilt = false
-        return
-    end
-
-    self.__needsUpdate = needs_update
-
-    self.__lights = candidate
-    self:__rebuild(level, dt)
-
-    if level:getSystem("Sight") then
-        for actor in level:eachActor() do
-            level:getSystem("Sight"):updateFOV(level, actor)
-        end
-    end
-end
-
 --- Creates a list of all of the light components in the level and returns it.
 function LightingSystem:__buildLightList(level)
     local lights = SparseMap()
@@ -159,7 +141,7 @@ function LightingSystem:__buildLightList(level)
     return lights
 end
 
-function LightingSystem:__checkLightList(candidate)
+function LightingSystem:__checkLightList(candidate, dt)
     local candidate_count = candidate:count()
     local light_count = self.__lights:count()
 
@@ -168,7 +150,7 @@ function LightingSystem:__checkLightList(candidate)
 
     -- Find new lights or lights that have changed position
     for x, y, candidate_cell in candidate:each() do
-        if not self.__lights:has(x, y, candidate_cell) then
+        if not self.__lights:has(x, y, candidate_cell) or (dt and candidate_cell.effect) then
             table.insert(needs_update, {x, y, candidate_cell})
         end
     end
@@ -188,42 +170,65 @@ function LightingSystem:forceRebuildLighting(level, dt)
     self:__rebuild(level, dt)
 end
 
-local function index_to_component(index)
-    if index == 1 then
-        return "r"
-    elseif index == 2 then
-        return "g"
-    elseif index == 3 then
-        return "b"
+function LightingSystem:rebuildLighting(level, dt)
+    local candidate = self:__buildLightList(level)
+    self.__needsUpdate = nil
+
+    -- if our light list hasn't changed, we don't need to rebuild the lighting
+    -- looping through the qctors and building a list is way cheaper than rebuilding the lighting
+    -- so we do this check first.
+    local should_update, needs_update = self:__checkLightList(candidate, dt)
+    if not should_update and not dt then
+        self.rebuilt = false
+        return
+    end
+
+    self.__needsUpdate = needs_update
+
+    self.__lights = candidate
+    self:__rebuild(level, dt)
+
+    if level:getSystem("Sight") then
+        for actor in level:eachActor() do
+            level:getSystem("Sight"):updateFOV(level, actor)
+        end
     end
 end
 
-function LightingSystem:getColorComponentMap(index)
-    return self.__lightMap[index_to_component(index)]
-end
-
 function LightingSystem:__rebuild(level, dt)
+    local lightMap = self.__lightMap
+    if dt then
+        lightMap = self.__effectLightMap
+    end
+
     self.rebuilt = true
-    self.__lightMap:clear()
-    --self.__effectLightMap:clear()
+    lightMap:clear()
 
     if self.__needsUpdate == nil then
         for x, y, light in self.__lights:each() do
             light.__cache = LightBuffer(61, 61)
             self.x = x
             self.y = y
-            self:__spreadLight(level, 31, 31, x - 31, y - 31, light.color, light.__cache, light.falloff)
+            local color = light.color
+            if dt and light.effect then
+                color = light.effect(dt, light.color)
+            end
+            self:__spreadLight(level, 31, 31, x - 31, y - 31, color, light.__cache, light.falloff)
         end
     else
         for _, updateEntry in pairs(self.__needsUpdate) do
             local x, y, light = updateEntry[1], updateEntry[2], updateEntry[3]
             light.__cache = LightBuffer(61, 61)
-            self:__spreadLight(level, 31, 31, x - 31, y - 31, light.color, light.__cache, light.falloff)
+            local color = light.color
+            if dt and light.effect then
+                color = light.effect(dt, light.color)
+            end
+            self:__spreadLight(level, 31, 31, x - 31, y - 31, color, light.__cache, light.falloff)
         end
     end
 
     for x, y, light in self.__lights:each() do
-        self.__lightMap:accumulate_buffer(x - 30, y - 30, light.__cache)
+        lightMap:accumulate_buffer(x - 30, y - 30, light.__cache)
     end
 end
 

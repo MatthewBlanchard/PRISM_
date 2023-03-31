@@ -7,8 +7,6 @@ CrystalSword.char = Tiles["shortsword"]
 CrystalSword.name = "Crystal Sword"
 CrystalSword.color = { 0.498, 1.00, 0.831, 1}
 
-local lightEffect = components.Light.effects.pulse({ 0.498, 1.00, 0.831, 1}, 0.2, 0.2)
-
 CrystalSword.components = {
     components.Item(),
     components.Weapon{
@@ -20,7 +18,7 @@ CrystalSword.components = {
     },
     components.Light{
         color = LightColor(15, 31, 25),
-        effect = lightEffect
+        effect = {components.Light.effects.pulse, {0.2, 0.2}},
     },
     components.Cost{rarity = "uncommon"}
 }

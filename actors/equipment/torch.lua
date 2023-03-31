@@ -7,12 +7,10 @@ Torch.char = Tiles["torch"]
 Torch.name = "torch"
 Torch.color = { 0.8666, 0.4509, 0.0862, 1 }
 
-local lightEffect = components.Light.effects.flicker({ 0.8666, 0.4509, 0.0862, 1 }, 0.2, 0.07)
-
 Torch.components = {
     components.Light{
         color = LightColor(28, 16, 1),
-        effect = lightEffect
+        effect = {components.Light.effects.flicker, {0.15, 0.3}},
     },
     components.Item(),
     components.Equipment{
