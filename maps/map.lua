@@ -10,11 +10,7 @@ local Clipper = require('maps.clipper.clipper')
 
 local tablex = require 'lib.batteries.tablex'
 
-local id_generator_index = 0
-local id_generator = function()
-  id_generator_index = id_generator_index + 1
-  return id_generator_index
-end
+local id_generator = require 'maps.uuid'
 
 function Map:new(width, height, value)
   local o = {}
@@ -43,9 +39,9 @@ function Map:init(width, height, value)
   self.height = height
 end
 
-function Map:insert_actor(actor_id, x, y, callback)
+function Map:insert_actor(actor_id, x, y, callback, unique_id)
   local position = vec2(x, y)
-  local unique_id = id_generator()
+  local unique_id = unique_id or id_generator()
   table.insert(self.actors.list, {id = actor_id, unique_id = unique_id, pos = position, callback = callback})
   
   return self, unique_id
@@ -89,14 +85,10 @@ end
 
 function Map:special_merge(graph)
   local function new_chunk(params)
-    local width = params.width or 4
-    local height = params.height or 4
-    local actors = params.actors or {}
-    local shaper = params.shaper or function(params, chunk) chunk:clear_rect(1,1, chunk.width-1, chunk.height-1) end
-
-    local chunk = Map:new(width, height, 1)
+    params:parameters()
+    local chunk = Map:new(params.width, params.height, 1)
     
-    shaper(params, chunk)
+    params:shaper(chunk)
 
     return chunk:new_from_outline()
   end
