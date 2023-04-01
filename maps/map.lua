@@ -22,9 +22,9 @@ end
 function Map:init(width, height, value)
   local map = {}
   
-  for x = 0, width do
+  for x = 0, width do --TODO
     map[x] = {}
-    for y = 0, height do
+    for y = 0, height do --TODO
       map[x][y] = value
     end
   end
@@ -48,8 +48,8 @@ function Map:insert_actor(actor_id, x, y, callback, unique_id)
 end
 
 function Map:for_cells()
-  local x = 0
-  local y = -1
+  local x = 0 --TODO
+  local y = -1 --TODO
   
   return function ()
     if y < self.height then
@@ -90,8 +90,8 @@ function Map:special_merge(graph)
     params:shaper(chunk)
 
     local overlay = Map:new(params.width+1, params.height+1, 0)
-    overlay:fill_perimeter(0, 0, params.width+1, params.height+1)
-    overlay:copy_map_onto_self_at_position(chunk, 0, 0)
+    overlay:fill_perimeter(0, 0, params.width+1, params.height+1) --TODO
+    overlay:copy_map_onto_self_at_position(chunk, 0, 0) --TODO
     
     return overlay:new_from_outline()
   end
@@ -218,7 +218,6 @@ function Map:special_merge(graph)
           if (not travelled[v.node]) and v.meta.type == 'Join' then
             travelled[v.node] = true
             table.insert(queue, {parent = node, self = v.node})
-            --matches[tostring(node)..' '..tostring(v.node)] = find_valid_matches(graph.nodes[node], graph.nodes[v.node], v.meta)
             matches[tostring(node)..' '..tostring(v.node)] = find_valid_matches(node, v.node, v.meta)
             recursion(v.node)
           end
@@ -450,10 +449,10 @@ function Map:new_from_trim_edges(left, right, top, bottom)
 end
 
 function Map:new_from_outline()
-  local padding = 1
-  local offset = vec2(padding, padding)
-  local outline_map = Map:new(self.width+padding*2, self.height+padding*2, 1)
-  :copy_map_onto_self_at_position(self, padding, padding, true)
+  local padding = 1 --TODO
+  local offset = vec2(padding, padding) --TODO
+  local outline_map = Map:new(self.width+padding*2, self.height+padding*2, 1) --TODO
+  :copy_map_onto_self_at_position(self, padding, padding, true) --TODO
   
   
   for x, y in outline_map:for_cells() do
@@ -482,7 +481,7 @@ end
 function Map:new_from_outline_strict()
   local outline_map = Map:new(self.width, self.height, 0)
   
-  local to_check = {{0,0}}
+  local to_check = {{0,0}} --TODO
   local checked = {}
   while true do
     
@@ -570,9 +569,6 @@ end
 
 function Map:get_center()
   return math.floor(self.width/2), math.floor(self.height/2)
-end
-function Map:is_cell_in_map(x, y)
-  
 end
 function Map:get_cell(x, y)
   return self.cells[x] and self.cells[x][y] or nil
@@ -1105,9 +1101,9 @@ function Map:DLAInOut()
     local x2,y2 = nil,nil
     
     repeat
-      x1 = love.math.random(2, self.width - 2)
-      y1 = love.math.random(2, self.height - 2)
-    until self.cells[x1][y1] == 0
+      x1 = love.math.random(2, self.width - 2) --TODO
+      y1 = love.math.random(2, self.height - 2) --TODO
+    until self:get_cell(x1, y1) == 0
     
     
     local n = 0
@@ -1116,7 +1112,7 @@ function Map:DLAInOut()
       x2 = x1 + neighbors[vec][1]
       y2 = y1 + neighbors[vec][2]
       
-      if self.cells[x2][y2] == 1 then
+      if self:get_cell(x2, y2) == 1 then
         break
       else
         n = n + 1
@@ -1125,7 +1121,7 @@ function Map:DLAInOut()
     end
     
     if n ~= 4 then
-      self.cells[x2][y2] = 0
+      self:clear_cell(x2, y2)
       break
     end
   end
@@ -1134,8 +1130,8 @@ end
 function Map:DLA()
   local x1,y1 = nil,nil
   repeat
-    x1 = math.random(2, self.width-2)
-    y1 = math.random(2, self.height-2)
+    x1 = math.random(2, self.width-2) --TODO
+    y1 = math.random(2, self.height-2) --TODO
   until self:get_cell(x1, y1) == 1
   
   local function clamp(n, min, max)
@@ -1148,8 +1144,8 @@ function Map:DLA()
     x2,y2 = x1,y1
     
     local vec = math.random(1, 4)
-    x1 = clamp(x1 + neighbors[vec][1], 2, self.width-2)
-    y1 = clamp(y1 + neighbors[vec][2], 2, self.height-2)
+    x1 = clamp(x1 + neighbors[vec][1], 2, self.width-2) --TODO
+    y1 = clamp(y1 + neighbors[vec][2], 2, self.height-2) --TODO
   until self:get_cell(x1, y1) == 0
   
   self:clear_cell(x2, y2) 
@@ -1169,8 +1165,8 @@ function Map:drunkWalk(x, y, exitFunc)
   repeat
     i = i + 1
     local vec = love.math.random(1, 4)
-    x = clamp(x + neighbors[vec][1], 1, self.width-1)
-    y = clamp(y + neighbors[vec][2], 1, self.height-1)
+    x = clamp(x + neighbors[vec][1], 1, self.width-1) --TODO
+    y = clamp(y + neighbors[vec][2], 1, self.height-1) --TODO
     
     path:add_point(vec2(x,y))
   until exitFunc(x, y, i, self) == true

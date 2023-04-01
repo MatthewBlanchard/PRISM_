@@ -192,7 +192,7 @@ graph:connect_nodes(edge_join_door, snip_farm, filler_nodes[love.math.random(1, 
 
 
 local merged_room_3 = Map:special_merge(graph)
-map:copy_map_onto_self_at_position(merged_room_3, 0, 0)
+map:copy_map_onto_self_at_position(merged_room_3, 0, 0) --TODO
 
 
 local player_pos
@@ -212,7 +212,7 @@ end
 -- end
 
 local heat_map = Map:new(600, 600, 0)
-heat_map:copy_map_onto_self_at_position(map, 0, 0)
+heat_map:copy_map_onto_self_at_position(map, 0, 0) --TODO
 heat_map = heat_map:dijkstra({player_pos}, 'vonNeuman')
 for x, y, cell in heat_map:for_cells() do
   if cell == 999 then
@@ -224,7 +224,28 @@ for x, y in map:for_cells() do
   callback(x, y, map.cells[x][y])
 end
 
-return map, heat_map, rooms
+-- local function draw_heat_map()
+--   for i, v in ipairs(heat_map.map) do
+--     for i2, v2 in ipairs(v) do
+--       if v2 ~= 999 then
+--         local color_modifier = v2*5
+--         local custom = {
+--           color = {
+--             math.max(0, (255-color_modifier)/255),
+--             0/255,
+--             math.max(0, (0+color_modifier)/255),
+--             1
+--           }
+--         }
+--         local coloredtile = actors.Coloredtile(custom)
+--         spawn_actor(coloredtile, i, i2)
+--       end
+--     end
+--   end
+-- end
+-- draw_heat_map()
+
+return map
 end
 
 
