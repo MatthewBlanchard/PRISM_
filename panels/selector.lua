@@ -91,7 +91,6 @@ function SelectorPanel:getTargetPosition()
     return game.curActor.position
   else
     self.targetIndex = #self.targets + 1
-    print(#self.targets)
     local target = self:getValidTargets(self.targetIndex)
     if #target == 0 then
       local message_system = game.level:getSystem("Message")
@@ -172,7 +171,6 @@ function SelectorPanel:getValidTargets(index)
 
   local targets = {}
 
-  print(index, #self.action.targets)
   if self.action.targets[index]:is(targets.Point) then
     return sight_component.seenActors
   end
