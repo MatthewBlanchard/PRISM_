@@ -145,6 +145,7 @@ function Map:special_merge(graph)
     
     return matches
   end
+  
   local function does_intersect(subject, clip, num_of_points, offset)
     local offset_clip = Clipper.Path(num_of_points)
     for i = 0, num_of_points-1 do
@@ -162,6 +163,7 @@ function Map:special_merge(graph)
     
     return is_intersect, offset_clip
   end
+
   local function find_valid_matches(node_index1, node_index2, edge_meta_info)
     local matches = get_matching_edges(edges[node_index1], edges[node_index2])
     local matches_without_intersections = {}
@@ -605,25 +607,27 @@ function Map:target_rect(x1,y1, x2,y2, func)
   
   return self
 end
-function Map:clear_rect(x1,y1, x2,y2)
-  self:target_rect(
-  x1,y1, x2,y2,
-  function(x,y)
-    self:clear_cell(x,y)
-  end
-)
 
-return self
+function Map:clear_rect(x1,y1, x2,y2)
+    self:target_rect(
+    x1,y1, x2,y2,
+    function(x,y)
+      self:clear_cell(x,y)
+    end
+  )
+
+  return self
 end
+
 function Map:fill_rect(x1,y1, x2,y2)
   self:target_rect(
-  x1,y1, x2,y2,
-  function(x,y)
-    self:fill_cell(x,y)
-  end
-)
+    x1,y1, x2,y2,
+    function(x,y)
+      self:fill_cell(x,y)
+    end
+  )
 
-return self
+  return self
 end
 
 -- Perimeter
