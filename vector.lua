@@ -32,6 +32,10 @@ function Vector2:length()
   return math.sqrt(self.x * self.x + self.y * self.y)
 end
 
+function Vector2:rotateClockwise()
+  return Vector2(self.y, -self.x)
+end
+
 --- Adds two vectors together.
 --@tparam Vector2 a The first vector.
 --@tparam Vector2 b The second vector.

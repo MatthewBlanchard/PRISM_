@@ -73,8 +73,8 @@ end
 game = {}
 
 local function createLevel()
-  --local map, populater = ROT.Map.Brogue(50, 50), require "populater" -- Brogue Gen
-  local map, populater = require "maps.new.level_gen"(), require "maps.new.populater" -- Dim Gen
+  local map, populater = ROT.Map.Brogue(50, 50), require "populater" -- Brogue Gen
+  --local map, populater = require "maps.new.level_gen"(), require "maps.new.populater" -- Dim Gen
   local level = Level(map, populater)
   level:addSystem(systems.Message())
   level:addSystem(systems.Inventory())
@@ -155,10 +155,15 @@ function love.update(dt)
     return
   end
 
+  -- the game has told us to pause execution and draw frames for a while
+  if game.interface.waitTime and game.interface.waitTime > 0 and not skipAnimation then
+    return
+  end
+
   local success, ret
   -- when we press a key during animations we want to skip them
   repeat
-    success, ret = coroutine.resume(updateCoroutine, game.level, awaitedAction)
+    success, ret, time = coroutine.resume(updateCoroutine, game.level, awaitedAction)
     if success == false then
       error(ret .. "\n" .. debug.traceback(updateCoroutine))
     end
@@ -178,6 +183,8 @@ function love.update(dt)
     end
 
     effects.effects = {}
+  elseif coroutine_status == "suspended" and ret == "wait" then
+    game.interface.waitTime = time
   elseif coroutine_status == "dead" then
     -- The coroutine has not stopped running and returned "descend".
     -- It's time for us to load a new level.

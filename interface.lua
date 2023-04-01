@@ -18,12 +18,22 @@ function Interface:__new(display)
   self.stack = {}
   self.t = 0
   
+  self.waitTime = nil
+
   self.fov = {}
 end
 
 function Interface:update(dt)
   self.t = (self.t + dt)
   self.dt = dt
+
+  if self.waitTime then
+    self.waitTime = self.waitTime - dt
+    if self.waitTime <= 0 then
+      self.waitTime = nil
+    end
+  end
+  
   self.messagePanel:update(dt)
 
   self.fov = {}
