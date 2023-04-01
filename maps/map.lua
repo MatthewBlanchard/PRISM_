@@ -66,7 +66,7 @@ function Map:for_cells()
 end
 
 -- Merging
-function Map:copy_map_onto_self_at_position(map, x, y, is_destructive)
+function Map:blit(map, x, y, is_destructive)
   for i = x, x+map.width do
     for i2 = y, y+map.height do
       if (is_destructive) or (self:get_cell(i, i2) == 0) then
@@ -334,7 +334,7 @@ function Map:special_merge(graph)
   
   local map = Map:new(clip_width_sum*2, clip_height_sum*2, 0)
   
-  map:copy_map_onto_self_at_position(matches[match_index][1].chunk, clip_width_sum, clip_height_sum, false)
+  map:blit(matches[match_index][1].chunk, clip_width_sum, clip_height_sum, false)
   for i = 2, #matches[match_index] do
     local match = matches[match_index][i]
     local segment_index_1 = match.segment_index_1
@@ -359,7 +359,7 @@ function Map:special_merge(graph)
       vec = vec,
       edge_meta_info = match.edge_meta_info,
     })
-    map:copy_map_onto_self_at_position(graph.nodes[match[5]].chunk, offset.x+clip_width_sum, offset.y+clip_height_sum, false)
+    map:blit(graph.nodes[match[5]].chunk, offset.x+clip_width_sum, offset.y+clip_height_sum, false)
   end
   
   for i, v in ipairs(connections) do
@@ -454,7 +454,7 @@ function Map:new_from_outline()
   local padding = 1
   local offset = vec2(padding, padding)
   local outline_map = Map:new(self.width+padding*2, self.height+padding*2, 1)
-  :copy_map_onto_self_at_position(self, padding, padding, true)
+  :blit(self, padding, padding, true)
   
   
   for x, y in outline_map:for_cells() do
