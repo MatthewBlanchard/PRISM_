@@ -87,31 +87,26 @@ function Map:special_merge(graph)
   local function new_chunk(params)
     params:parameters()
     local chunk = Map:new(params.width, params.height, 1)
-    
     params:shaper(chunk)
+
+    local overlay = Map:new(params.width+1, params.height+1, 0)
+    overlay:fill_perimeter(0, 0, params.width+1, params.height+1)
+    overlay:copy_map_onto_self_at_position(chunk, 0, 0)
     
-    return chunk:new_from_outline()
+    return overlay:new_from_outline()
   end
   
-  local strict_outlines = {}
-  local edges = {}
-  local paths = {}
   for _, v in ipairs(graph.nodes) do
-    v.chunk = new_chunk(v.parameters)
-    
-    local outline = v.chunk:new_from_outline_strict()
-    table.insert(strict_outlines, outline)
-    
+    local chunk = new_chunk(v.parameters)
+    local outline = chunk:new_from_outline_strict()
     local edge = outline:find_edges()
-    table.insert(edges, edge)
-    
+
     local num_of_points = 0
     for _, v2 in ipairs(edge) do
       for _, v3 in ipairs(v2) do
         num_of_points = num_of_points + 1
       end
     end
-    
     local path = Clipper.Path(num_of_points)
     local i = 0
     for _, v2 in ipairs(edge) do
@@ -120,7 +115,10 @@ function Map:special_merge(graph)
         i = i + 1
       end
     end
-    table.insert(paths, path)
+    
+    v.chunk = chunk
+    v.outline_edges = edge
+    v.polygon = path
     
     v.parameters.populater(v.parameters, v.chunk, path)
   end
@@ -162,12 +160,12 @@ function Map:special_merge(graph)
     
     return is_intersect, offset_clip
   end
-  local function find_valid_matches(node_index1, node_index2, edge_meta_info)
-    local matches = get_matching_edges(edges[node_index1], edges[node_index2])
+  local function find_valid_matches(node1, node2, edge_meta_info)
+    local matches = get_matching_edges(node1.outline_edges, node2.outline_edges)
     local matches_without_intersections = {}
     
     local num_of_points = 0
-    for i, v in ipairs(edges[node_index2]) do
+    for i, v in ipairs(node2.outline_edges) do
       for i2, v2 in ipairs(v) do
         num_of_points = num_of_points + 1
       end
@@ -182,24 +180,24 @@ function Map:special_merge(graph)
           local offset = vec2(v[1][segment_index_1].x - v[2][segment_index_2].x, v[1][segment_index_1].y - v[2][segment_index_2].y)
           local connection_point_1 = vec2(v[1][segment_index_1].x, v[1][segment_index_1].y)
           local connection_point_2 = vec2(v[2][segment_index_2].x, v[2][segment_index_2].y)
-          local is_intersect, offset_clip = does_intersect(paths[node_index1], paths[node_index2], num_of_points, offset)
+          local is_intersect, offset_clip = does_intersect(node1.polygon, node2.polygon, num_of_points, offset)
           if (not is_intersect) then
             table.insert(matches_without_intersections, {
-              v, segment_index_1, segment_index_2, offset_clip, node_index2, offset, num_of_points, connection_point_1, connection_point_2,
+              v, segment_index_1, segment_index_2, offset_clip, node2, offset, num_of_points, connection_point_1, connection_point_2,
               
               segment_index_1 = segment_index_1,
               segment_index_2 = segment_index_2,
               
               offset = offset,
               offset_clip = offset_clip,
-              clip = paths[node_index2],
+              clip = node2.polygon,
               num_of_points = num_of_points,
               edge_meta_info = edge_meta_info
               
             })
           end
-          
-          --::continue::
+
+
         end
       end
     end
@@ -220,7 +218,8 @@ function Map:special_merge(graph)
           if (not travelled[v.node]) and v.meta.type == 'Join' then
             travelled[v.node] = true
             table.insert(queue, {parent = node, self = v.node})
-            matches[tostring(node)..' '..tostring(v.node)] = find_valid_matches(graph.nodes[node], graph.nodes[v.node], v.meta)
+            --matches[tostring(node)..' '..tostring(v.node)] = find_valid_matches(graph.nodes[node], graph.nodes[v.node], v.meta)
+            matches[tostring(node)..' '..tostring(v.node)] = find_valid_matches(node, v.node, v.meta)
             recursion(v.node)
           end
         end
@@ -285,7 +284,7 @@ function Map:special_merge(graph)
             
             local clips = clip_buffer
             local clipper = Clipper.Clipper()
-            local subject = paths[graph.nodes[clips[1]]]
+            local subject = clips[1].polygon
             clipper:AddPath(subject, Clipper.ptSubject, true)
             for i = 2, n do
               clipper:AddPath(clips[i].offset_clip, Clipper.ptClip, true)
@@ -359,7 +358,7 @@ function Map:special_merge(graph)
       vec = vec,
       edge_meta_info = match.edge_meta_info,
     })
-    map:copy_map_onto_self_at_position(graph.nodes[match[5]].chunk, offset.x+clip_width_sum, offset.y+clip_height_sum, false)
+    map:copy_map_onto_self_at_position(match[5].chunk, offset.x+clip_width_sum, offset.y+clip_height_sum, false)
   end
   
   for i, v in ipairs(connections) do

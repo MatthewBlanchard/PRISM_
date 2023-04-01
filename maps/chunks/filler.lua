@@ -6,7 +6,7 @@ function filler:parameters()
   self.height = love.math.random(4, 10)
 end
 function filler:shaper(chunk)
-  chunk:clear_rect(1,1, chunk.width-1, chunk.height-1)
+  chunk:clear_rect(0,0, chunk.width, chunk.height)
 end
 function filler:populater(chunk, clipping)
   local cx, cy = chunk:get_center()
