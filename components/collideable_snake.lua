@@ -17,11 +17,14 @@ function CollideableSnake:__new(length)
     end
 end
 
-function CollideableSnake:newFromTiles(tiles)
+function CollideableSnake.newFromTiles(tiles)
+    local self = CollideableSnake(#tiles)
     self.occupiedTile = tiles
+
+    return self
 end
 
-function CollideableSnake:eachCell(actor)
+function CollideableSnake:eachCellGlobal(actor)
     local i = 0
     return function()
         i = i + 1
@@ -30,6 +33,18 @@ function CollideableSnake:eachCell(actor)
         end
 
         return self.occupiedTile[i] + actor.position
+    end
+end
+
+function CollideableSnake:eachCell()
+    local i = 0
+    return function()
+        i = i + 1
+        if i > #self.occupiedTile then
+            return nil
+        end
+
+        return self.occupiedTile[i]
     end
 end
 

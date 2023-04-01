@@ -18,22 +18,51 @@ end
 function Collideable:getActionTiles(actor)
 end
 
-function Collideable:eachCell(actor)
+function Collideable:eachCellGlobal(actor)
+    error("eachCellGlobal must be implemented by a subclass")
+end
+
+function Collideable:eachCell()
+    error("eachCell must be implemented by a subclass")
+end
+
+function Collideable:localToGlobal(actor, localPos)
+    return actor.position + localPos
+end
+
+function Collideable:globalToLocal(actor, globalPos)
+    return globalPos - actor.position
+end
+
+function Collideable:hasCell(cell)
+    for vec in self:eachCell() do
+        if vec == cell then
+            return true
+        end
+    end
+
+    return false
+end
+
+function Collideable:hasGlobalCell(actor, cell)
+    return self:hasCell(actor, cell)
 end
 
 -- given a direction return a list of cells we intend to occupy
 function Collideable:moveCandidate(actor, direction)
+    error("moveCandidate must be implemented by a subclass")
 end
 
 -- called if our moveCandidate is accepted so we can update our state
 function Collideable:acceptedCandidate(actor, direction)
+    error("acceptedCandidate must be implemented by a subclass")
 end
 
 -- called if our moveCandidate is blocked by another actor
-function Collideable:trySqueeze(actor, direction, rejected)
+function Collideable:trySqueeze(actor, direction, rejected, accepted)
 end
 
-function Collideable:acceptedSqueeze(actor, direction, rejected)
+function Collideable:acceptedSqueeze(actor, direction, rejected, accepted)
 end
 
 return Collideable
