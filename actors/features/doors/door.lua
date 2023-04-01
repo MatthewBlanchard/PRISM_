@@ -19,7 +19,7 @@ function Open:perform(level)
   door.char = not collideable and Tiles["door_2"] or Tiles["door_1"]
 
   if collideable then
-    door:removeComponent(components.Collideable)
+    door:removeComponent(components.Collideable_box)
   else
     door:addComponent(components.Collideable_box())
   end

@@ -49,20 +49,20 @@ function Collideable:hasGlobalCell(actor, cell)
 end
 
 -- given a direction return a list of cells we intend to occupy
-function Collideable:moveCandidate(actor, direction)
+function Collideable:moveCandidate(level, actor, direction)
     error("moveCandidate must be implemented by a subclass")
 end
 
 -- called if our moveCandidate is accepted so we can update our state
-function Collideable:acceptedCandidate(actor, direction)
+function Collideable:acceptedCandidate(level, actor, direction)
     error("acceptedCandidate must be implemented by a subclass")
 end
 
 -- called if our moveCandidate is blocked by another actor
-function Collideable:trySqueeze(actor, direction, rejected, accepted)
+function Collideable:trySqueeze(level, actor, direction, rejected, accepted)
 end
 
-function Collideable:acceptedSqueeze(actor, direction, rejected, accepted)
+function Collideable:acceptedSqueeze(level, actor, direction, rejected, accepted)
 end
 
 return Collideable

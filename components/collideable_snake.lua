@@ -49,7 +49,7 @@ function CollideableSnake:eachCell()
 end
 
 -- given a direction return a list of cells we intend to occupy
-function CollideableSnake:moveCandidate(actor, direction)
+function CollideableSnake:moveCandidate(level, actor, direction)
     local list = {}
 
     for i = 2, #self.occupiedTile do
@@ -64,7 +64,7 @@ function CollideableSnake:moveCandidate(actor, direction)
     end
 end
 
-function CollideableSnake:acceptedCandidate(actor, direction)
+function CollideableSnake:acceptedCandidate(level, actor, direction)
     local list = {}
 
     for i = 2, #self.occupiedTile do
@@ -79,7 +79,7 @@ end
 
 -- called if our moveCandidate is blocked, we can see exactly which tiles
 -- are blocked and make an attempt to squeeze through
-function CollideableSnake:trySqueeze(actor, direction, rejected)
+function CollideableSnake:trySqueeze(level, actor, direction, rejected)
     return nil
 end
 

@@ -22,16 +22,16 @@ function CollideableDynamic:eachCell()
     return self.internalCollideable:eachCell()
 end
 
-function CollideableDynamic:moveCandidate(actor, direction)
+function CollideableDynamic:moveCandidate(level, actor, direction)
     -- we always try to fit the box first, if we can't then we try to
     -- squeeze into a snake
-    return self.boxCollideable:moveCandidate(actor, direction)
+    return self.boxCollideable:moveCandidate(level, actor, direction)
 end
 
-function CollideableDynamic:acceptedCandidate(actor, direction)
+function CollideableDynamic:acceptedCandidate(level, actor, direction)
     -- we're not blocked so we can just move
     self.internalCollideable = self.boxCollideable
-    self.internalCollideable:acceptedCandidate(actor, direction)
+    self.internalCollideable:acceptedCandidate(level, actor, direction)
 end
 
 function CollideableDynamic:createSnakeSpiral(actor, direction, rejected, accepted)
@@ -115,7 +115,7 @@ function CollideableDynamic:createSnakeSpiral(actor, direction, rejected, accept
 end
 
 -- called if our moveCandidate is blocked by another actor or cell
-function CollideableDynamic:trySqueeze(actor, direction, rejected, accepted)
+function CollideableDynamic:trySqueeze(level, actor, direction, rejected, accepted)
     assert(rejected and accepted, "Must provide rejected and accepted cells")
     -- see if all of our cells were rejected or if there's a gap we can
     -- snake through
@@ -127,21 +127,21 @@ function CollideableDynamic:trySqueeze(actor, direction, rejected, accepted)
     -- if we're already a snake we can just try to move
     if self.internalCollideable:is(CollideableSnake) then
         print "SKABEET"
-        return self.internalCollideable:moveCandidate(actor, direction), actor.position + direction
+        return self.internalCollideable:moveCandidate(level, actor, direction), actor.position + direction
     end
 
     local snake_collideable, new_origin = self:createSnakeSpiral(actor, direction, rejected, accepted)
-    return snake_collideable:moveCandidate({position = new_origin}, direction), new_origin + direction
+    return snake_collideable:moveCandidate(level, {position = new_origin}, direction), new_origin + direction
 end
 
-function CollideableDynamic:acceptedSqueeze(actor, direction, rejected, accepted)
+function CollideableDynamic:acceptedSqueeze(level, actor, direction, rejected, accepted)
     print "YEET"
     if not self.internalCollideable:is(CollideableSnake) then
         self.internalCollideable = self:createSnakeSpiral(actor, direction, rejected, accepted)
     end
 
-    local snake_collideable, new_origin = self:trySqueeze(actor, direction, rejected, accepted)
-    self.internalCollideable:acceptedCandidate({position = new_origin}, direction)
+    local snake_collideable, new_origin = self:trySqueeze(level, actor, direction, rejected, accepted)
+    self.internalCollideable:acceptedCandidate(level, {position = new_origin}, direction)
 end
 
 return CollideableDynamic

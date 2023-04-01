@@ -33,7 +33,7 @@ function Interface:update(dt)
       self.waitTime = nil
     end
   end
-  
+
   self.messagePanel:update(dt)
 
   self.fov = {}
@@ -136,7 +136,9 @@ function Interface:draw()
   end
 
   local function getAnimationChar(actor)
-    if not actor:hasComponent(components.Animated) then return actor.char end
+    if not actor:hasComponent(components.Animated) then
+       return actor.char
+    end
 
     local animation = actor:getComponent(components.Animated)
     if self.t % 0.600 > 0.400 then
