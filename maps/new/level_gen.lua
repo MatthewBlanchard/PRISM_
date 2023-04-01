@@ -190,7 +190,7 @@ graph:connect_nodes(edge_join_door, snip_farm, filler_nodes[love.math.random(1, 
 
 
 local merged_room_3 = Map:special_merge(graph)
-map:copy_map_onto_self_at_position(merged_room_3, 0, 0)
+map:blit(merged_room_3, 0, 0)
 
 
 local player_pos
@@ -210,7 +210,7 @@ end
 -- end
 
 local heat_map = Map:new(600, 600, 0)
-heat_map:copy_map_onto_self_at_position(map, 0, 0)
+heat_map:blit(map, 0, 0)
 heat_map = heat_map:dijkstra({player_pos}, 'vonNeuman')
 for x, y, cell in heat_map:for_cells() do
   if cell == 999 then
@@ -219,7 +219,7 @@ for x, y, cell in heat_map:for_cells() do
 end
 
 for x, y in map:for_cells() do
-  callback(x, y, map.cells[x][y])
+  callback(x + 1, y + 1, map.cells[x][y])
 end
 
 return map, heat_map, rooms
