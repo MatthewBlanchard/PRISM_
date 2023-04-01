@@ -1,17 +1,9 @@
-local Chunk = require 'maps.chunk'
+local Cave = require "maps.chunks.cave"
 local Clipper = require('maps.clipper.clipper')
 
-local sqeeto_hive = Chunk:extend()
-function sqeeto_hive:parameters()
-  self.width, self.height = 20, 20
-end
-function sqeeto_hive:shaper(chunk)
-  chunk:clear_ellipse(chunk.width/2, chunk.height/2, 5, 5)
-  for i = 1, 20 do
-    chunk:DLAInOut()
-  end
-end
-function sqeeto_hive:populater(chunk, clipping)
+local SqeetoHive = Cave:extend()
+
+function SqeetoHive:populater(chunk, clipping)
   local cx, cy = math.floor(chunk.width/2)+1, math.floor(chunk.height/2)+1
   
   for i = 1, 3 do
@@ -25,4 +17,4 @@ function sqeeto_hive:populater(chunk, clipping)
   chunk:insert_actor('Prism', cx, cy)
 end
 
-return sqeeto_hive
+return SqeetoHive
