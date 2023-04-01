@@ -18,7 +18,7 @@ function CollideableBox:eachCell()
 end
 
 -- given a direction return a list of cells we intend to occupy
-function CollideableBox:moveCandidate(actor, direction)
+function CollideableBox:moveCandidate(level, actor, direction)
     local list = {}
 
     for vec in self:eachCellGlobal(actor) do
@@ -30,13 +30,13 @@ function CollideableBox:moveCandidate(actor, direction)
     end
 end
 
-function CollideableBox:acceptedCandidate(actor, direction)
+function CollideableBox:acceptedCandidate(level, actor, direction)
     -- we don't modify our occupied tiles so we can just return
     return
 end
 
 -- called if our moveCandidate is blocked by another actor
-function CollideableBox:trySqueeze(actor, direction, rejected)
+function CollideableBox:trySqueeze(level, actor, direction, rejected)
     return nil
 end
 

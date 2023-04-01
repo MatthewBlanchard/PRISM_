@@ -8,8 +8,8 @@ Cube.char = Tiles["player"]
 Cube.color = {0.5, 0.5, 0.8}
 
 Cube.components = {
-    components.Collideable_dynamic(2),
-    components.Move{speed = 100},
+    components.Collideable_bfs(9),
+    components.Move{speed = 150},
     components.Sight{range = 5, fov = true, explored = false},
     components.Stats {
         ATK = 0,
@@ -27,7 +27,7 @@ function Cube:act(level)
     local target = actUtil.closestSeenActorByFaction(self, "player")
 
     if target then
-        return actUtil.moveTowardSimple(self, target)
+        return actUtil.moveToward(self, target)
     end
 
     return self:getAction(actions.Wait)(self)
