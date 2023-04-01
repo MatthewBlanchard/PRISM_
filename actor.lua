@@ -349,7 +349,7 @@ function Actor:getRange(type, actor)
 
   local self_tiles = {}
   if collideable_component then
-    for vec in collideable_component:eachCell(self) do
+    for vec in collideable_component:eachCellGlobal(self) do
       table.insert(self_tiles, vec)
     end
   else
@@ -358,7 +358,7 @@ function Actor:getRange(type, actor)
 
   local other_tiles = {}
   if other_collideable_component then
-    for vec in other_collideable_component:eachCell(actor) do
+    for vec in other_collideable_component:eachCellGlobal(actor) do
       table.insert(other_tiles, vec)
     end
   else

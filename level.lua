@@ -280,7 +280,7 @@ function Level:eachActorTile(actor)
 
   local collideable_component = actor:getComponent(components.Collideable)
   if collideable_component then
-    for vec in collideable_component:eachCell(actor) do
+    for vec in collideable_component:eachCellGlobal(actor) do
       table.insert(list, vec)
     end
   else
@@ -344,47 +344,61 @@ end
 function Level:moveActorChecked(actor, direction)
   local newPosition = actor.position + direction
 
-  local candidate_rejected = {}
+  local accepted = {}
+  local rejected = {}
+
   local collideable = actor:getComponent(components.Collideable)
   if collideable then 
+    local debug = {}
     for cell in collideable:moveCandidate(actor, direction) do
       local blockSelf = actor
       
+      table.insert(debug, cell)
       if collideable and collideable.blockSelf then
         blockSelf = nil
       end
 
       if not self:getCellPassable(cell.x, cell.y, blockSelf) then
-        table.insert(candidate_rejected, cell)
+        table.insert(rejected, cell)
+      else 
+        table.insert(accepted, cell)
       end
     end
+
+    self:getSystem("Effects"):addEffect(effects.tryMoveDebug(actor, debug))
   else
     if not self:getCellPassableNoActors(newPosition.x, newPosition.y, actor) then
       return
     end
   end
 
-  if #candidate_rejected > 0 then
-    local trySqueeze = collideable:trySqueeze(actor, direction, candidate_rejected)
+  if #rejected > 0 then
+    local trySqueeze, new_origin = collideable:trySqueeze(actor, direction, rejected, accepted)
     -- we didn't come up with a squeeze so we should abort
     if not trySqueeze then
       return
     end
 
     local squeeze_success = true
+    local debug = {}
     for cell in trySqueeze do
+      table.insert(debug, cell)
       if not self:getCellPassable(cell.x, cell.y, actor) then
         squeeze_success = false
+      else
       end
     end
 
+    print(#debug)
+    self:getSystem("Effects"):addEffect(effects.tryMoveDebug(actor, debug))
+
     if squeeze_success then
+      print("NEW ORIGIN", new_origin)
       self:removeSparseMapEntries(actor)
 
-        collideable:acceptedSqueeze(actor, direction, candidate_rejected)
+      collideable:acceptedSqueeze(actor, direction, rejected, accepted)
       
-
-      self:moveActor(actor, newPosition, true)
+      self:moveActor(actor, new_origin, true)
 
       self:insertSparseMapEntries(actor)
     end
@@ -398,7 +412,7 @@ function Level:moveActorChecked(actor, direction)
   -- sparse map ourselves.
   self:moveActor(actor, newPosition, true)
 
-  if collideable and #candidate_rejected == 0 then
+  if collideable and #rejected == 0 then
     collideable:acceptedCandidate(actor, direction)
   end
 
@@ -572,9 +586,9 @@ end
 function Level:getMapCallback()
   return function(x, y, val)    
     if val == 0 then
-      self.map:set(x + 1, y + 1, Cell())
+      self.map:set(x, y, Cell())
     else
-      self.map:set(x + 1, y + 1, Wall())
+      self.map:set(x, y, Wall())
     end
   end
 end

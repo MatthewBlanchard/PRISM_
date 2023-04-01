@@ -47,6 +47,20 @@ effects.OpenEffect = function(actor, totalTime)
   end
 end
 
+effects.tryMoveDebug = function(actor, cells)
+  local t = 0
+  local lastflip = 9
+  return function(dt, interface)
+    t = t + dt
+
+    for _, cell in ipairs(cells) do
+      interface:effectWriteOffset(Tiles["pointy_poof"], cell.x, cell.y, { 1, 1, 1, 1 })
+    end
+    
+    if t > 1 then return true end
+  end
+end
+
 effects.CritEffect = function(actor, totalTime)
   local t = 0
   local lastflip = 9
