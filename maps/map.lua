@@ -1088,8 +1088,18 @@ end
 --   end
 -- end
 
--- DLA needs a cleared cell to start from and a space to clear
 function Map:DLAInOut()
+  local is_at_least_one_empty = false
+  local is_at_least_one_full = false
+  for x, y, cell in self:for_cells() do
+    if cell == 0 then
+      is_at_least_one_empty = true
+    elseif cell == 1 then
+      is_at_least_one_full = true
+    end
+  end
+  assert(is_at_least_one_empty and is_at_least_one_full)
+
   local function clamp(n, min, max)
     local n = math.max(math.min(n, max), min)
     return n
@@ -1128,6 +1138,17 @@ function Map:DLAInOut()
 end
 
 function Map:DLA()
+  local is_at_least_one_empty = false
+  local is_at_least_one_full = false
+  for x, y, cell in self:for_cells() do
+    if cell == 0 then
+      is_at_least_one_empty = true
+    elseif cell == 1 then
+      is_at_least_one_full = true
+    end
+  end
+  assert(is_at_least_one_empty and is_at_least_one_full)
+
   local x1,y1 = nil,nil
   repeat
     x1 = math.random(2, self.width-2) 

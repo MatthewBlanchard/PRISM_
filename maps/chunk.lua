@@ -7,12 +7,12 @@ function Chunk:__new(width, height)
 end
 
 function Chunk:parameters()
-  self.width = 4
-  self.height = 4
+  self.width = 3
+  self.height = 3
 end
 
 function Chunk:shaper(map)
-  chunk:clear_rect(1,1, chunk.width-1, chunk.height-1)
+  chunk:clear_rect(0,0, chunk.width, chunk.height)
 end
 
 function Chunk:populater(map)

@@ -1,4 +1,4 @@
---jit.off()
+--jit.off() --gitignore
 
 -- require is not smart so we are going to wrap it to warn us if we include
 -- a file using /s instead of .s
@@ -29,6 +29,7 @@ reactions = {}
 actions = {}
 components = {}
 actors = {}
+cells = {}
 effects = require "effects"
 
 love.graphics.setDefaultFilter("nearest", "nearest")
@@ -56,6 +57,7 @@ loadItems("actions/reactions", reactions, true)
 loadItems("components", components, true)
 loadItems("conditions", conditions, true)
 loadItems("actors", actors, true)
+loadItems("cells", cells, true)
 loadItems("systems", systems, true)
 Loot = require "loot"
 
