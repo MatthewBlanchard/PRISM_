@@ -1,5 +1,5 @@
 --love.math.setRandomSeed(1)
-love.audio.setVolume(0)
+--love.audio.setVolume(0)
 
 local Map = require "maps.map"
 local Object = require "object"
@@ -43,9 +43,7 @@ function Level:create(callback)
     end
   end
   
-  local Chunk = require 'maps.chunk'
   local id_generator = require 'maps.uuid'
-
   local boss_key_uuid
 
   local chunks = {}
@@ -69,23 +67,6 @@ function Level:create(callback)
   loadItems("maps/chunks", chunks, false)
   
 
-  local Start = chunks.Start
-  Start.key_id = id_generator()
-  boss_key_uuid = Start.key_id
-  local start = graph:add_node(Start)
-
-
-  local finish = graph:add_node(chunks.Finish)
-  local sqeeto_hive = graph:add_node(chunks.Sqeeto_hive)  
-  local spider_nest = graph:add_node(chunks.Spider_nest)
-  local shop = graph:add_node(chunks.Shop)
-  local snip_farm = graph:add_node(chunks.Snip_farm)  
-  
-  local encounters = {
-    {cr = 1, actors = {"sqeeto"}},
-    {cr = 2, actors = {"lizbop"}},
-    {cr = 3, actors = {"Webweaver"}},
-  }
 
   local edge_join_door = {
     type = 'Join', 
@@ -146,10 +127,6 @@ function Level:create(callback)
           chunk:insert_actor('River'..river_dir_type, point.x, point.y)
         end
       end
-      
-
-      -- chunk:clear_cell(x, y)
-
     end,
   }
 
@@ -183,25 +160,36 @@ function Level:create(callback)
     end
   end
 
-graph:connect_nodes(edge_join_door, start, filler_nodes[love.math.random(1, #filler_nodes)])
-graph:connect_nodes(edge_join_door, finish, filler_nodes[love.math.random(1, #filler_nodes)])
-graph:connect_nodes(edge_join_breakable_wall, sqeeto_hive, filler_nodes[love.math.random(1, #filler_nodes)])
-graph:connect_nodes(edge_join_boss_door, spider_nest, filler_nodes[love.math.random(1, #filler_nodes)])
-graph:connect_nodes(edge_join_door, shop, filler_nodes[love.math.random(1, #filler_nodes)])
-graph:connect_nodes(edge_join_door, snip_farm, filler_nodes[love.math.random(1, #filler_nodes)])
+  local Start = chunks.Start
+  Start.key_id = id_generator()
+  boss_key_uuid = Start.key_id
+  local start = graph:add_node(Start)
+
+  local finish = graph:add_node(chunks.Finish)
+  local sqeeto_hive = graph:add_node(chunks.Sqeeto_hive)  
+  local spider_nest = graph:add_node(chunks.Spider_nest)
+  local shop = graph:add_node(chunks.Shop)
+  local snip_farm = graph:add_node(chunks.Snip_farm)
+
+  graph:connect_nodes(edge_join_door, start, filler_nodes[love.math.random(1, #filler_nodes)])
+  graph:connect_nodes(edge_join_door, finish, filler_nodes[love.math.random(1, #filler_nodes)])
+  graph:connect_nodes(edge_join_breakable_wall, sqeeto_hive, filler_nodes[love.math.random(1, #filler_nodes)])
+  graph:connect_nodes(edge_join_boss_door, spider_nest, filler_nodes[love.math.random(1, #filler_nodes)])
+  graph:connect_nodes(edge_join_door, shop, filler_nodes[love.math.random(1, #filler_nodes)])
+  graph:connect_nodes(edge_join_door, snip_farm, filler_nodes[love.math.random(1, #filler_nodes)])
 
 
-local merged_room_3 = Map:special_merge(graph)
-map:copy_map_onto_self_at_position(merged_room_3, 0, 0) --TODO
+  local merged_room_3 = Map:special_merge(graph)
+  map:blit(merged_room_3, 0, 0) 
 
 
-local player_pos
-for i, v in ipairs(map.actors.list) do
-  if v.id == 'Player' then
-    player_pos = v.pos
-    break
+  local player_pos
+  for i, v in ipairs(map.actors.list) do
+    if v.id == 'Player' then
+      player_pos = v.pos
+      break
+    end
   end
-end
 
 
 -- for x, y, cell in map:for_cells() do
@@ -211,18 +199,18 @@ end
 --   end
 -- end
 
-local heat_map = Map:new(600, 600, 0)
-heat_map:copy_map_onto_self_at_position(map, 0, 0) --TODO
-heat_map = heat_map:dijkstra({player_pos}, 'vonNeuman')
-for x, y, cell in heat_map:for_cells() do
-  if cell == 999 then
-    map:fill_cell(x, y)
+  local heat_map = Map:new(600, 600, 0)
+  heat_map:blit(map, 0, 0) 
+  heat_map = heat_map:dijkstra({player_pos}, 'vonNeuman')
+  for x, y, cell in heat_map:for_cells() do
+    if cell == 999 then
+      map:fill_cell(x, y)
+    end
   end
-end
 
-for x, y in map:for_cells() do
-  callback(x, y, map.cells[x][y])
-end
+  for x, y in map:for_cells() do
+    callback(x, y, map.cells[x][y])
+  end
 
 -- local function draw_heat_map()
 --   for i, v in ipairs(heat_map.map) do
@@ -245,7 +233,7 @@ end
 -- end
 -- draw_heat_map()
 
-return map
+  return map
 end
 
 

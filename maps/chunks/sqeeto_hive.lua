@@ -6,13 +6,14 @@ function sqeeto_hive:parameters()
   self.width, self.height = 20, 20
 end
 function sqeeto_hive:shaper(chunk)
-  chunk:clear_ellipse(chunk.width/2, chunk.height/2, 5, 5)
+  local cx, cy = chunk:get_center()
+  chunk:clear_ellipse(cx-1, cx-1, 5, 5)
   for i = 1, 20 do
     chunk:DLAInOut()
   end
 end
 function sqeeto_hive:populater(chunk, clipping)
-  local cx, cy = math.floor(chunk.width/2)+1, math.floor(chunk.height/2)+1
+  local cx, cy = chunk:get_center()
   
   for i = 1, 3 do
     local x, y
