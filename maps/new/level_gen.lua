@@ -3,7 +3,7 @@
 
 local Map = require "maps.map"
 local Object = require "object"
-local vec2 = require "vector"
+local vec2 = require "math.vector"
 local Clipper = require('maps.clipper.clipper')
 
 local Level = Object:extend()
@@ -172,7 +172,7 @@ function Level:create(callback)
   
   local filler_nodes = {}
   for i = 1, 4 do
-    filler_nodes[i] = graph:add_node(chunks.Filler)
+    filler_nodes[i] = graph:add_node(chunks.Hallway)
     
     if i > 1 then
       local tunnel = graph:add_node(chunks.Tunnel)
