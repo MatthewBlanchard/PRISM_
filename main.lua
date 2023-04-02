@@ -48,7 +48,7 @@ end
 
 Loot = require "loot"
 
-local Level = require "level"
+local Level = require "core.level"
 local Interface = require "interface"
 local Display = require "display.display"
 local Start = require "panels.start"
