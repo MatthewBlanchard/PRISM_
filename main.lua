@@ -1,205 +1,36 @@
-require 'lib.safe_require'
-
--- TODO: Refactor this! We need a World object that holds all of the loaded actors, actions, etc. and the current level.
-ROT = require 'lib.rot.rot'
-MusicManager = require "music.musicmanager"
-Actor = require "core.actor"
-
-require "lib.batteries":export()
-
-systems = {}
-conditions = {}
-reactions = {}
-actions = {}
-components = {}
-actors = {}
-effects = require "core.effects"
+require "export_lib"
 
 love.graphics.setDefaultFilter("nearest", "nearest")
-local function loadItems(directoryName, items, recurse)
-  local info = {}
 
-  for k, item in pairs(love.filesystem.getDirectoryItems(directoryName)) do
-    local fileName = directoryName .. "/" .. item
-    love.filesystem.getInfo(fileName, info)
-    if info.type == "file" then
-      fileName = string.gsub(fileName, ".lua", "")
-      fileName = string.gsub(fileName, "/", ".")
-      local name = string.gsub(item:sub(1, 1):upper() .. item:sub(2), ".lua", "")
+local Game = require "game"
 
-      items[name] = require(fileName)
-    elseif info.type == "directory" and recurse then
-      loadItems(fileName, items, recurse)
-    end
-  end
-end
+-- This accepts a list of modules to load. Each module should contain subfolders
+-- full of game objects. The game object will load all of the game objects in the
+-- modules and export them to the global namespace. TODO: In the future modules
+-- should be able to define what other modules they depend on.
 
-targets = require "core.target"
-loadItems("modules/core/actions", actions, false)
-loadItems("modules/core/actions/reactions", reactions, true)
-loadItems("modules/core/components", components, true)
-loadItems("modules/core/conditions", conditions, true)
-loadItems("modules/core/actors", actors, true)
-loadItems("modules/core/systems", systems, true)
+-- Modules can include the following subfolders:
+-- actions, actors, cells, components, conditions, systems
+game = Game("core")
 
-for k, v in pairs(actions) do
-  print(k, v)
-end
+local StateManager = require "gamestates.statemanager"
+local LevelState = require "gamestates.levelstate"
 
-Loot = require "loot"
-
-local Level = require "core.level"
-local Interface = require "interface"
-local Display = require "display.display"
-local Start = require "panels.start"
-
-for _, actor in ipairs(actors) do
-  for i, component in ipairs(actor.components) do
-    actor.component[i] = component:extend()
-  end
-end
-------
--- Global
-
-game = {}
-
-local function createLevel()
-  local map, populater = ROT.Map.Brogue(50, 50), require "populater" -- Brogue Gen
-  --local map, populater = require "maps.new.level_gen"(), require "maps.new.populater" -- Dim Gen
-  local level = Level(map, populater)
-  level:addSystem(systems.Message())
-  level:addSystem(systems.Inventory())
-  level:addSystem(systems.Effects())
-  level:addSystem(systems.New_lighting())
-  level:addSystem(systems.Sight())
-  level:addSystem(systems.Equipment())
-  level:addSystem(systems.Weapon())
-  level:addSystem(systems.Lose_condition())
-  return level
-end
+local manager = StateManager()
 
 function love.load()
-  min_dt = 1 / 30 --fps
-  next_time = love.timer.getTime()
-
-  local scale = 1
-  local w, h = math.floor(81 / scale), math.floor(49 / scale)
-  local w2, h2 = math.floor(81 / 2), math.floor(49 / 2)
-  local display = Display:new(w, h, scale, nil, { 1, 1, 1, 0 }, nil, nil, true)
-  local viewDisplay2x = Display:new(w2, h2, 2, nil, { .09, .09, .09 }, nil, nil, false)
-  local viewDisplay1x = Display:new(w, h, 1, nil, { .09, .09, .09 }, nil, nil, false)
-
-  game.music = MusicManager()
-  game.display = display
-  game.viewDisplay1x = viewDisplay1x
-  game.viewDisplay2x = viewDisplay2x
-  game.viewDisplay = viewDisplay2x
-  game.Player = actors.Player()
-
-  local interface = Interface(display)
-  interface:push(Start(display, interface))
-
-  game.level = createLevel()
-  game.interface = interface
-
-  local player = game.Player
-  game.curActor = player
-
-  local torch = actors.Torch()
-  print(getmetatable(getmetatable(player)).name)
-  table.insert(player:getComponent(components.Inventory).inventory, torch)
-  table.insert(player:getComponent(components.Inventory).inventory, actors.Lightning_blade())
-
-  love.keyboard.setKeyRepeat(true)
+    manager:push(LevelState(game:generateLevel(1)))
 end
 
 function love.draw()
-  if not game.display then return end
-  game.viewDisplay:clear()
-  game.display:clear()
-  game.interface:draw(game.display)
-  game.viewDisplay:draw()
-  game.display:draw("UI")
+    manager:draw()
 end
 
-local storedKeypress
-local updateCoroutine
-game.waiting = false
-local skipAnimation = false
+
 function love.update(dt)
-  local effects = game.level:getSystem("Effects")
-
-  game.music:update(dt)
-  game.interface:update(dt, game.level)
-
-  if not updateCoroutine then
-    updateCoroutine = coroutine.create(game.level.run)
-  end
-
-  local awaitedAction = game.interface:getAction()
-  
-  -- we're waiting and there's no input so stop advancing
-  if game.waiting and not awaitedAction then return end
-  game.waiting = false
-
-  -- don't advance game state while we're rendering effects please
-  if effects and #effects.effects ~= 0 then
-    return
-  end
-
-  -- the game has told us to pause execution and draw frames for a while
-  if game.interface.waitTime and game.interface.waitTime > 0 and not skipAnimation then
-    return
-  end
-
-  local success, ret
-  -- when we press a key during animations we want to skip them
-  repeat
-    success, ret, time = coroutine.resume(updateCoroutine, game.level, awaitedAction)
-    if success == false then
-      error(ret .. "\n" .. debug.traceback(updateCoroutine))
-    end
-  until not (ret == "effect" and skipAnimation)
-
-
-  local coroutine_status = coroutine.status(updateCoroutine)
-  if coroutine_status == "suspended" and ret.is and ret:is(Actor) then
-    -- if level update returns a table we know we've got out guy so we set
-    -- curActor to let the interface know to unlock input
-    assert(ret:is(Actor))
-    game.curActor = ret
-    game.waiting = true
-    skipAnimation = false
-    if storedKeypress then
-      love.keypressed(storedKeypress[1], storedKeypress[2])
-    end
-
-    effects.effects = {}
-  elseif coroutine_status == "suspended" and ret == "wait" then
-    game.interface.waitTime = time
-  elseif coroutine_status == "dead" then
-    -- The coroutine has not stopped running and returned "descend".
-    -- It's time for us to load a new level.
-    if ret == "descend" then
-      game.level = createLevel()
-      updateCoroutine = coroutine.create(game.level.run)
-    else
-      love.event.quit( 0 )
-    end
-  end
+    manager:update(dt)
 end
 
 function love.keypressed(key, scancode)
-  local effects = game.level:getSystem("Effects")
-
-  if not game.waiting then
-    effects.effects = {}
-    skipAnimation = true
-    storedKeypress = { key, scancode }
-    return
-  end
-
-  storedKeypress = nil
-  -- if there is no current actor than we freeze input
-  game.interface:handleKeyPress(key, scancode)
+    manager:keypressed(key, scancode)
 end

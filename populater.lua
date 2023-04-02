@@ -1,5 +1,5 @@
-local Vector2 = require "vector"
-local Grass = require "cells.grass"
+local Vector2 = require "math.vector"
+local Grass = require "modules.core.cells.grass"
 
 local function randDirection()
   local x = math.random(1, 3) - 2
@@ -96,8 +96,7 @@ function Populater(level, map)
       tries = tries + 1
     until level:getCellPassable(x, y) or tries > 10
 
-    actor.position.x = x
-    actor.position.y = y
+    actor.position = Vector2(x, y)
     level:addActor(actor)
   end
 
@@ -137,7 +136,7 @@ function Populater(level, map)
     spawnActor(room, game.Player)
     spawnActor(room, actors.Box())
     spawnActor(room, actors.Snip())
-    --spawnActor(room, actors.Gelatinous_cube())
+    spawnActor(room, actors.Gelatinous_cube())
     --spawnActor(room, actors.Lizbop())
     --spawnActor(room, actors.Webweaver())
     --spawnActor(room, actors.Gazer())
@@ -266,7 +265,7 @@ function Populater(level, map)
   table.insert(toSpawn, actors.Stairs())
   table.insert(toSpawn, actors.Webweaver())
   table.insert(toSpawn, actors.Lizbop())
-  table.insert(toSpawn, actors.Stingboy())
+ --table.insert(toSpawn, actors.Stingboy())
 
   local startRoom = table.remove(map._rooms, love.math.random(1, #map._rooms))
 

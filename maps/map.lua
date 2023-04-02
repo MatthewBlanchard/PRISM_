@@ -1,7 +1,7 @@
 local Object = require "object"
 local Map = Object:extend()
 
-local vec2 = require "vector"
+local vec2 = require "math.vector"
 
 local lib_path = love.filesystem.getSource() .. '/maps/clipper'
 local extension = jit.os == 'Windows' and 'dll' or jit.os == 'Linux' and 'so' or jit.os == 'OSX' and 'dylib'
@@ -19,6 +19,7 @@ function Map:new(width, height, value)
   o:init(width, height, value)
   return o
 end
+
 function Map:init(width, height, value)
   local map = {}
   
@@ -61,6 +62,14 @@ function Map:for_cells()
     
     if x <= self.width then
       return x, y, self.cells[x][y]
+    end
+  end
+end
+
+function Map:get_random_open_tile()
+  for x, y, cell in self:for_cells() do
+    if cell == 0 then
+      return x, y
     end
   end
 end
@@ -590,6 +599,15 @@ function Map:clear_cell(x,y)
   
   return self
 end
+
+function Map:clear_cell_checked(x, y)
+  if self.map[x] and self.map[x][y] then
+    self:clear_cell(x, y)
+  end
+  
+  return self
+end
+
 function Map:fill_cell(x,y)
   self.cells[x][y] = 1
   
@@ -1212,5 +1230,69 @@ function Map:guidedDrunkWalk(x1, y1, x2, y2, map, limit)
   until map[x][y] == limit
   
 end
+
+function Map:tunneler(x1, y1, width, turnThreshold, steps)
+  local x, y = x1, y1
+  local directions = {
+    {1, 0},  -- Right
+    {-1, 0}, -- Left
+    {0, 1},  -- Down
+    {0, -1}  -- Up
+  }
+
+  local currentDirection = directions[math.random(1, 4)]
+
+  local function clear_tunnel_cells(x, y, direction, width)
+    local halfWidth = math.floor(width / 2)
+    
+    for i = -halfWidth, halfWidth do
+      for j = -halfWidth, halfWidth do
+        local newX, newY = x + i * math.abs(direction[2]), y + i * math.abs(direction[1])
+        self:clear_cell_checked(newX, newY)
+      end
+    end
+  end
+
+  local function change_direction(x, y, width)
+    local newDirection = currentDirection
+    while newDirection == currentDirection do
+      newDirection = directions[math.random(1, 4)]
+    end
+    currentDirection = newDirection
+  end
+
+  local function push_away_from_edge(x, y, width)
+    if x <= width then
+      x = width + 1
+    elseif x >= #self.map - width then
+      x = #self.map - width - 1
+    end
+
+    if y <= width then
+      y = width + 1
+    elseif y >= #self.map[1] - width then
+      y = #self.map[1] - width - 1
+    end
+
+    return x, y
+  end
+
+  for step = 1, steps do
+    x, y = push_away_from_edge(x, y, width)
+    clear_tunnel_cells(x, y, currentDirection, width)
+
+    if turnThreshold > math.random() then
+      change_direction(x, y, width)
+    end
+
+    x = x + currentDirection[1]
+    y = y + currentDirection[2]
+
+    -- Ensure the tunneler stays within the map boundaries
+    x = math.max(math.min(x, #self.map - 1), 1)
+    y = math.max(math.min(y, #self.map[1] - 1), 1)
+  end
+end
+
 
 return Map
