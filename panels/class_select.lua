@@ -1,6 +1,6 @@
-local Panel = require "panel"
+local Panel = require "panels.panel"
 local SwirlPanel = require "panels.swirl"
-local Colors = require "colors"
+local Colors = require "math.colors"
 
 local ClassSelectPanel = Panel:extend()
 

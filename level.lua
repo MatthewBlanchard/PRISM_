@@ -1,13 +1,13 @@
 local Object = require "object"
-local Actor = require "actor"
-local System = require "system"
-local Scheduler = require "scheduler"
-local SparseMap = require "sparsemap"
-local Vector2 = require "vector"
+local Actor = require "core.actor"
+local System = require "core.system"
+local Scheduler = require "core.scheduler"
+local SparseMap = require "structures.sparsemap"
+local Vector2 = require "math.vector"
 
-local Grid = require "grid"
-local Cell = require "cell"
-local Wall = require "cells.wall"
+local Grid = require "structures.grid"
+local Cell = require "core.cell"
+local Wall = require "modules.core.cells.wall"
 
 local Level = Object:extend()
 

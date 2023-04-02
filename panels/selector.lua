@@ -1,7 +1,7 @@
-local Panel = require "panel"
+local Panel = require "panels.panel"
 local ContextPanel = require "panels.context"
-local Vector = require "vector"
-local Bresenham = require "bresenham"
+local Vector = require "math.vector"
+local Bresenham = require "math.bresenham"
 
 local function bresenhamCallback(x, y)
   return game.level:getCellPassableNoActors(x, y)

@@ -1,4 +1,4 @@
-local Panel = require "panel"
+local Panel = require "panels.panel"
 local ItemPanel = require "panels.item"
 
 local InventoryPanel = Panel:extend()

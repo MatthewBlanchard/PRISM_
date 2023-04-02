@@ -1,5 +1,5 @@
-local Panel = require "panel"
-local Colors = require "colors"
+local Panel = require "panels.panel"
+local Colors = require "math.colors"
 
 local StatusPanel = Panel:extend()
 

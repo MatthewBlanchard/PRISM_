@@ -1,5 +1,5 @@
-local inflector = require "en"
-local Panel = require "panel"
+local inflector = require "lib.en"
+local Panel = require "panels.panel"
 
 local Message = Panel:extend()
 

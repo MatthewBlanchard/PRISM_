@@ -1,4 +1,4 @@
-local Panel = require "panel"
+local Panel = require "panels.panel"
 
 local ContextPanel = Panel:extend()
 ContextPanel.interceptInput = true

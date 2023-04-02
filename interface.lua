@@ -1,8 +1,8 @@
 local Object = require "object"
-local Vector2 = require "vector"
-local Tiles = require "tiles"
+local Vector2 = require "math.vector"
+local Tiles = require "display.tiles"
 
-local Panel = require "panel"
+local Panel = require "panels.panel"
 local Inventory = require "panels.inventory"
 local Status = require "panels.status"
 local Message = require "panels.message"

@@ -2,7 +2,7 @@
 -- A Code Page 437 terminal emulator based on AsciiPanel.
 local Display = {}
 local util = require 'display.util'
-local Tiles = require('tiles')
+local Tiles = require 'display.tiles'
 local json = require 'lib.json'
 Display.defaultTileset = 'display/atlas'
 

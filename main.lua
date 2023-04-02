@@ -1,23 +1,9 @@
--- require is not smart so we are going to wrap it to warn us if we include
--- a file using /s instead of .s
-local _require = require
-require = function(path)
-  if path:find("/") and not path:find("rot") then
-    print("WARNING: require(" .. path .. ") uses / instead of .")
-  end
-
-  if string.lower(path) ~= path and not path:find("rot") then
-    print("WARNING: require(" .. path .. ") uses uppercase letters")
-  end
-
-  return _require(path)
-end
+require 'lib.safe_require'
 
 -- TODO: Refactor this! We need a World object that holds all of the loaded actors, actions, etc. and the current level.
 ROT = require 'lib.rot.rot'
-MusicManager = require "musicmanager"
-vector22 = require "vector"
-Actor = require "actor"
+MusicManager = require "music.musicmanager"
+Actor = require "core.actor"
 
 require "lib.batteries":export()
 
@@ -27,7 +13,7 @@ reactions = {}
 actions = {}
 components = {}
 actors = {}
-effects = require "effects"
+effects = require "core.effects"
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 local function loadItems(directoryName, items, recurse)
@@ -48,13 +34,18 @@ local function loadItems(directoryName, items, recurse)
   end
 end
 
-targets = require "target"
-loadItems("actions", actions, false)
-loadItems("actions/reactions", reactions, true)
-loadItems("components", components, true)
-loadItems("conditions", conditions, true)
-loadItems("actors", actors, true)
-loadItems("systems", systems, true)
+targets = require "core.target"
+loadItems("modules/core/actions", actions, false)
+loadItems("modules/core/actions/reactions", reactions, true)
+loadItems("modules/core/components", components, true)
+loadItems("modules/core/conditions", conditions, true)
+loadItems("modules/core/actors", actors, true)
+loadItems("modules/core/systems", systems, true)
+
+for k, v in pairs(actions) do
+  print(k, v)
+end
+
 Loot = require "loot"
 
 local Level = require "level"
@@ -115,6 +106,7 @@ function love.load()
   game.curActor = player
 
   local torch = actors.Torch()
+  print(getmetatable(getmetatable(player)).name)
   table.insert(player:getComponent(components.Inventory).inventory, torch)
   table.insert(player:getComponent(components.Inventory).inventory, actors.Lightning_blade())
 
