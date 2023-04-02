@@ -13,10 +13,10 @@ function snip_farm:populater(chunk)
   chunk:fill_perimeter(cx-2, cy-2, cx+2, cy+2)
   chunk:clear_cell(cx, cy+2)
   
-  local _, shopkeep_id = chunk:insert_actor('Shopkeep', cx, cy+2)
+  local _, shopkeep_id = chunk:insert_entity('Shopkeep', cx, cy+2)
   
   chunk:target_rect(cx-1, cy-1, cx+1, cy+1, function(x, y)
-    chunk:insert_actor('Snip', x, y)
+    chunk:insert_entity('Snip', x, y)
   end)
 end
 

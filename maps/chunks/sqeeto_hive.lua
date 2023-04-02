@@ -20,10 +20,10 @@ function sqeeto_hive:populater(chunk, clipping)
     repeat
       x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
     until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-    chunk:insert_actor('Sqeeto', x, y)
+    chunk:insert_entity('Sqeeto', x, y)
   end
   
-  chunk:insert_actor('Prism', cx, cy)
+  chunk:insert_entity('Prism', cx, cy)
 end
 
 return sqeeto_hive

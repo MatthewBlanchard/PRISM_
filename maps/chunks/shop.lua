@@ -10,9 +10,9 @@ end
 function shop:populater(chunk, clipping)
   local cx, cy = chunk:get_center()
   
-  local _, shopkeep_id = chunk:insert_actor('Shopkeep', cx, cy-1)
-  chunk:insert_actor('Stationarytorch', cx-2, cy-1)
-  chunk:insert_actor('Stationarytorch', cx+2, cy-1)
+  local _, shopkeep_id = chunk:insert_entity('Shopkeep', cx, cy-1)
+  chunk:insert_entity('Stationarytorch', cx-2, cy-1)
+  chunk:insert_entity('Stationarytorch', cx+2, cy-1)
 
   local shopItems = {
     {
@@ -48,7 +48,7 @@ function shop:populater(chunk, clipping)
 
       return status
     end
-    chunk:insert_actor('Product', cx-2+i, cy, callback)
+    chunk:insert_entity('Product', cx-2+i, cy, callback)
   end
 end
 

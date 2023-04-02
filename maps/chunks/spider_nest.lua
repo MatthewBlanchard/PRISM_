@@ -29,7 +29,7 @@ function spider_nest:populater(chunk, clipping)
     repeat
       x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
     until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-    --chunk:insert_actor('Webweaver', x, y)
+    --chunk:insert_entity('Webweaver', x, y)
   end
 
   for i = 1, 2 do
@@ -37,7 +37,7 @@ function spider_nest:populater(chunk, clipping)
     repeat
       x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
     until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-    chunk:insert_actor('Web', x, y)
+    chunk:insert_entity('Web', x, y)
   end
 
   for i = 1, 2 do
@@ -46,9 +46,9 @@ function spider_nest:populater(chunk, clipping)
       x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
     until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
     if love.math.random(0, 1) == 1 then
-      chunk:insert_actor('Bones_1', x, y)
+      chunk:insert_entity('Bones_1', x, y)
     else
-      chunk:insert_actor('Bones_2', x, y)
+      chunk:insert_entity('Bones_2', x, y)
     end
   end
 
@@ -56,9 +56,9 @@ function spider_nest:populater(chunk, clipping)
     -- print(x, y)
     -- if cell == 1 then
     --   if love.math.random(0, 1) == 1 then
-    --     chunk:insert_actor('Rocks_1', x, y)
+    --     chunk:insert_entity('Rocks_1', x, y)
     --   else
-    --     chunk:insert_actor('Rocks_2', x, y)
+    --     chunk:insert_entity('Rocks_2', x, y)
     --   end
     -- end
   end

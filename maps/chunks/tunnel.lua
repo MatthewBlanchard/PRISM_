@@ -23,9 +23,9 @@ function tunnel:populater(chunk, clipping)
       x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
     until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
     if love.math.random(0, 1) == 1 then
-      chunk:insert_actor('Glowshroom_1', x, y)
+      chunk:insert_entity('Glowshroom_1', x, y)
     else
-      chunk:insert_actor('Glowshroom_2', x, y)
+      chunk:insert_entity('Glowshroom_2', x, y)
     end
   end
 end

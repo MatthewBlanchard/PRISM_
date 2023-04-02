@@ -21,8 +21,8 @@ local function New(level, map)
     level:addActor(actor)
   end
 
-  local function spawn_actors()
-    for i, v in ipairs(map.actors.list) do
+  local function spawn_entities()
+    for i, v in ipairs(map.entities.list) do
       local id, unique_id, x, y, callback = v.id, v.unique_id, v.pos.x, v.pos.y, v.callback
       if cells[id] ~= nil then
         spawn_cell(cells[id](), x, y)
@@ -34,7 +34,7 @@ local function New(level, map)
     end
   end
 
-  spawn_actors()
+  spawn_entities()
 
   for i, v in ipairs(callback_queue) do
     v()

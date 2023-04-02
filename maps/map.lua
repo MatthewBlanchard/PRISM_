@@ -29,7 +29,7 @@ function Map:init(width, height, value)
     end
   end
   
-  self.actors = {
+  self.entities = {
     list = {},
     position_key = {}
   }
@@ -39,10 +39,10 @@ function Map:init(width, height, value)
   self.height = height
 end
 
-function Map:insert_actor(actor_id, x, y, callback, unique_id)
+function Map:insert_entity(entity_id, x, y, callback, unique_id)
   local position = vec2(x, y)
   local unique_id = unique_id or id_generator()
-  table.insert(self.actors.list, {id = actor_id, unique_id = unique_id, pos = position, callback = callback})
+  table.insert(self.entities.list, {id = entity_id, unique_id = unique_id, pos = position, callback = callback})
   
   return self, unique_id
 end
@@ -75,11 +75,11 @@ function Map:blit(map, x, y, is_destructive)
     end
   end
   
-  local copy = tablex.deep_copy(map.actors.list)
+  local copy = tablex.deep_copy(map.entities.list)
   for i, v in ipairs(copy) do
     v.pos = v.pos + vec2(x, y)
   end
-  self.actors.list = tablex.append(self.actors.list, copy)
+  self.entities.list = tablex.append(self.entities.list, copy)
   return self
 end
 
@@ -96,7 +96,7 @@ function Map:special_merge(graph)
     return overlay:new_from_outline()
   end
   
-  for _, v in ipairs(graph.nodes) do
+  for _, v in ipairs(graph.vertices) do
     local chunk = new_chunk(v.parameters)
     local outline = chunk:new_from_outline_strict()
     local edge = outline:find_edges()
@@ -209,21 +209,21 @@ function Map:special_merge(graph)
   
   local function solve_for_room_positions()
     local function build_queue_and_matches()
-      local travelled = {[graph.nodes[1]] = true}
+      local travelled = {[graph.vertices[1]] = true}
       local matches = {}
-      local queue = {{parent = nil, self = graph.nodes[1]}}
+      local queue = {{parent = nil, self = graph.vertices[1]}}
       
-      local function recursion(node)
-        for i, v in ipairs(node.edges) do
-          if (not travelled[v.node]) and v.meta.type == 'Join' then
-            travelled[v.node] = true
-            table.insert(queue, {parent = node, self = v.node})
-            matches[tostring(node)..' '..tostring(v.node)] = find_valid_matches(node, v.node, v.meta)
-            recursion(v.node)
+      local function recursion(vertex)
+        for i, v in ipairs(vertex.edges) do
+          if (not travelled[v.vertex]) and v.meta.type == 'Join' then
+            travelled[v.vertex] = true
+            table.insert(queue, {parent = vertex, self = v.vertex})
+            matches[tostring(vertex)..' '..tostring(v.vertex)] = find_valid_matches(vertex, v.vertex, v.meta)
+            recursion(v.vertex)
           end
         end
       end
-      recursion(graph.nodes[1])
+      recursion(graph.vertices[1])
       
       return queue, matches
     end
@@ -241,13 +241,13 @@ function Map:special_merge(graph)
         if n ~= #queue+1 then
           --cycles = cycles + 1
           --print(cycles, n)
-          local node, parent = queue[n].self, queue[n].parent
+          local vertex, parent = queue[n].self, queue[n].parent
           local parent_offset = offsets[parent] or vec2(0, 0)
           local match = {}
           if parent ~= nil then
-            match = matches[tostring(parent)..' '..tostring(node)]
+            match = matches[tostring(parent)..' '..tostring(vertex)]
           else
-            clip_buffer[n] = node
+            clip_buffer[n] = vertex
             recursion(n+1)
           end
           
@@ -274,7 +274,7 @@ function Map:special_merge(graph)
             
             local offset = parent_offset
             clip.offset, offset = clip.offset + offset, offset + clip.offset
-            offsets[node] = offset
+            offsets[vertex] = offset
             for i3 = 0, clip.num_of_points-1 do
               clip.offset_clip[i3] = Clipper.IntPoint(clip.clip[i3].X + offset.x, clip.clip[i3].Y + offset.y)
             end
@@ -324,7 +324,7 @@ function Map:special_merge(graph)
   print((love.timer.getTime() - start) * 100)
   
   local clip_width_sum, clip_height_sum = 0, 0
-  for i, v in ipairs(graph.nodes) do
+  for i, v in ipairs(graph.vertices) do
     clip_width_sum = clip_width_sum + v.chunk.width
     clip_height_sum = clip_height_sum + v.chunk.height
   end
@@ -439,11 +439,11 @@ end
 --     end
 --   end
   
---   local copy = tablex.deep_copy(self.actors.list)
+--   local copy = tablex.deep_copy(self.entities.list)
 --   for i, v in ipairs(copy) do
 --     v.pos = v.pos - vec2(left, top)
 --   end
---   map.actors.list = copy
+--   map.entities.list = copy
   
 --   return map
 -- end

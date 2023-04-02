@@ -10,7 +10,7 @@ function filler:shaper(chunk)
 end
 function filler:populater(chunk, clipping)
   local cx, cy = chunk:get_center()
-  --chunk:insert_actor('Sqeeto', cx, cy)
+  --chunk:insert_entity('Sqeeto', cx, cy)
 end
 
 return filler

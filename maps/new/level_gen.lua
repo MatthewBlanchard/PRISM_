@@ -18,11 +18,11 @@ function Level:create(callback)
   local map = self._map
   
   local graph = {
-    nodes = {},
+    vertices = {},
     edges = {}
   }
   function graph:add_node(parameters)
-    local node = {
+    local vertex = {
       parameters = parameters,
       chunk = nil,
       outline_edges = nil,
@@ -30,16 +30,16 @@ function Level:create(callback)
       edges = {}
     }
 
-    table.insert(self.nodes, node)
-    self.nodes[node] = #self.nodes
+    table.insert(self.vertices, vertex)
+    self.vertices[vertex] = #self.vertices
     
-    return node
+    return vertex
   end
   function graph:connect_nodes(meta, ...)
-    local nodes = {...}
-    for i = 1, #nodes-1 do
-      table.insert(nodes[i].edges, {meta = meta, node = nodes[i+1]})
-      table.insert(nodes[i+1].edges, {meta = meta, node = nodes[i]})
+    local vertices = {...}
+    for i = 1, #vertices-1 do
+      table.insert(vertices[i].edges, {meta = meta, vertex = vertices[i+1]})
+      table.insert(vertices[i+1].edges, {meta = meta, vertex = vertices[i]})
     end
   end
   
@@ -77,7 +77,7 @@ function Level:create(callback)
       chunk:clear_cell(x, y)
       :clear_cell(x+info.vec[2], y+info.vec[1])
       :clear_cell(x-info.vec[2], y-info.vec[1])
-      :insert_actor('Door', x, y)
+      :insert_entity('Door', x, y)
     end,
   }
 
@@ -90,7 +90,7 @@ function Level:create(callback)
       chunk:clear_cell(x, y)
       :clear_cell(x+info.vec[2], y+info.vec[1])
       :clear_cell(x-info.vec[2], y-info.vec[1])
-      :insert_actor('Breakable_wall', x, y)
+      :insert_entity('Breakable_wall', x, y)
     end,
   }
 
@@ -108,7 +108,7 @@ function Level:create(callback)
       chunk:clear_cell(point.x, point.y)
       :clear_cell(point.x+info.vec[2], point.y+info.vec[1])
       :clear_cell(point.x-info.vec[2], point.y+info.vec[1])
-      chunk:insert_actor('Bridge'..bridge_dir_type, point.x, point.y)
+      chunk:insert_entity('Bridge'..bridge_dir_type, point.x, point.y)
 
       for n = 1, 1 do
         local segment_index = info.segment_index_2 - n
@@ -116,7 +116,7 @@ function Level:create(callback)
           local point = vec2(info.segment_2[segment_index].x, info.segment_2[segment_index].y)
           point = point + info.offset + info.clip_dimension_sum
           chunk:clear_cell(point.x, point.y)
-          chunk:insert_actor('River'..river_dir_type, point.x, point.y)
+          chunk:insert_entity('River'..river_dir_type, point.x, point.y)
         end
 
         local segment_index = info.segment_index_2 + n
@@ -124,7 +124,7 @@ function Level:create(callback)
           local point = vec2(info.segment_2[segment_index].x, info.segment_2[segment_index].y)
           point = point + info.offset + info.clip_dimension_sum
           chunk:clear_cell(point.x, point.y)
-          chunk:insert_actor('River'..river_dir_type, point.x, point.y)
+          chunk:insert_entity('River'..river_dir_type, point.x, point.y)
         end
       end
     end,
@@ -139,12 +139,12 @@ function Level:create(callback)
       chunk:clear_cell(x, y)
       :clear_cell(x+info.vec[2], y+info.vec[1])
       :clear_cell(x-info.vec[2], y-info.vec[1])
-      :insert_actor('Door_locked', x, y, function(actor, actors_by_unique_id)
-        if not actors_by_unique_id[boss_key_uuid] then
+      :insert_entity('Door_locked', x, y, function(actor, entities_by_unique_id)
+        if not entities_by_unique_id[boss_key_uuid] then
           return 'Delay'
         end
         local chest_lock = actor:getComponent(components.Lock_id)
-        chest_lock:setKey(actors_by_unique_id[boss_key_uuid])
+        chest_lock:setKey(entities_by_unique_id[boss_key_uuid])
       end)
     end,
   }
@@ -184,7 +184,7 @@ function Level:create(callback)
 
 
   local player_pos
-  for i, v in ipairs(map.actors.list) do
+  for i, v in ipairs(map.entities.list) do
     if v.id == 'Player' then
       player_pos = v.pos
       break
@@ -194,7 +194,7 @@ function Level:create(callback)
 
 -- for x, y, cell in map:for_cells() do
 --   if cell == 1 then
---     map:insert_actor('Wall', x, y)
+--     map:insert_entity('Wall', x, y)
 --     map:clear_cell(x, y)
 --   end
 -- end
@@ -225,7 +225,7 @@ function Level:create(callback)
 --             1
 --           }
 --         }
---         local coloredtile = actors.Coloredtile(custom)
+--         local coloredtile = entities.Coloredtile(custom)
 --         spawn_actor(coloredtile, i, i2)
 --       end
 --     end
