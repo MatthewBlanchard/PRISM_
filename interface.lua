@@ -193,14 +193,14 @@ function Interface:draw()
   -- next up draw things that move but don't block movement
   drawActors(seenActors,
     function(actor)
-      return actor:hasComponent(components.Move) and actor:hasComponent(components.Collideable)
+      return actor:hasComponent(components.Move) and not actor:hasComponent(components.Collideable)
     end
   )
 
   -- now we draw the stuff that moves and blocks movement
   drawActors(seenActors,
     function(actor)
-      return actor:hasComponent(components.Move) and not actor:hasComponent(components.Collideable)
+      return actor:hasComponent(components.Move) and actor:hasComponent(components.Collideable)
     end
   )
 
