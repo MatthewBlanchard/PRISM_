@@ -39,7 +39,7 @@ function Attack:perform(level)
     self.hit = true
     if critical then
       self.crit = true
-      --dmg = dmg * 2
+      dmg = dmg * 2
       effects_system:addEffect(effects.CritEffect(defender))
     end
 
