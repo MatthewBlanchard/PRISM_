@@ -18,7 +18,8 @@ Box.components = {
   components.Stats{
     maxHP = 1,
     AC = 0
-  }
+  },
+  components.Light_occluder(3),
 }
 
 return Box
