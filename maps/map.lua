@@ -45,23 +45,37 @@ end
 function Map:insert_entity(entity_id, x, y, callback, unique_id)
   local position = vec2(x, y)
   local unique_id = unique_id or id_generator()
-  table.insert(self.entities.list, {id = entity_id, unique_id = unique_id, pos = position, callback = callback})
-  self.entities.sparsemap:insert(x, y, entity_id)
+  local entity = {id = entity_id, unique_id = unique_id, pos = position, callback = callback}
+  self.entities.list[entity] = entity
+  self.entities.sparsemap:insert(x, y, entity)
 
   return self, unique_id
 end
 
 function Map:remove_entities(x, y)
-  -- This causes rooms to disappear???
-  -- for i, v in ipairs(self.entities.list) do
-  --   if v.pos == vec2(x, y) then
-  --     self.entities.list[i] = nil
-  --   end
-  -- end
-
+  local entities = {}
   for k, v in pairs(self.entities.sparsemap:get(x, y)) do
+    table.insert(entities, k)
     self.entities.sparsemap:remove(x, y, k)
   end
+
+  for i, v in ipairs(entities) do
+    self.entities.list[v] = nil
+  end
+end
+
+function Map:get_entities(x, y)
+
+  local entities = {}
+  for k, v in pairs(self.entities.sparsemap:get(x, y)) do
+    table.insert(entities, k)
+  end
+
+  for i, v in ipairs(entities) do
+    entities[i] = self.entities.list[v]
+  end
+
+  return entities
 end
 
 function Map:for_cells()
@@ -94,10 +108,10 @@ function Map:blit(map, x, y, is_destructive)
   
   local copy = tablex.deep_copy(map.entities)
 
-  for i, v in ipairs(copy.list) do
+  for k, v in pairs(copy.list) do
     v.pos = v.pos + vec2(x, y)
   end
-  self.entities.list = tablex.append(self.entities.list, copy.list)
+  self.entities.list = tablex.overlay(self.entities.list, copy.list)
 
   for x2, y2, k in copy.sparsemap:each() do
     self.entities.sparsemap:insert(x2+x, y2+y, k)

@@ -22,7 +22,7 @@ local function New(level, map)
   end
 
   local function spawn_entities()
-    for i, v in ipairs(map.entities.list) do
+    for k, v in pairs(map.entities.list) do
       local id, unique_id, x, y, callback = v.id, v.unique_id, v.pos.x, v.pos.y, v.callback
       if cells[id] ~= nil then
         spawn_cell(cells[id](), x, y)

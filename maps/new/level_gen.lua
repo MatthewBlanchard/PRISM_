@@ -186,7 +186,7 @@ function Level:create(callback)
 
 
   local player_pos
-  for i, v in ipairs(map.entities.list) do
+  for k, v in pairs(map.entities.list) do
     if v.id == 'Player' then
       player_pos = v.pos
       break
@@ -206,8 +206,8 @@ function Level:create(callback)
 
   for x, y, cell in map:for_cells() do
     local cell_is_occupied = false
-    for k, v in pairs(map.entities.sparsemap:get(x, y)) do
-      if cells[k] then
+    for k, v in pairs(map:get_entities(x, y)) do
+      if cells[v.id] then
         cell_is_occupied = true
         break
       end
