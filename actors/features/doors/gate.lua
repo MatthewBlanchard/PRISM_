@@ -12,7 +12,7 @@ Gate.remembered = true
 local targetDoor = targets.Actor:extend()
 
 function targetDoor:validate(owner, Gate)
-  return Gate:is(Gates.Gate)
+  return Gate:is(actors.Gate)
 end
 
 local Open = Action:extend()

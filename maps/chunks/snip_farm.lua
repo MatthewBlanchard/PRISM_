@@ -10,8 +10,10 @@ end
 function snip_farm:populater(chunk)
   local cx, cy = chunk:get_center()
   
-  chunk:fill_perimeter(cx-2, cy-2, cx+2, cy+2)
-  chunk:clear_cell(cx, cy+2)
+  chunk:target_perimeter(cx-2, cy-2, cx+2, cy+2, function(x, y)
+    chunk:insert_entity('Fence', x, y)
+  end)
+  chunk:remove_entities(x, y)
   
   local _, shopkeep_id = chunk:insert_entity('Shopkeep', cx, cy+2)
   

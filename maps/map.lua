@@ -51,6 +51,19 @@ function Map:insert_entity(entity_id, x, y, callback, unique_id)
   return self, unique_id
 end
 
+function Map:remove_entities(x, y)
+  -- This causes rooms to disappear???
+  -- for i, v in ipairs(self.entities.list) do
+  --   if v.pos == vec2(x, y) then
+  --     self.entities.list[i] = nil
+  --   end
+  -- end
+
+  for k, v in pairs(self.entities.sparsemap:get(x, y)) do
+    self.entities.sparsemap:remove(x, y, k)
+  end
+end
+
 function Map:for_cells()
   local x = 0 
   local y = -1 

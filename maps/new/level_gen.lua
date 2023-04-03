@@ -74,9 +74,7 @@ function Level:create(callback)
       local connection_point = vec2(info.match_point_2.x, info.match_point_2.y) + info.offset + info.clip_dimension_sum
       local x, y = connection_point.x, connection_point.y
 
-      for k, v in pairs(chunk.entities.sparsemap:get(x, y)) do
-        chunk.entities.sparsemap:remove(x, y, k)
-      end
+      chunk:remove_entities(x, y)
 
       chunk:clear_cell(x, y)
       :clear_cell(x+info.vec[2], y+info.vec[1])
