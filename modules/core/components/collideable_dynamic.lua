@@ -91,21 +91,15 @@ function CollideableDynamic:createSnakeSpiral(actor, direction, rejected, accept
             visited = checkVisited(curCell + direction)
         end
 
-        print(cell)
         table.push(snakeTiles, cell)
         curCell = cell
     end
-
-    print(head)
     
     local snakeTiles = table.reverse(snakeTiles)
     table.push(snakeTiles, head)
 
     local found = ROT.Type.Grid:new()
     for _, vec in ipairs(snakeTiles) do
-        if found:getCell(vec.x, vec.y) then
-            print("DUPLICATE", vec)
-        end
         found:setCell(vec.x, vec.y, true)
     end
 
@@ -126,7 +120,6 @@ function CollideableDynamic:trySqueeze(level, actor, direction, rejected, accept
 
     -- if we're already a snake we can just try to move
     if self.internalCollideable:is(CollideableSnake) then
-        print "SKABEET"
         return self.internalCollideable:moveCandidate(level, actor, direction), actor.position + direction
     end
 
@@ -135,7 +128,6 @@ function CollideableDynamic:trySqueeze(level, actor, direction, rejected, accept
 end
 
 function CollideableDynamic:acceptedSqueeze(level, actor, direction, rejected, accepted)
-    print "YEET"
     if not self.internalCollideable:is(CollideableSnake) then
         self.internalCollideable = self:createSnakeSpiral(actor, direction, rejected, accepted)
     end
