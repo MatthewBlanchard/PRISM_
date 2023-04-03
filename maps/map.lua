@@ -67,19 +67,35 @@ function Map:for_cells()
 end
 
 function Map:get_random_open_tile()
-  for x, y, cell in self:for_cells() do
-    if cell == 0 then
-      return x, y
-    end
+  local x, y = math.random(0, self.width), math.random(0, self.height)
+
+  while self:get_cell(x, y) ~= 0 do
+    print("SEARCHING FOR OPEN TILE", x, y, self:get_cell(x, y))
+    x, y = math.random(0, self.width), math.random(0, self.height)
   end
+
+  return x, y
+end
+
+function Map:get_random_closed_tile()
+  local x, y = math.random(0, self.width), math.random(0, self.height)
+
+  while self:get_cell(x, y) == 0 do
+    --print("SEARCHING FOR CLOSED TILE", x, y)
+    x, y = math.random(0, self.width), math.random(0, self.height)
+  end
+
+  return x, y
 end
 
 -- Merging
-function Map:blit(map, x, y, is_destructive)
+function Map:blit(map, x, y, is_destructive, mask)
+  local mask = mask or 0
   for i = x, x+map.width do
     for i2 = y, y+map.height do
-      if (is_destructive) or (self:get_cell(i, i2) == 0) then
-        self:set_cell(i, i2, map:get_cell(i-x, i2-y))
+      if is_destructive or (self:get_cell(i, i2) == mask) then
+        print "YUP"
+        self:set_cell_checked(i, i2, map:get_cell(i-x, i2-y))
       end
     end
   end
@@ -90,6 +106,33 @@ function Map:blit(map, x, y, is_destructive)
   end
   self.actors.list = tablex.append(self.actors.list, copy)
   return self
+end
+
+function Map:check_overlap(map, x, y)
+  for i = x, x + map.width - 2 do
+    for j = y, y + map.height - 2 do
+      if self:get_cell(i, j) and map:get_cell(i - x, j - y) then
+        local currentCell = self:get_cell(i, j)
+        local mapCell = map:get_cell(i - x, j - y)
+
+        if currentCell == 0 and mapCell == 0 then
+          print "OVERLAP FOUND!"
+          return true
+        end
+      else
+        return true
+      end
+    end
+  end
+  return false
+end
+
+function Map:from_chunk(chunk)
+  chunk:parameters()
+  local map = Map:new(chunk.width, chunk.height, 1)
+  chunk:shaper(map)
+  
+  return map
 end
 
 function Map:special_merge(graph)
@@ -589,8 +632,15 @@ end
 function Map:get_cell(x, y)
   return self.cells[x] and self.cells[x][y] or nil
 end
+
 function Map:set_cell(x, y, v)
   self.cells[x][y] = v
+end
+
+function Map:set_cell_checked(x, y, v)
+  if self.cells[x] and self.cells[x][y] then
+    self:set_cell(x, y, v)
+  end
 end
 
 --Space
@@ -1231,7 +1281,7 @@ function Map:guidedDrunkWalk(x1, y1, x2, y2, map, limit)
   
 end
 
-function Map:tunneler(x1, y1, width, turnThreshold, steps)
+function Map:tunneler(x1, y1, width, turnThreshold, steps, startingDirection, min_turn)
   local x, y = x1, y1
   local directions = {
     {1, 0},  -- Right
@@ -1240,14 +1290,16 @@ function Map:tunneler(x1, y1, width, turnThreshold, steps)
     {0, -1}  -- Up
   }
 
-  local currentDirection = directions[math.random(1, 4)]
+  local min_turn = min_turn or 0
+  -- Use the provided starting direction or randomize it if not provided
+  local currentDirection = startingDirection or directions[math.random(1, 4)]
 
   local function clear_tunnel_cells(x, y, direction, width)
     local halfWidth = math.floor(width / 2)
     
     for i = -halfWidth, halfWidth do
       for j = -halfWidth, halfWidth do
-        local newX, newY = x + i * math.abs(direction[2]), y + i * math.abs(direction[1])
+        local newX, newY = x + i, y + j
         self:clear_cell_checked(newX, newY)
       end
     end
@@ -1255,33 +1307,52 @@ function Map:tunneler(x1, y1, width, turnThreshold, steps)
 
   local function change_direction(x, y, width)
     local newDirection = currentDirection
-    while newDirection == currentDirection do
+
+    local ndx, ndy = unpack(newDirection)
+    local cdx, cdy = unpack(currentDirection)
+
+    while math.abs(ndx) == math.abs(cdx) and math.abs(ndy) == math.abs(cdy) do
+      print(ndx, ndy, cdx, cdy)
       newDirection = directions[math.random(1, 4)]
+      ndx, ndy = unpack(newDirection)
     end
     currentDirection = newDirection
   end
 
   local function push_away_from_edge(x, y, width)
+    local changed = false
     if x <= width then
+      changed = true
       x = width + 1
     elseif x >= #self.map - width then
+      changed = true
       x = #self.map - width - 1
     end
 
     if y <= width then
+      changed = true
       y = width + 1
     elseif y >= #self.map[1] - width then
+      changed = true
       y = #self.map[1] - width - 1
+    end
+
+    if changed then
+      change_direction(x, y, width)
     end
 
     return x, y
   end
 
+  local last_turn = 1
   for step = 1, steps do
     x, y = push_away_from_edge(x, y, width)
     clear_tunnel_cells(x, y, currentDirection, width)
 
-    if turnThreshold > math.random() then
+    print(step, last_turn, min_turn)
+    if turnThreshold > math.random() and step - last_turn > min_turn then
+      last_turn = step
+      print(last_turn)
       change_direction(x, y, width)
     end
 
@@ -1291,6 +1362,55 @@ function Map:tunneler(x1, y1, width, turnThreshold, steps)
     -- Ensure the tunneler stays within the map boundaries
     x = math.max(math.min(x, #self.map - 1), 1)
     y = math.max(math.min(y, #self.map[1] - 1), 1)
+  end
+end
+
+function Map:remove_isolated_walls()
+  local function flood_fill(x, y)
+    local queue = {{x = x, y = y}}
+
+    while #queue > 0 do
+      local current = table.remove(queue, 1)
+      local x, y = current.x, current.y
+
+      if self:get_cell(x, y) ~= 1 then
+        goto continue
+      end
+
+      self:set_cell(x, y, 0)
+
+      local neighbors = {
+        {x = x + 1, y = y},
+        {x = x - 1, y = y},
+        {x = x, y = y + 1},
+        {x = x, y = y - 1}
+      }
+
+      for _, neighbor in ipairs(neighbors) do
+        table.insert(queue, neighbor)
+      end
+
+      ::continue::
+    end
+  end
+
+  for x = 1, self.width do
+    for y = 1, self.height do
+      local cell = self:get_cell(x, y)
+      if cell == 1 then
+        local wall_neighbors = 0
+        for _, v in ipairs({{-1, 0}, {1, 0}, {0, -1}, {0, 1}}) do
+          local nx, ny = x + v[1], y + v[2]
+          if self:get_cell(nx, ny) == 1 then
+            wall_neighbors = wall_neighbors + 1
+          end
+        end
+
+        if wall_neighbors < 2 then
+          flood_fill(x, y)
+        end
+      end
+    end
   end
 end
 

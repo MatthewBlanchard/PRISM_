@@ -9,6 +9,7 @@ end
 
 function StateManager:push(state)
     assert(state:is(GameState), "state must be a subclass of GameState")
+    state.manager = self
     table.push(self.stateStack, state)
     if state.load then
         state:load()

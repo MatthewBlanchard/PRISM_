@@ -1,6 +1,7 @@
 require "export_lib"
 
 love.graphics.setDefaultFilter("nearest", "nearest")
+math.randomseed(os.time())
 
 local Game = require "game"
 
@@ -15,11 +16,12 @@ game = Game("core")
 
 local StateManager = require "gamestates.statemanager"
 local LevelState = require "gamestates.levelstate"
+local MapDebuggerState = require "gamestates.mapdebuggerstate"
 
 local manager = StateManager()
 
 function love.load()
-    manager:push(LevelState(game:generateLevel(1)))
+    manager:push(LevelState(game:generateLevel(1), 1))
 end
 
 function love.draw()
