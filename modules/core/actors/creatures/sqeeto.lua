@@ -100,7 +100,7 @@ function Sqeeto:act(level)
       return actUtil.randomMove(level, self)
     end
 
-    return actUtil.moveTowardVecAvoid(self, highestLocation)
+    return actUtil.crowdAround(self, highestLocation, true)
   end
 
   return actUtil.moveTowardLight(level, self)
