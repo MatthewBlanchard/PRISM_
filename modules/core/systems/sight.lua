@@ -169,13 +169,22 @@ function SightSystem:updateSeenActors(level, actor)
 
     -- we loop through all the actors on the level and check if they are visible to the actor
     for k, other in ipairs(level.actors) do
-        local other_cell = level:getCell(other.position.x, other.position.y)
-        local actor_cell = level:getCell(actor.position.x, actor.position.y)
-        if  (other:isVisible() or actor == other) and
-            sight_component:canSeeCell(other.position.x, other.position.y) and
-            actor_cell:visibleFromCell(level, other_cell) and
-            other_cell:visibleFromCell(level, actor_cell)
-        then
+        -- Check visibility for each tile of the actor
+        local isVisible = false
+        for vec in level:eachActorTile(other) do
+            local other_cell = level:getCell(vec.x, vec.y)
+            local actor_cell = level:getCell(actor.position.x, actor.position.y)
+            if  (other:isVisible() or actor == other) and
+                sight_component:canSeeCell(vec.x, vec.y) and
+                actor_cell:visibleFromCell(level, other_cell) and
+                other_cell:visibleFromCell(level, actor_cell)
+            then
+                isVisible = true
+                break
+            end
+        end
+
+        if isVisible then
             table.insert(sight_component.seenActors, other)
         end
     end
