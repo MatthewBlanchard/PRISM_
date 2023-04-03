@@ -236,7 +236,17 @@ function LightingSystem:__isOpaque(level, row, col)
 end
 
 function LightingSystem:__getLightReduction(level, row, col)
-    return level:getCell(row, col).lightReduction or 1
+    local reduction = level:getCell(row, col).lightReduction or 0
+    local actors = level:getActorsAt(row, col)
+
+    for _, actor in ipairs(actors) do
+        local lightOccluderComponent = actor:getComponent(components.Light_occluder)
+        if lightOccluderComponent then
+            reduction = reduction + lightOccluderComponent.reduction
+        end
+    end
+
+    return reduction
 end
 
 local rowDirections = {-1, 1, 0, 0, -1, -1, 1, 1}
@@ -247,7 +257,11 @@ function LightingSystem:__spreadLight(level, row, col, offsetx, offsety, lightLe
     local visited = ROT.Type.Grid:new()
 
     local function processCell(curRow, curCol, curLightLevel, depth)
-        if self:__isOpaque(level, curRow + offsetx, curCol + offsety) or visited:getCell(curRow, curCol) then return end
+        if  self:__isOpaque(level, curRow + offsetx, curCol + offsety) or
+            visited:getCell(curRow, curCol)
+        then 
+            return
+        end
 
         lightMap:setWithFFIStruct(curRow, curCol, curLightLevel)
         visited:setCell(curRow, curCol, true)
@@ -256,8 +270,11 @@ function LightingSystem:__spreadLight(level, row, col, offsetx, offsety, lightLe
             local newRow = curRow + rowDirections[i]
             local newCol = curCol + colDirections[i]
             if not visited:getCell(newRow, newCol) then
-                local reducedLightLevel = curLightLevel:subtract_scalar(
-                    math.floor(depth * falloffFactor) + self:__getLightReduction(level, curRow + offsetx, curCol + offsety)
+                local reducedLightLevel
+
+                reducedLightLevel = curLightLevel:subtract_scalar(
+                    math.floor(depth * falloffFactor) + 
+                    self:__getLightReduction(level, curRow + offsetx, curCol + offsety)
                 )
 
                 if reducedLightLevel.r > 0 or reducedLightLevel.g > 0 or reducedLightLevel.b > 0 then
