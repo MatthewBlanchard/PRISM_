@@ -21,7 +21,7 @@ function Level:create(callback)
     vertices = {},
     edges = {}
   }
-  function graph:add_node(parameters)
+  function graph:add_vertex(parameters)
     local vertex = {
       parameters = parameters,
       chunk = nil,
@@ -35,7 +35,7 @@ function Level:create(callback)
     
     return vertex
   end
-  function graph:connect_nodes(meta, ...)
+  function graph:connect_vertices(meta, ...)
     local vertices = {...}
     for i = 1, #vertices-1 do
       table.insert(vertices[i].edges, {meta = meta, vertex = vertices[i+1]})
@@ -153,34 +153,34 @@ function Level:create(callback)
     end,
   }
   
-  local filler_nodes = {}
+  local filler_vertices = {}
   for i = 1, 4 do
-    filler_nodes[i] = graph:add_node(chunks.Filler)
+    filler_vertices[i] = graph:add_vertex(chunks.Filler)
     
     if i > 1 then
-      local tunnel = graph:add_node(chunks.Tunnel)
+      local tunnel = graph:add_vertex(chunks.Tunnel)
     
-      graph:connect_nodes(edge_join_river, filler_nodes[i], tunnel, filler_nodes[love.math.random(1, i-1)])
+      graph:connect_vertices(edge_join_river, filler_vertices[i], tunnel, filler_vertices[love.math.random(1, i-1)])
     end
   end
 
   local Start = chunks.Start
   Start.key_id = id_generator()
   boss_key_uuid = Start.key_id
-  local start = graph:add_node(Start)
+  local start = graph:add_vertex(Start)
 
-  local finish = graph:add_node(chunks.Finish)
-  local sqeeto_hive = graph:add_node(chunks.Sqeeto_hive)  
-  local spider_nest = graph:add_node(chunks.Spider_nest)
-  local shop = graph:add_node(chunks.Shop)
-  local snip_farm = graph:add_node(chunks.Snip_farm)
+  local finish = graph:add_vertex(chunks.Finish)
+  local sqeeto_hive = graph:add_vertex(chunks.Sqeeto_hive)  
+  local spider_nest = graph:add_vertex(chunks.Spider_nest)
+  local shop = graph:add_vertex(chunks.Shop)
+  local snip_farm = graph:add_vertex(chunks.Snip_farm)
 
-  graph:connect_nodes(edge_join_door, start, filler_nodes[love.math.random(1, #filler_nodes)])
-  graph:connect_nodes(edge_join_door, finish, filler_nodes[love.math.random(1, #filler_nodes)])
-  graph:connect_nodes(edge_join_breakable_wall, sqeeto_hive, filler_nodes[love.math.random(1, #filler_nodes)])
-  graph:connect_nodes(edge_join_boss_door, spider_nest, filler_nodes[love.math.random(1, #filler_nodes)])
-  graph:connect_nodes(edge_join_door, shop, filler_nodes[love.math.random(1, #filler_nodes)])
-  graph:connect_nodes(edge_join_door, snip_farm, filler_nodes[love.math.random(1, #filler_nodes)])
+  graph:connect_vertices(edge_join_door, start, filler_vertices[love.math.random(1, #filler_vertices)])
+  graph:connect_vertices(edge_join_door, finish, filler_vertices[love.math.random(1, #filler_vertices)])
+  graph:connect_vertices(edge_join_breakable_wall, sqeeto_hive, filler_vertices[love.math.random(1, #filler_vertices)])
+  graph:connect_vertices(edge_join_boss_door, spider_nest, filler_vertices[love.math.random(1, #filler_vertices)])
+  graph:connect_vertices(edge_join_door, shop, filler_vertices[love.math.random(1, #filler_vertices)])
+  graph:connect_vertices(edge_join_door, snip_farm, filler_vertices[love.math.random(1, #filler_vertices)])
 
 
   local merged_room_3 = Map:special_merge(graph)

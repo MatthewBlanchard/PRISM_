@@ -35,7 +35,7 @@ function Map:init(width, height, value)
     keys = {},
     sparsemap = Sparse_map(),
   }
-  
+
   self.map = map
   self.cells = map
   self.width = width
@@ -170,12 +170,12 @@ function Map:special_merge(graph)
     
     return is_intersect, offset_clip
   end
-  local function find_valid_matches(node1, node2, edge_meta_info)
-    local matches = get_matching_edges(node1.outline_edges, node2.outline_edges)
+  local function find_valid_matches(vertex1, vertex2, edge_meta_info)
+    local matches = get_matching_edges(vertex1.outline_edges, vertex2.outline_edges)
     local matches_without_intersections = {}
     
     local num_of_points = 0
-    for i, v in ipairs(node2.outline_edges) do
+    for i, v in ipairs(vertex2.outline_edges) do
       for i2, v2 in ipairs(v) do
         num_of_points = num_of_points + 1
       end
@@ -190,17 +190,17 @@ function Map:special_merge(graph)
           local offset = vec2(v[1][segment_index_1].x - v[2][segment_index_2].x, v[1][segment_index_1].y - v[2][segment_index_2].y)
           local connection_point_1 = vec2(v[1][segment_index_1].x, v[1][segment_index_1].y)
           local connection_point_2 = vec2(v[2][segment_index_2].x, v[2][segment_index_2].y)
-          local is_intersect, offset_clip = does_intersect(node1.polygon, node2.polygon, num_of_points, offset)
+          local is_intersect, offset_clip = does_intersect(vertex1.polygon, vertex2.polygon, num_of_points, offset)
           if (not is_intersect) then
             table.insert(matches_without_intersections, {
-              v, segment_index_1, segment_index_2, offset_clip, node2, offset, num_of_points, connection_point_1, connection_point_2,
+              v, segment_index_1, segment_index_2, offset_clip, vertex2, offset, num_of_points, connection_point_1, connection_point_2,
               
               segment_index_1 = segment_index_1,
               segment_index_2 = segment_index_2,
               
               offset = offset,
               offset_clip = offset_clip,
-              clip = node2.polygon,
+              clip = vertex2.polygon,
               num_of_points = num_of_points,
               edge_meta_info = edge_meta_info
               
@@ -908,26 +908,26 @@ end
   
 --   while true do
 --     local nextNode = nil
---     local nodeIndex = nil
+--     local vertexIndex = nil
     
 --     for i, v in ipairs(toTravel) do
 --       if aMap[v.x][v.y] == 0 then
         
 --         if nextNode == nil then
 --           nextNode = v
---           nodeIndex = i
+--           vertexIndex = i
 --         elseif  v.t < nextNode.t then
 --           nextNode = v
---           nodeIndex = i
+--           vertexIndex = i
 --         elseif v.t == nextNode.t and v.e < nextNode.e then
 --           nextNode = v
---           nodeIndex = i
+--           vertexIndex = i
 --         end
         
 --       end
 --     end
     
---     table.remove(toTravel, nodeIndex)
+--     table.remove(toTravel, vertexIndex)
 --     table.insert(travelled, nextNode)
 --     aMap[nextNode.x][nextNode.y] = nextNode.s
     
