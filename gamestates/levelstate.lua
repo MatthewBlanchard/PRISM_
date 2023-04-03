@@ -6,7 +6,8 @@ local Start = require "panels.start"
 local LevelState = GameState:extend()
 -- This state is passed a Level object and sets up the interface and main loop for
 -- the level.
-function LevelState:__new(level)
+function LevelState:__new(level, depth)
+    self.depth = depth
     self.level = level
     self.storedKeypress = nil
     self.updateCoroutine = coroutine.create(level.run)
@@ -82,8 +83,8 @@ function LevelState:update(dt)
         -- The coroutine has not stopped running and returned "descend".
         -- It's time for us to load a new level.
         if ret == "descend" then
-        game.level = createLevel()
-        self.updateCoroutine = coroutine.create(game.level.run)
+            self.manager:pop()
+            self.manager:push(LevelState(game:generateLevel(1), 2))
         else
         love.event.quit( 0 )
         end

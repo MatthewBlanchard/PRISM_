@@ -88,7 +88,6 @@ end
 function Game:__loadItems(directoryName, items, recurse)
     local info = {}
     
-    print(directoryName)
     for k, item in pairs(love.filesystem.getDirectoryItems(directoryName)) do
         local fileName = directoryName .. "/" .. item
         love.filesystem.getInfo(fileName, info)

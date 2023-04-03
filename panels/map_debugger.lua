@@ -1,12 +1,12 @@
 local Panel = require "panels.panel"
 local Vector2 = require "math.vector"
 
-local Wall = require "cells.wall"
-local Cell = require "cell"
+local Wall = require "modules.core.cells.wall"
+local Cell = require "core.cell"
 
-local Start = Panel:extend()
+local MapDebugger = Panel:extend()
 
-function Start:__new(display, parent, level)
+function MapDebugger:__new(display, parent, level)
     Panel.__new(self, display, parent)
     self.level = level
 
@@ -19,10 +19,10 @@ function Start:__new(display, parent, level)
     end
 end
 
-function Start:update(dt)
+function MapDebugger:update(dt)
 end
 
-function Start:draw()
+function MapDebugger:draw()
     local viewX, viewY = self.display.widthInChars, self.display.heightInChars
     local sx, sy = self.offset.x, self.offset.y
 
@@ -42,7 +42,7 @@ function Start:draw()
 end
 
 
-function Start:handleKeyPress(keypress)
+function MapDebugger:handleKeyPress(keypress)
     local movementTranslation = {
         -- cardinal
         w = Vector2(0, -1),
@@ -58,16 +58,14 @@ function Start:handleKeyPress(keypress)
         c = Vector2(1, 1),
     }
 
-    print(self.offset)
     local movement = movementTranslation[keypress]
     if movement then
-        self.offset = self.offset + movement
+        self.offset = self.offset + movement * 10
     end
 
     if keypress == "space" then
         if coroutine.status(self.coroutine) == "dead" then
-            print "ENDING"
-            game.interface:pop()
+            print "DONE"
         else
             local success, ret = coroutine.resume(self.coroutine)
             if success == false then
@@ -77,4 +75,4 @@ function Start:handleKeyPress(keypress)
     end
 end
 
-return Start
+return MapDebugger
