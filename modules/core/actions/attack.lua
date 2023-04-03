@@ -11,6 +11,7 @@ function Attack:__new(owner, defender, weapon)
   self.weapon = weapon or owner:getComponent(components.Attacker).wielded
   self.time = self.weapon.time or 100
   self.damageBonus = 0
+  self.diceBonuses = {}
   self.attackBonus = 0
   self.criticalOn = 20
 end
@@ -26,15 +27,19 @@ function Attack:perform(level)
   local defender = self:getTarget(1)
   local dmg = ROT.Dice.roll(weapon.dice)
     + self.owner:getStatBonus(weapon.stat)
-    + ROT.Dice.roll(self.damageBonus)
+    + self.damageBonus
 
+  for _, dice in ipairs(self.diceBonuses) do
+    dmg = dmg + ROT.Dice.roll(dice)
+  end
+  
   local critical = naturalRoll >= self.criticalOn
   
   if roll >= defender:getAC() or critical then
     self.hit = true
     if critical then
       self.crit = true
-      dmg = dmg * 2
+      --dmg = dmg * 2
       effects_system:addEffect(effects.CritEffect(defender))
     end
 
@@ -47,6 +52,10 @@ function Attack:perform(level)
   if effects_system then
     effects_system:addEffect(effects.DamageEffect(self.owner.position, defender, dmg, false))
   end
+end
+
+function Attack:addDiceBonus(dice)
+  table.push(self.diceBonuses, dice)
 end
 
 return Attack

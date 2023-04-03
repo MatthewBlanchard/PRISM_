@@ -7,7 +7,7 @@ MinorInvisibility.name = "MinorInvisibility"
 
 MinorInvisibility:onAction(actions.Attack,
   function (self, level, actor, action)
-    self.damageBonus = "1d6"
+    action:addDiceBonus("1d6")
   end
 )
 
