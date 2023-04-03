@@ -294,7 +294,7 @@ function Level:eachActorTile(actor)
   end
 end
 
-function Level:getActorsAtPosition(x, y)
+function Level:getActorsAt(x, y)
   local actorsAtPosition = {}
   for actor, _ in pairs(self.sparseMap:get(x, y)) do
     table.insert(actorsAtPosition, actor)

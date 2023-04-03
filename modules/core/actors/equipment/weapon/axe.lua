@@ -30,7 +30,7 @@ function Swing:onAttack(level, attacker, defender)
   level:suppressEffects()
   for i = 1, 2 do 
     local target = directionsToHit[i] + attacker.position
-    local actorsToHit = level:getActorsAtPosition(target.x, target.y)
+    local actorsToHit = level:getActorsAt(target.x, target.y)
 
     for j = 1, #actorsToHit do 
       level:performAction(attacker:getAction(actions.Attack)(attacker, actorsToHit[j]))

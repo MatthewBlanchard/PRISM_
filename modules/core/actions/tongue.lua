@@ -11,7 +11,7 @@ function Tongue:perform(level)
     local line, valid = Bresenham.line(self.owner.position.x, self.owner.position.y, target.position.x, target.position.y)
     local goalpos = Vector2(line[2][1], line[2][2])
     for i, point in ipairs (line) do
-        local additionaltarget = level:getActorsAtPosition(point[1], point[2])
+        local additionaltarget = level:getActorsAt(point[1], point[2])
         for _, actor in ipairs (additionaltarget) do
             local actor_collide = actor:hasComponent(components.Collideable)
             if not actor_collide then
