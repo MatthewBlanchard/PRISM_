@@ -311,7 +311,7 @@ function Level:destroyActor(actor)
   end
 end
 
-function Level:getActorsAtPosition(x, y)
+function Level:getActorsAt(x, y)
   local actorsAtPosition = {}
   for i = 1, #self.actors do
     local actorPosition= self.actors[i].position
