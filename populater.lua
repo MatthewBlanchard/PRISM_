@@ -1,5 +1,5 @@
 local Vector2 = require "vector"
-local Grass = require "cells.grass"
+local Grass = cells.Grass
 
 local function randDirection()
   local x = math.random(1, 3) - 2

@@ -74,6 +74,10 @@ function Level:create(callback)
       local connection_point = vec2(info.match_point_2.x, info.match_point_2.y) + info.offset + info.clip_dimension_sum
       local x, y = connection_point.x, connection_point.y
 
+      for k, v in pairs(chunk.entities.sparsemap:get(x, y)) do
+        chunk.entities.sparsemap:remove(x, y, k)
+      end
+
       chunk:clear_cell(x, y)
       :clear_cell(x+info.vec[2], y+info.vec[1])
       :clear_cell(x-info.vec[2], y-info.vec[1])
@@ -192,13 +196,6 @@ function Level:create(callback)
   end
 
 
--- for x, y, cell in map:for_cells() do
---   if cell == 1 then
---     map:insert_entity('Wall', x, y)
---     map:clear_cell(x, y)
---   end
--- end
-
   local heat_map = Map:new(600, 600, 0)
   heat_map:blit(map, 0, 0) 
   heat_map = heat_map:dijkstra({player_pos}, 'vonNeuman')
@@ -208,9 +205,27 @@ function Level:create(callback)
     end
   end
 
-  for x, y in map:for_cells() do
-    callback(x, y, map.cells[x][y])
+
+  for x, y, cell in map:for_cells() do
+    local cell_is_occupied = false
+    for k, v in pairs(map.entities.sparsemap:get(x, y)) do
+      if cells[k] then
+        cell_is_occupied = true
+        break
+      end
+    end
+    if cell_is_occupied == false then
+      if cell == 1 then
+        map:insert_entity('Wall', x, y)
+      elseif cell == 0 then
+        map:insert_entity('Floor', x, y)
+      end
+    end
   end
+
+  -- for x, y in map:for_cells() do
+  --   callback(x, y, map.cells[x][y])
+  -- end
 
 -- local function draw_heat_map()
 --   for i, v in ipairs(heat_map.map) do

@@ -51,18 +51,6 @@ function spider_nest:populater(chunk, clipping)
       chunk:insert_entity('Bones_2', x, y)
     end
   end
-
-  for x, y, cell in chunk:for_cells() do
-    -- print(x, y)
-    -- if cell == 1 then
-    --   if love.math.random(0, 1) == 1 then
-    --     chunk:insert_entity('Rocks_1', x, y)
-    --   else
-    --     chunk:insert_entity('Rocks_2', x, y)
-    --   end
-    -- end
-  end
-
 end
 
 return spider_nest

@@ -6,8 +6,8 @@ local SparseMap = require "sparsemap"
 local Vector2 = require "vector"
 
 local Grid = require "grid"
-local Cell = require "cell"
-local Wall = require "cells.wall"
+local Cell = cells.Floor--require "cell"
+local Wall = cells.Wall
 
 local Level = Object:extend()
 

@@ -2,6 +2,7 @@ local Object = require "object"
 local Map = Object:extend()
 
 local vec2 = require "vector"
+local Sparse_map = require 'sparsemap'
 
 local lib_path = love.filesystem.getSource() .. '/maps/clipper'
 local extension = jit.os == 'Windows' and 'dll' or jit.os == 'Linux' and 'so' or jit.os == 'OSX' and 'dylib'
@@ -31,8 +32,10 @@ function Map:init(width, height, value)
   
   self.entities = {
     list = {},
-    position_key = {}
+    keys = {},
+    sparsemap = Sparse_map(),
   }
+  
   self.map = map
   self.cells = map
   self.width = width
@@ -43,7 +46,8 @@ function Map:insert_entity(entity_id, x, y, callback, unique_id)
   local position = vec2(x, y)
   local unique_id = unique_id or id_generator()
   table.insert(self.entities.list, {id = entity_id, unique_id = unique_id, pos = position, callback = callback})
-  
+  self.entities.sparsemap:insert(x, y, entity_id)
+
   return self, unique_id
 end
 
@@ -75,11 +79,17 @@ function Map:blit(map, x, y, is_destructive)
     end
   end
   
-  local copy = tablex.deep_copy(map.entities.list)
-  for i, v in ipairs(copy) do
+  local copy = tablex.deep_copy(map.entities)
+
+  for i, v in ipairs(copy.list) do
     v.pos = v.pos + vec2(x, y)
   end
-  self.entities.list = tablex.append(self.entities.list, copy)
+  self.entities.list = tablex.append(self.entities.list, copy.list)
+
+  for x2, y2, k in copy.sparsemap:each() do
+    self.entities.sparsemap:insert(x2+x, y2+y, k)
+  end
+
   return self
 end
 

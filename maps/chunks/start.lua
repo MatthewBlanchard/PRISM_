@@ -22,6 +22,16 @@ function start:populater(chunk, clipping)
     chest_lock:setKey(actors.Key_type)
   end
   chunk:insert_entity('Chest_lock_type', cx+1, cy, callback)
+
+  for x, y, cell in chunk:for_cells() do
+    if cell == 1 then
+      if love.math.random(0, 1) == 1 then
+        chunk:insert_entity('Rocks_1', x, y)
+      else
+        chunk:insert_entity('Rocks_2', x, y)
+      end
+    end
+  end
 end
 
 return start
