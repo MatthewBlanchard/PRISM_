@@ -441,11 +441,19 @@ function Map:planar_embedding(graph)
     end
   end
 
+  local function get_id(t)
+    return string.format("%p", t)
+  end
   local function get_variables()
     local variables = {}
     for _, v in ipairs(graph.vertices) do
       table.insert(variables, v)
     end
+
+    for k, v in pairs(graph.vertices) do
+      variables[get_id(v)] = v
+    end
+
     return variables
   end
 
@@ -475,13 +483,29 @@ function Map:planar_embedding(graph)
   end
 
   local function get_constraints()
+    local memoize = function(func)
+      local cache = {}
+      return function(...)
+        local args = {...}
+        local key = table.concat(args, '-')
+        if cache[key] == nil then
+          cache[key] = func(...)
+        end
+        return cache[key]
+      end
+    end
+
     local constraints = {}
 
-    local function common_edge(assignment)
-      local function shares_common_edge(vertex_1, vertex_2)
-        local function get_offset_edges(vertex)
+    local function common_edge(variables, assignment)
+      local shares_common_edge = memoize(function(vertex_1_id, vertex_2_id, assignment_1_x, assignment_1_y, assignment_2_x, assignment_2_y)
+        local vertex_1, vertex_2 = variables[vertex_1_id], variables[vertex_2_id]
+        local assignment_1 = vec2(assignment_1_x, assignment_1_y)
+        local assignment_2 = vec2(assignment_2_x, assignment_2_y)
+
+        local function get_offset_edges(vertex, assignment)
           local edges = vertex.outline_edges
-          local offset = assignment[vertex]
+          local offset = assignment
 
           local offset_edges = tablex.deep_copy(edges)
 
@@ -516,8 +540,8 @@ function Map:planar_embedding(graph)
           end
         end
 
-        local edges_1 = get_offset_edges(vertex_1)
-        local edges_2 = get_offset_edges(vertex_2)
+        local edges_1 = get_offset_edges(vertex_1, assignment_1)
+        local edges_2 = get_offset_edges(vertex_2, assignment_2)
 
         local shares_common_edge = false
         for _, edge_1 in ipairs(edges_1) do
@@ -547,14 +571,14 @@ function Map:planar_embedding(graph)
         end
 
         return shares_common_edge
-      end
+      end)
 
       local is_consistent = true
       for _, v in ipairs(graph.edges) do
         local vertex_1, vertex_2 = v.vertex_1, v.vertex_2
         if assignment[vertex_1] ~= nil and assignment[vertex_2] ~= nil then
 
-          if not shares_common_edge(vertex_1, vertex_2) then
+          if not shares_common_edge(get_id(vertex_1), get_id(vertex_2), assignment[vertex_1].x, assignment[vertex_1].y, assignment[vertex_2].x, assignment[vertex_2].y) then
             is_consistent = false
             break
           end
@@ -565,13 +589,16 @@ function Map:planar_embedding(graph)
       return is_consistent
     end
 
-    local function no_overlap(assignment)
-      local function does_intersect(vertex_1, vertex_2)
+    local function no_overlap(variables, assignment)
+      local does_intersect = memoize(function(vertex_1_id, vertex_2_id, assignment_1_x, assignment_1_y, assignment_2_x, assignment_2_y)
+        local vertex_1, vertex_2 = variables[vertex_1_id], variables[vertex_2_id]
+        local assignment_1 = vec2(assignment_1_x, assignment_1_y)
+        local assignment_2 = vec2(assignment_2_x, assignment_2_y)
 
-        local function get_offset_clip(vertex)
+        local function get_offset_clip(vertex, assignment)
           local clip = vertex.polygon
           local num_of_points = vertex.num_of_points
-          local offset = assignment[vertex]
+          local offset = assignment
 
           local offset_clip = Clipper.Path(num_of_points)
           for i = 0, num_of_points-1 do
@@ -581,8 +608,8 @@ function Map:planar_embedding(graph)
           return offset_clip
         end
 
-        local subject = get_offset_clip(vertex_1)
-        local clip = get_offset_clip(vertex_2)
+        local subject = get_offset_clip(vertex_1, assignment_1)
+        local clip = get_offset_clip(vertex_2, assignment_2)
 
         local solution = Clipper.Paths(1)
         local clipper = Clipper.Clipper()
@@ -592,30 +619,21 @@ function Map:planar_embedding(graph)
         
         local is_intersect = (Clipper.Area(solution[0]) ~= Clipper.Area(subject)+Clipper.Area(clip))
         return is_intersect
-      end
+      end)
 
       local is_consistent = true
       for _, vertex_1 in ipairs(graph.vertices) do
-
         if assignment[vertex_1] ~= nil then
-
           for _, vertex_2 in ipairs(graph.vertices) do
             if vertex_1 ~= vertex_2 then
-
               if assignment[vertex_2] ~= nil then
-
-
-                if does_intersect(vertex_1, vertex_2) then
+                if does_intersect(get_id(vertex_1), get_id(vertex_2), assignment[vertex_1].x, assignment[vertex_1].y, assignment[vertex_2].x, assignment[vertex_2].y) then
                   is_consistent = false
                   break
                 end
-                
-
               end
-
             end
           end
-
         end
       end
 
@@ -627,6 +645,8 @@ function Map:planar_embedding(graph)
 
     return constraints
   end
+
+  local start = love.timer.getTime()
 
   fill_vertices_info()
 
@@ -647,26 +667,11 @@ function Map:planar_embedding(graph)
     return min_var
   end
 
-  local function is_consistent(assignment, constraints)
-    -- Check if the assignment satisfies all constraints
-    -- for _, clause in ipairs(constraints) do
-    --     local satisfied = false
-    --     for _, literal in ipairs(clause) do
-    --         if assignment[literal.variable] == literal.value then
-    --             satisfied = true
-    --             break
-    --         end
-    --     end
-    --     if not satisfied then
-    --         return false
-    --     end
-    -- end
-    -- return true
-
+  local function is_consistent(assignment, constraints, variables)
     -- Check if the assignment satisfies all constraints
     local satisfied = true
     for _, clause in ipairs(constraints) do
-      if clause(assignment) == false then
+      if clause(variables, assignment) == false then
         satisfied = false
         break
       end
@@ -689,7 +694,7 @@ function Map:planar_embedding(graph)
         assignment[var] = value
         
         -- Check if the assignment satisfies all constraints
-        if is_consistent(assignment, constraints) then
+        if is_consistent(assignment, constraints, vars) then
             -- Recursively search with the updated assignment
             local result = backtrack_search(vars, domains, constraints, assignment)
             
@@ -714,9 +719,10 @@ function Map:planar_embedding(graph)
   local map = Map:new(length*2, length*2, 0)
 
   for i, v in ipairs(variables) do
-    print(assignment[v])
     map:blit(v.chunk, assignment[v].x, assignment[v].y, false)
   end
+
+  print((love.timer.getTime() - start) * 100)
 
   return map
 end

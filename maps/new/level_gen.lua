@@ -158,13 +158,13 @@ function Level:create(callback)
   }
   
   local filler_vertices = {}
-  for i = 1, 1 do
-    filler_vertices[i] = graph:add_vertex(chunks.Filler)
+  for i = 1, 2 do
+    filler_vertices[i] = graph:add_vertex(chunks.Tunnel)
     
     if i > 1 then
-      local tunnel = graph:add_vertex(chunks.Filler)--graph:add_vertex(chunks.Tunnel)
+      --local tunnel = graph:add_vertex(chunks.Filler)--graph:add_vertex(chunks.Tunnel)
     
-      graph:add_edge(edge_join_river, filler_vertices[i], tunnel, filler_vertices[love.math.random(1, i-1)])
+      --graph:add_edge(edge_join_river, filler_vertices[i], tunnel, filler_vertices[love.math.random(1, i-1)])
     end
   end
 
