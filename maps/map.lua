@@ -94,7 +94,6 @@ function Map:blit(map, x, y, is_destructive, mask)
   for i = x, x+map.width do
     for i2 = y, y+map.height do
       if is_destructive or (self:get_cell(i, i2) == mask) then
-        print "YUP"
         self:set_cell_checked(i, i2, map:get_cell(i-x, i2-y))
       end
     end
@@ -109,14 +108,13 @@ function Map:blit(map, x, y, is_destructive, mask)
 end
 
 function Map:check_overlap(map, x, y)
-  for i = x, x + map.width - 2 do
-    for j = y, y + map.height - 2 do
+  for i = x, x + map.width do
+    for j = y, y + map.height do
       if self:get_cell(i, j) and map:get_cell(i - x, j - y) then
         local currentCell = self:get_cell(i, j)
         local mapCell = map:get_cell(i - x, j - y)
 
         if currentCell == 0 and mapCell == 0 then
-          print "OVERLAP FOUND!"
           return true
         end
       else
@@ -125,6 +123,105 @@ function Map:check_overlap(map, x, y)
     end
   end
   return false
+end
+
+function Map:check_adjacency(map, x, y)
+  local hasOverlap = false
+  local hasAdjacentWall
+
+  if self:check_overlap(map, x, y) then
+    return false
+  end
+
+  for i = x, x + map.width - 1 do
+    for j = y, y + map.height - 1 do
+      local currentCell = self:get_cell(i, j)
+      local mapCell = map:get_cell(i - x, j - y)
+
+      local neighbors = {
+        vec2(0, 1),
+        vec2(0, -1),
+        vec2(1, 0),
+        vec2(-1, 0),
+        vec2(1, 1),
+        vec2(-1, -1),
+        vec2(1, -1),
+        vec2(-1, 1),
+      }
+
+      if mapCell == 0 or currentCell == 0 then
+        for _, offset in ipairs(neighbors) do
+          local ni = i + offset.x
+          local nj = j + offset.y
+
+          local neighborCurrentCell = self:get_cell(ni, nj)
+          local neighborMapCell = map:get_cell(ni, nj)
+
+          if neighborCurrentCell == 0 or neighborMapCell == 0 then
+            hasOverlap = true
+          end
+        end
+      end
+
+      if mapCell == 1 and currentCell == 1 then
+        local offsets = {
+          vec2(0, 1),
+          vec2(0, -1),
+          vec2(1, 0),
+          vec2(-1, 0)
+        }
+
+        for _, offset in ipairs(offsets) do
+          local ni = i + offset.x
+          local nj = j + offset.y
+
+          local ni1 = i - offset.x
+          local nj1 = j - offset.y
+
+          local neighborCurrentCell = self:get_cell(ni, nj)
+          local neighborMapCell = map:get_cell(ni1 - x, nj1 - y)
+
+          if neighborCurrentCell == 0 and neighborMapCell == 0 then
+              hasAdjacentWall = {i, j}
+          end
+        end
+      end
+    end
+  end
+
+  if not hasOverlap and hasAdjacentWall then
+    return hasAdjacentWall
+  end
+end
+
+
+function Map:room_accretion(map, open_tile, wall_tile)
+  local open_tile = open_tile or 0
+  local wall_tile = wall_tile or 1
+  local placed = false
+
+  -- Find all possible starting positions
+  local possible_positions = {}
+  for x = 1, self.width - map.width do
+    for y = 1, self.height - map.height do
+      table.insert(possible_positions, {x, y})
+    end
+  end
+  
+  -- Iterate through the shuffled positions and try to place the map
+  local attempts = 0
+  while attempts < 1000 and not placed do
+    attempts = attempts + 1
+
+    local x, y = unpack(table.remove(possible_positions, math.random(1, #possible_positions)))
+
+    local adjacent = self:check_adjacency(map, x, y)
+
+    if adjacent then
+      self:blit(map, x, y, false, 1)
+      return adjacent
+    end
+  end
 end
 
 function Map:from_chunk(chunk)
@@ -1166,7 +1263,9 @@ function Map:automata2()
 end
 
 -- DLA needs a cleared cell to start from and a space to clear
-function Map:DLAInOut()
+function Map:DLAInOut(attempts)
+  local attempts = attempts or 1000
+
   local function clamp(n, min, max)
     local n = math.max(math.min(n, max), min)
     return n
@@ -1177,10 +1276,12 @@ function Map:DLAInOut()
     local x1,y1 = nil,nil
     local x2,y2 = nil,nil
     
+    local n = 0
     repeat
       x1 = love.math.random(2, self.width - 2)
       y1 = love.math.random(2, self.height - 2)
-    until self.cells[x1][y1] == 0
+      n = n + 1
+    until self.cells[x1][y1] == 0 or n > attempts
     
     
     local n = 0
@@ -1217,6 +1318,7 @@ function Map:DLA()
   end
   local neighbors = {{1,0},{-1,0},{0,1},{0,-1}}
   local x2, y2 = nil, nil
+  
   repeat
     x2,y2 = x1,y1
     
@@ -1312,7 +1414,6 @@ function Map:tunneler(x1, y1, width, turnThreshold, steps, startingDirection, mi
     local cdx, cdy = unpack(currentDirection)
 
     while math.abs(ndx) == math.abs(cdx) and math.abs(ndy) == math.abs(cdy) do
-      print(ndx, ndy, cdx, cdy)
       newDirection = directions[math.random(1, 4)]
       ndx, ndy = unpack(newDirection)
     end
