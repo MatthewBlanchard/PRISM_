@@ -27,6 +27,8 @@ function Level:create(callback)
       chunk = nil,
       outline_edges = nil,
       polygon = nil,
+      num_of_points = nil,
+      
       edges = {}
     }
 
@@ -35,11 +37,15 @@ function Level:create(callback)
     
     return vertex
   end
-  function graph:connect_vertices(meta, ...)
+  function graph:add_edge(meta, ...)
     local vertices = {...}
     for i = 1, #vertices-1 do
-      table.insert(vertices[i].edges, {meta = meta, vertex = vertices[i+1]})
-      table.insert(vertices[i+1].edges, {meta = meta, vertex = vertices[i]})
+      local vertex_1 = vertices[i]
+      local vertex_2 = vertices[i+1]
+
+      table.insert(self.edges, {meta = meta, vertex_1 = vertex_1, vertex_2 = vertex_2})
+      table.insert(vertex_1.edges, {meta = meta, vertex = vertex_2})
+      table.insert(vertex_2.edges, {meta = meta, vertex = vertex_1})
     end
   end
   
@@ -152,13 +158,13 @@ function Level:create(callback)
   }
   
   local filler_vertices = {}
-  for i = 1, 4 do
+  for i = 1, 1 do
     filler_vertices[i] = graph:add_vertex(chunks.Filler)
     
     if i > 1 then
-      local tunnel = graph:add_vertex(chunks.Tunnel)
+      local tunnel = graph:add_vertex(chunks.Filler)--graph:add_vertex(chunks.Tunnel)
     
-      graph:connect_vertices(edge_join_river, filler_vertices[i], tunnel, filler_vertices[love.math.random(1, i-1)])
+      graph:add_edge(edge_join_river, filler_vertices[i], tunnel, filler_vertices[love.math.random(1, i-1)])
     end
   end
 
@@ -167,22 +173,23 @@ function Level:create(callback)
   boss_key_uuid = Start.key_id
   local start = graph:add_vertex(Start)
 
-  local finish = graph:add_vertex(chunks.Finish)
-  local sqeeto_hive = graph:add_vertex(chunks.Sqeeto_hive)  
-  local spider_nest = graph:add_vertex(chunks.Spider_nest)
-  local shop = graph:add_vertex(chunks.Shop)
-  local snip_farm = graph:add_vertex(chunks.Snip_farm)
+  -- local finish = graph:add_vertex(chunks.Finish)
+  -- local sqeeto_hive = graph:add_vertex(chunks.Sqeeto_hive)  
+  -- local spider_nest = graph:add_vertex(chunks.Spider_nest)
+  -- local shop = graph:add_vertex(chunks.Shop)
+  -- local snip_farm = graph:add_vertex(chunks.Snip_farm)
 
-  graph:connect_vertices(edge_join_door, start, filler_vertices[love.math.random(1, #filler_vertices)])
-  graph:connect_vertices(edge_join_door, finish, filler_vertices[love.math.random(1, #filler_vertices)])
-  graph:connect_vertices(edge_join_breakable_wall, sqeeto_hive, filler_vertices[love.math.random(1, #filler_vertices)])
-  graph:connect_vertices(edge_join_boss_door, spider_nest, filler_vertices[love.math.random(1, #filler_vertices)])
-  graph:connect_vertices(edge_join_door, shop, filler_vertices[love.math.random(1, #filler_vertices)])
-  graph:connect_vertices(edge_join_door, snip_farm, filler_vertices[love.math.random(1, #filler_vertices)])
+  graph:add_edge(edge_join_door, start, filler_vertices[love.math.random(1, #filler_vertices)])
+  -- graph:add_edge(edge_join_door, finish, filler_vertices[love.math.random(1, #filler_vertices)])
+  -- graph:add_edge(edge_join_breakable_wall, sqeeto_hive, filler_vertices[love.math.random(1, #filler_vertices)])
+  -- graph:add_edge(edge_join_boss_door, spider_nest, filler_vertices[love.math.random(1, #filler_vertices)])
+  -- graph:add_edge(edge_join_door, shop, filler_vertices[love.math.random(1, #filler_vertices)])
+  -- graph:add_edge(edge_join_door, snip_farm, filler_vertices[love.math.random(1, #filler_vertices)])
 
 
-  local merged_room_3 = Map:special_merge(graph)
-  map:blit(merged_room_3, 0, 0) 
+  --local merged_room = Map:special_merge(graph)
+  local merged_room = Map:planar_embedding(graph)
+  map:blit(merged_room, 0, 0) 
 
 
   local player_pos
@@ -194,14 +201,14 @@ function Level:create(callback)
   end
 
 
-  local heat_map = Map:new(600, 600, 0)
-  heat_map:blit(map, 0, 0) 
-  heat_map = heat_map:dijkstra({player_pos}, 'vonNeuman')
-  for x, y, cell in heat_map:for_cells() do
-    if cell == 999 then
-      map:fill_cell(x, y)
-    end
-  end
+  -- local heat_map = Map:new(600, 600, 0)
+  -- heat_map:blit(map, 0, 0) 
+  -- heat_map = heat_map:dijkstra({player_pos}, 'vonNeuman')
+  -- for x, y, cell in heat_map:for_cells() do
+  --   if cell == 999 then
+  --     map:fill_cell(x, y)
+  --   end
+  -- end
 
 
   for x, y, cell in map:for_cells() do

@@ -1,4 +1,4 @@
---jit.off() --gitignore
+jit.off() --gitignore
 
 -- require is not smart so we are going to wrap it to warn us if we include
 -- a file using /s instead of .s

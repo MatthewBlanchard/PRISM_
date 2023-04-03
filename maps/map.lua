@@ -155,6 +155,7 @@ function Map:special_merge(graph)
     
     v.chunk = chunk
     v.outline_edges = edge
+    v.num_of_points = num_of_points
     v.polygon = path
     
     v.parameters.populater(v.parameters, v.chunk, path)
@@ -201,13 +202,6 @@ function Map:special_merge(graph)
     local matches = get_matching_edges(vertex1.outline_edges, vertex2.outline_edges)
     local matches_without_intersections = {}
     
-    local num_of_points = 0
-    for i, v in ipairs(vertex2.outline_edges) do
-      for i2, v2 in ipairs(v) do
-        num_of_points = num_of_points + 1
-      end
-    end
-    
     for _, v in ipairs(matches) do
       for i = 2, #v[1]-1 do
         for i2 = 2, #v[2]-1 do
@@ -217,7 +211,7 @@ function Map:special_merge(graph)
           local offset = vec2(v[1][segment_index_1].x - v[2][segment_index_2].x, v[1][segment_index_1].y - v[2][segment_index_2].y)
           local connection_point_1 = vec2(v[1][segment_index_1].x, v[1][segment_index_1].y)
           local connection_point_2 = vec2(v[2][segment_index_2].x, v[2][segment_index_2].y)
-          local is_intersect, offset_clip = does_intersect(vertex1.polygon, vertex2.polygon, num_of_points, offset)
+          local is_intersect, offset_clip = does_intersect(vertex1.polygon, vertex2.polygon, vertex2.num_of_points, offset)
           if (not is_intersect) then
             table.insert(matches_without_intersections, {
               v, segment_index_1, segment_index_2, offset_clip, vertex2, offset, num_of_points, connection_point_1, connection_point_2,
@@ -228,7 +222,7 @@ function Map:special_merge(graph)
               offset = offset,
               offset_clip = offset_clip,
               clip = vertex2.polygon,
-              num_of_points = num_of_points,
+              num_of_points = vertex2.num_of_points,
               edge_meta_info = edge_meta_info
               
             })
@@ -399,6 +393,329 @@ function Map:special_merge(graph)
   
   for i, v in ipairs(connections) do
     v.edge_meta_info.callback(map, v)
+  end
+
+  return map
+end
+
+function Map:planar_embedding(graph)
+  local function fill_vertices_info()
+    local function new_chunk(params)
+      params:parameters()
+      local chunk = Map:new(params.width, params.height, 1)
+      params:shaper(chunk)
+
+      local overlay = Map:new(params.width+1, params.height+1, 0)
+      overlay:fill_perimeter(0, 0, params.width+1, params.height+1) 
+      overlay:blit(chunk, 0, 0) 
+      
+      return overlay:new_from_outline()
+    end
+    
+    for _, v in ipairs(graph.vertices) do
+      local chunk = new_chunk(v.parameters)
+      local outline = chunk:new_from_outline_strict()
+      local edges = outline:find_edges()
+
+      local num_of_points = 0
+      for _, v2 in ipairs(edges) do
+        for _, v3 in ipairs(v2) do
+          num_of_points = num_of_points + 1
+        end
+      end
+      local path = Clipper.Path(num_of_points)
+      local i = 0
+      for _, v2 in ipairs(edges) do
+        for _, v3 in ipairs(v2) do
+          path[i] = Clipper.IntPoint(v3.x, v3.y)
+          i = i + 1
+        end
+      end
+      
+      v.chunk = chunk
+      v.outline_edges = edges
+      v.num_of_points = num_of_points
+      v.polygon = path
+      
+      v.parameters.populater(v.parameters, v.chunk, path)
+    end
+  end
+
+  local function get_variables()
+    local variables = {}
+    for _, v in ipairs(graph.vertices) do
+      table.insert(variables, v)
+    end
+    return variables
+  end
+
+  local function find_domain_range_max()
+    local chunk_dimensions_sum = vec2(0, 0)
+    for i, v in ipairs(graph.vertices) do
+      local chunk_dimensions = vec2(v.chunk.width, v.chunk.height)
+      chunk_dimensions_sum = chunk_dimensions_sum + chunk_dimensions
+    end
+
+    return math.max(chunk_dimensions_sum.x, chunk_dimensions_sum.y)
+  end
+  local function get_domains(variables)
+    local domains = {}
+    local domain_range = vec2(0, find_domain_range_max())
+    for _, v in ipairs(variables) do
+      local domain = {}
+      for x = domain_range.x, domain_range.y do
+        for y = domain_range.x, domain_range.y do
+          table.insert(domain, vec2(x, y))
+        end
+      end
+      domains[v] = domain
+    end
+
+    return domains
+  end
+
+  local function get_constraints()
+    local constraints = {}
+
+    local function common_edge(assignment)
+      local function shares_common_edge(vertex_1, vertex_2)
+        local function get_offset_edges(vertex)
+          local edges = vertex.outline_edges
+          local offset = assignment[vertex]
+
+          local offset_edges = tablex.deep_copy(edges)
+
+          for _, edge in ipairs(offset_edges) do
+            for i, point in ipairs(edge) do
+              edge[i] = vec2(point.x + offset.x, point.y + offset.y)
+            end
+          end
+
+          return offset_edges
+        end
+        local function areIntersecting(x1, y1, x2, y2, x3, y3, x4, y4)
+          local denominator = ((y4 - y3) * (x2 - x1)) - ((x4 - x3) * (y2 - y1))
+          local numerator1 = ((x4 - x3) * (y1 - y3)) - ((y4 - y3) * (x1 - x3))
+          local numerator2 = ((x2 - x1) * (y1 - y3)) - ((y2 - y1) * (x1 - x3))
+          
+          if denominator == 0 then
+            if numerator1 == 0 and numerator2 == 0 then
+              return true
+            else
+              return false
+            end
+          end
+          
+          local r = numerator1 / denominator
+          local s = numerator2 / denominator
+          
+          if r >= 0 and r <= 1 and s >= 0 and s <= 1 then
+            return true
+          else
+            return false
+          end
+        end
+
+        local edges_1 = get_offset_edges(vertex_1)
+        local edges_2 = get_offset_edges(vertex_2)
+
+        local shares_common_edge = false
+        for _, edge_1 in ipairs(edges_1) do
+          for _, edge_2 in ipairs(edges_2) do
+
+            local p1, q1 = edge_1[1], edge_1[#edge_1]
+            local p2, q2 = edge_2[1], edge_2[#edge_2]
+            
+            local dx1, dy1 = p1.x - q1.x, p1.y - q1.y
+            local dx2, dy2 = p2.x - q2.x, p2.y - q2.y
+            
+            if math.sign(dx1) == -math.sign(dx2) and math.sign(dy1) == -math.sign(dy2) then
+              if #edge_1 > 2 and #edge_2 > 2 then
+                if areIntersecting(
+                  p1.x, p1.y, q1.x, q1.y,
+                  p2.x, p2.y, q2.x, q2.y
+                ) 
+                then
+                  shares_common_edge = true
+                  break
+                end
+              end
+            end
+
+          end
+
+        end
+
+        return shares_common_edge
+      end
+
+      local is_consistent = true
+      for _, v in ipairs(graph.edges) do
+        local vertex_1, vertex_2 = v.vertex_1, v.vertex_2
+        if assignment[vertex_1] ~= nil and assignment[vertex_2] ~= nil then
+
+          if not shares_common_edge(vertex_1, vertex_2) then
+            is_consistent = false
+            break
+          end
+
+        end
+      end
+
+      return is_consistent
+    end
+
+    local function no_overlap(assignment)
+      local function does_intersect(vertex_1, vertex_2)
+
+        local function get_offset_clip(vertex)
+          local clip = vertex.polygon
+          local num_of_points = vertex.num_of_points
+          local offset = assignment[vertex]
+
+          local offset_clip = Clipper.Path(num_of_points)
+          for i = 0, num_of_points-1 do
+            offset_clip[i] = Clipper.IntPoint(clip[i].X + offset.x, clip[i].Y + offset.y)
+          end
+
+          return offset_clip
+        end
+
+        local subject = get_offset_clip(vertex_1)
+        local clip = get_offset_clip(vertex_2)
+
+        local solution = Clipper.Paths(1)
+        local clipper = Clipper.Clipper()
+        clipper:AddPath(subject, Clipper.ptSubject, true)
+        clipper:AddPath(clip, Clipper.ptClip, true)
+        clipper:Execute(Clipper.ctUnion, solution)
+        
+        local is_intersect = (Clipper.Area(solution[0]) ~= Clipper.Area(subject)+Clipper.Area(clip))
+        return is_intersect
+      end
+
+      local is_consistent = true
+      for _, vertex_1 in ipairs(graph.vertices) do
+
+        if assignment[vertex_1] ~= nil then
+
+          for _, vertex_2 in ipairs(graph.vertices) do
+            if vertex_1 ~= vertex_2 then
+
+              if assignment[vertex_2] ~= nil then
+
+
+                if does_intersect(vertex_1, vertex_2) then
+                  is_consistent = false
+                  break
+                end
+                
+
+              end
+
+            end
+          end
+
+        end
+      end
+
+      return is_consistent
+    end
+
+    table.insert(constraints, common_edge)
+    table.insert(constraints, no_overlap)
+
+    return constraints
+  end
+
+  fill_vertices_info()
+
+  local variables = get_variables()
+  local domains = get_domains(variables)
+  local constraints = get_constraints()
+  local assignment = {}
+
+  local function select_unassigned_variable(vars, domains, assignment)
+    -- Select the variable with the fewest remaining values in its domain
+    local min_var, min_size = nil, math.huge
+    for _, var in ipairs(vars) do
+        if assignment[var] == nil and #domains[var] < min_size then
+            min_var = var
+            min_size = #domains[var]
+        end
+    end
+    return min_var
+  end
+
+  local function is_consistent(assignment, constraints)
+    -- Check if the assignment satisfies all constraints
+    -- for _, clause in ipairs(constraints) do
+    --     local satisfied = false
+    --     for _, literal in ipairs(clause) do
+    --         if assignment[literal.variable] == literal.value then
+    --             satisfied = true
+    --             break
+    --         end
+    --     end
+    --     if not satisfied then
+    --         return false
+    --     end
+    -- end
+    -- return true
+
+    -- Check if the assignment satisfies all constraints
+    local satisfied = true
+    for _, clause in ipairs(constraints) do
+      if clause(assignment) == false then
+        satisfied = false
+        break
+      end
+    end
+    return satisfied
+  end
+
+  local function backtrack_search(vars, domains, constraints, assignment)
+    -- If all variables are assigned, return the solution
+    if #tablex.keys(assignment) == #vars then
+      return assignment
+    end
+    
+    -- Choose the next unassigned variable
+    local var = select_unassigned_variable(vars, domains, assignment)
+    
+    -- Try assigning each value in the domain of the variable
+    for _, value in ipairs(domains[var]) do
+        -- Assign the value to the variable
+        assignment[var] = value
+        
+        -- Check if the assignment satisfies all constraints
+        if is_consistent(assignment, constraints) then
+            -- Recursively search with the updated assignment
+            local result = backtrack_search(vars, domains, constraints, assignment)
+            
+            -- If a solution is found, return it
+            if result ~= nil then
+                return result
+            end
+        end
+        
+        -- If the assignment violates a constraint, backtrack
+        assignment[var] = nil
+    end
+    
+    -- If no solution is found, return nil
+    return nil
+  end
+
+  local assignment = backtrack_search(variables, domains, constraints, assignment)
+  assert(assignment, 'unsatisfiable')
+
+  local length = find_domain_range_max()
+  local map = Map:new(length*2, length*2, 0)
+
+  for i, v in ipairs(variables) do
+    print(assignment[v])
+    map:blit(v.chunk, assignment[v].x, assignment[v].y, false)
   end
 
   return map
@@ -733,7 +1050,6 @@ function Map:target_circumference(cx, cy, radx, rady, func)
   Map:target_ellipse(cx, cy, radx, rady, function(x, y)
     local dx = (x - cx)^2
     local dy = (y - cy)^2
-    print(dx/(radx^2) + dy/(rady)^2)
     if dx/(radx^2) + dy/(rady)^2 >= 0.5 then
       func(x, y)
     end
