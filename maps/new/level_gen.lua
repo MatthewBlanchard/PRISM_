@@ -1,5 +1,5 @@
 --love.math.setRandomSeed(1)
-love.audio.setVolume(0) --gitignore
+--love.audio.setVolume(0) --gitignore
 
 local Map = require "maps.map"
 local Object = require "object"
@@ -77,63 +77,67 @@ function Level:create(callback)
   local edge_join_door = {
     type = 'Join', 
     callback = function(chunk, info)
-      local connection_point = vec2(info.match_point_2.x, info.match_point_2.y) + info.offset + info.clip_dimension_sum
-      local x, y = connection_point.x, connection_point.y
+      local point = info.points[1]
 
-      chunk:remove_entities(x, y)
+      chunk:remove_entities(point.x, point.y)
 
-      chunk:clear_cell(x, y)
-      :clear_cell(x+info.vec[2], y+info.vec[1])
-      :clear_cell(x-info.vec[2], y-info.vec[1])
-      :insert_entity('Door', x, y)
+      chunk:clear_cell(point.x, point.y)
+      :clear_cell(point.x+info.slope.y, point.y+info.slope.x)
+      :clear_cell(point.x-info.slope.y, point.y-info.slope.x)
+      :insert_entity('Door', point.x, point.y)
     end,
   }
 
   local edge_join_breakable_wall = {
     type = 'Join', 
     callback = function(chunk, info)
-      local connection_point = vec2(info.match_point_2.x, info.match_point_2.y) + info.offset + info.clip_dimension_sum
-      local x, y = connection_point.x, connection_point.y
+      local point = info.points[1]
 
-      chunk:clear_cell(x, y)
-      :clear_cell(x+info.vec[2], y+info.vec[1])
-      :clear_cell(x-info.vec[2], y-info.vec[1])
-      :insert_entity('Breakable_wall', x, y)
+      chunk:clear_cell(point.x, point.y)
+      :clear_cell(point.x+info.slope.y, point.y+info.slope.x)
+      :clear_cell(point.x-info.slope.y, point.y-info.slope.x)
+      :insert_entity('Breakable_wall', point.x, point.y)
     end,
   }
 
   local edge_join_river = {
     type = 'Join', 
     callback = function(chunk, info)
-      local connection_point = vec2(info.match_point_2.x, info.match_point_2.y) + info.offset + info.clip_dimension_sum
-      local x, y = connection_point.x, connection_point.y
-      local bridge_dir_type = info.vec[1] == 1 and '_v' or '_h'
-      local river_dir_type = info.vec[1] == 0 and '_v' or '_h'
+      local bridge_dir_type = math.abs(info.slope.x) == 1 and '_v' or '_h'
+      local river_dir_type = info.slope.x == 0 and '_v' or '_h'
 
-      local segment_index = info.segment_index_2
-      local point = vec2(info.segment_2[segment_index].x, info.segment_2[segment_index].y)
-      point = point + info.offset + info.clip_dimension_sum
-      chunk:clear_cell(point.x, point.y)
-      :clear_cell(point.x+info.vec[2], point.y+info.vec[1])
-      :clear_cell(point.x-info.vec[2], point.y+info.vec[1])
-      chunk:insert_entity('Bridge'..bridge_dir_type, point.x, point.y)
+      if #info.points % 2 == 0 then
+        local point = info.points[math.floor(#info.points / 2)]
+        chunk:clear_cell(point.x, point.y)
+        :clear_cell(point.x+info.slope.y, point.y+info.slope.x)
+        :clear_cell(point.x-info.slope.y, point.y-info.slope.x)
+        :insert_entity('Bridge'..bridge_dir_type, point.x, point.y)
 
-      for n = 1, 1 do
-        local segment_index = info.segment_index_2 - n
-        if segment_index ~= 1 then
-          local point = vec2(info.segment_2[segment_index].x, info.segment_2[segment_index].y)
-          point = point + info.offset + info.clip_dimension_sum
-          chunk:clear_cell(point.x, point.y)
-          chunk:insert_entity('River'..river_dir_type, point.x, point.y)
-        end
+        local point = info.points[math.floor(#info.points / 2)+1]
+        chunk:clear_cell(point.x, point.y)
+        :clear_cell(point.x+info.slope.y, point.y+info.slope.x)
+        :clear_cell(point.x-info.slope.y, point.y-info.slope.x)
+        :insert_entity('Bridge'..bridge_dir_type, point.x, point.y)
+      else
+        local point = info.points[math.ceil(#info.points / 2)]
+        chunk:clear_cell(point.x, point.y)
+        :clear_cell(point.x+info.slope.y, point.y+info.slope.x)
+        :clear_cell(point.x-info.slope.y, point.y-info.slope.x)
+        :insert_entity('Bridge'..bridge_dir_type, point.x, point.y)
 
-        local segment_index = info.segment_index_2 + n
-        if segment_index ~= #info.segment_2 then
-          local point = vec2(info.segment_2[segment_index].x, info.segment_2[segment_index].y)
-          point = point + info.offset + info.clip_dimension_sum
-          chunk:clear_cell(point.x, point.y)
-          chunk:insert_entity('River'..river_dir_type, point.x, point.y)
-        end
+        -- for i = math.ceil(#info.points / 2)+1, #info.points do
+        --   local point = info.points[i]
+        --   chunk:clear_cell(point.x, point.y)
+        --   :clear_cell(point.x+info.slope.y, point.y+info.slope.x)
+        --   :clear_cell(point.x-info.slope.y, point.y-info.slope.x)
+        --   :insert_entity('River'..river_dir_type, point.x, point.y)
+
+        --   local point = info.points[#info.points-2*i]
+        --   chunk:clear_cell(point.x, point.y)
+        --   :clear_cell(point.x+info.slope.y, point.y+info.slope.x)
+        --   :clear_cell(point.x-info.slope.y, point.y-info.slope.x)
+        --   :insert_entity('River'..river_dir_type, point.x, point.y)
+        -- end
       end
     end,
   }
@@ -141,13 +145,12 @@ function Level:create(callback)
   local edge_join_boss_door = {
     type = 'Join', 
     callback = function(chunk, info)
-      local connection_point = vec2(info.match_point_2.x, info.match_point_2.y) + info.offset + info.clip_dimension_sum
-      local x, y = connection_point.x, connection_point.y
+      local point = info.points[1]
 
-      chunk:clear_cell(x, y)
-      :clear_cell(x+info.vec[2], y+info.vec[1])
-      :clear_cell(x-info.vec[2], y-info.vec[1])
-      :insert_entity('Door_locked', x, y, function(actor, entities_by_unique_id)
+      chunk:clear_cell(point.x, point.y)
+      :clear_cell(point.x+info.slope.y, point.y+info.slope.x)
+      :clear_cell(point.x-info.slope.y, point.y-info.slope.x)
+      :insert_entity('Door_locked', point.x, point.y, function(actor, entities_by_unique_id)
         if not entities_by_unique_id[boss_key_uuid] then
           return 'Delay'
         end
@@ -158,42 +161,34 @@ function Level:create(callback)
   }
   
   local filler_vertices = {}
-  for i = 1, 3 do
-    filler_vertices[i] = graph:add_vertex(chunks.Filler)
-    
+  for i = 1, 4 do
+    local t = filler_vertices
+
+    t[i] = graph:add_vertex(chunks.Filler)
     if i > 1 then
-      --local tunnel = graph:add_vertex(chunks.Filler)--graph:add_vertex(chunks.Tunnel)
-    
-      --graph:add_edge(edge_join_river, filler_vertices[i], tunnel, filler_vertices[love.math.random(1, i-1)])
-      graph:add_edge(edge_join_door, filler_vertices[i], filler_vertices[i-1])
+      local tunnel = graph:add_vertex(chunks.Tunnel)
+      graph:add_edge(edge_join_river, t[i], tunnel, t[love.math.random(1, i-1)])
     end
   end
-  graph:add_edge(edge_join_door, filler_vertices[#filler_vertices], filler_vertices[1])
 
   local Start = chunks.Start
   Start.key_id = id_generator()
   boss_key_uuid = Start.key_id
   local start = graph:add_vertex(Start)
 
-  -- local finish = graph:add_vertex(chunks.Finish)
-  -- local sqeeto_hive = graph:add_vertex(chunks.Sqeeto_hive)  
-  -- local spider_nest = graph:add_vertex(chunks.Spider_nest)
-  -- local shop = graph:add_vertex(chunks.Shop)
-  -- local snip_farm = graph:add_vertex(chunks.Snip_farm)
+  local finish = graph:add_vertex(chunks.Finish)
+  local sqeeto_hive = graph:add_vertex(chunks.Sqeeto_hive)  
+  --local spider_nest = graph:add_vertex(chunks.Spider_nest)
+  local shop = graph:add_vertex(chunks.Shop)
+  local snip_farm = graph:add_vertex(chunks.Snip_farm)
 
-  graph:add_edge(edge_join_door, start, filler_vertices[#filler_vertices])
-
-  
-
-  --graph:add_edge(edge_join_door, start, filler_vertices[love.math.random(1, #filler_vertices)])
-  -- graph:add_edge(edge_join_door, finish, filler_vertices[love.math.random(1, #filler_vertices)])
-  -- graph:add_edge(edge_join_breakable_wall, sqeeto_hive, filler_vertices[love.math.random(1, #filler_vertices)])
-  -- graph:add_edge(edge_join_boss_door, spider_nest, filler_vertices[love.math.random(1, #filler_vertices)])
+  graph:add_edge(edge_join_door, start, filler_vertices[love.math.random(1, #filler_vertices)])
+  graph:add_edge(edge_join_door, finish, filler_vertices[love.math.random(1, #filler_vertices)])
+  graph:add_edge(edge_join_breakable_wall, sqeeto_hive, filler_vertices[love.math.random(1, #filler_vertices)])
+  --graph:add_edge(edge_join_boss_door, spider_nest, filler_vertices[love.math.random(1, #filler_vertices)])
   -- graph:add_edge(edge_join_door, shop, filler_vertices[love.math.random(1, #filler_vertices)])
   -- graph:add_edge(edge_join_door, snip_farm, filler_vertices[love.math.random(1, #filler_vertices)])
 
-
-  --local merged_room = Map:special_merge(graph)
   local merged_room = Map:planar_embedding(graph)
   map:blit(merged_room, 0, 0) 
 
@@ -207,14 +202,14 @@ function Level:create(callback)
   end
 
 
-  -- local heat_map = Map:new(600, 600, 0)
-  -- heat_map:blit(map, 0, 0) 
-  -- heat_map = heat_map:dijkstra({player_pos}, 'vonNeuman')
-  -- for x, y, cell in heat_map:for_cells() do
-  --   if cell == 999 then
-  --     map:fill_cell(x, y)
-  --   end
-  -- end
+  local heat_map = Map:new(500, 500, 0)
+  heat_map:blit(map, 0, 0) 
+  heat_map = heat_map:dijkstra({player_pos}, 'vonNeuman')
+  for x, y, cell in heat_map:for_cells() do
+    if cell == 999 then
+      --map:fill_cell(x, y)
+    end
+  end
 
 
   for x, y, cell in map:for_cells() do

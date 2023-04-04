@@ -399,7 +399,7 @@ function Map:special_merge(graph)
 end
 
 function Map:planar_embedding(graph)
-  jit.on()
+  --jit.on()
   local start = love.timer.getTime()
 
   local function fill_vertices_info()
@@ -781,12 +781,21 @@ function Map:planar_embedding(graph)
     map:blit(v.chunk, assignment[v].x, assignment[v].y, false)
   end
 
+  local function mysplit(inputstr, sep)
+    local sep = sep or '%s'
+    local t = {}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+      table.insert(t, str)
+    end
+    return t
+  end
   for k, v in pairs(edge_matches) do
+    local split_string = mysplit(k, ':')
     local edge_1 = v.edge_1
     local edge_2 = v.edge_2
 
+    local slope = edge_1[1] - edge_1[2]
     local overlapping_points = {}
-
     for i = 2, #edge_1-1 do
       for i2 = 2, #edge_2-1 do
         if edge_1[i] == edge_2[i2] then
@@ -795,14 +804,34 @@ function Map:planar_embedding(graph)
       end
     end
 
-    for _, point in ipairs(overlapping_points) do
-      map:clear_cell(point.x, point.y)
-      map:insert_entity('Gate', point.x, point.y)
+    table.sort(overlapping_points, function(a, b) 
+      if a.x == b.x then
+        return a.y < b.y
+      else
+        return a.x < b.x
+      end
+    end)
+
+    local vertex = variables[split_string[1]]
+    for _, edge in ipairs(vertex.edges) do
+      if variables[split_string[2]] == edge.vertex then
+        local info = {
+          chunk_offset = assignment[vertex],
+          points = overlapping_points,
+          slope = slope
+        }
+        edge.meta.callback(map, info)
+      end
     end
+
+    -- for _, point in ipairs(overlapping_points) do
+    --   map:clear_cell(point.x, point.y)
+    --   map:insert_entity('Gate', point.x, point.y)
+    -- end
   end
 
   print((love.timer.getTime() - start) * 100)
-  jit.off()
+  --jit.off()
   return map
 end
 
