@@ -1,5 +1,5 @@
 --love.math.setRandomSeed(1)
---love.audio.setVolume(0) --gitignore
+love.audio.setVolume(0) --gitignore
 
 local Map = require "maps.map"
 local Object = require "object"
@@ -9,9 +9,9 @@ local Clipper = require('maps.clipper.clipper')
 local Level = Object:extend()
 
 function Level:__new()
-  self._width = 600
-  self._height = 600
-  self._map = Map:new(600, 600, 0)
+  self._width = 500
+  self._height = 500
+  self._map = Map:new(500, 500, 0)
 end
 
 function Level:create(callback)
@@ -158,15 +158,17 @@ function Level:create(callback)
   }
   
   local filler_vertices = {}
-  for i = 1, 2 do
-    filler_vertices[i] = graph:add_vertex(chunks.Tunnel)
+  for i = 1, 3 do
+    filler_vertices[i] = graph:add_vertex(chunks.Filler)
     
     if i > 1 then
       --local tunnel = graph:add_vertex(chunks.Filler)--graph:add_vertex(chunks.Tunnel)
     
       --graph:add_edge(edge_join_river, filler_vertices[i], tunnel, filler_vertices[love.math.random(1, i-1)])
+      graph:add_edge(edge_join_door, filler_vertices[i], filler_vertices[i-1])
     end
   end
+  graph:add_edge(edge_join_door, filler_vertices[#filler_vertices], filler_vertices[1])
 
   local Start = chunks.Start
   Start.key_id = id_generator()
@@ -179,7 +181,11 @@ function Level:create(callback)
   -- local shop = graph:add_vertex(chunks.Shop)
   -- local snip_farm = graph:add_vertex(chunks.Snip_farm)
 
-  graph:add_edge(edge_join_door, start, filler_vertices[love.math.random(1, #filler_vertices)])
+  graph:add_edge(edge_join_door, start, filler_vertices[#filler_vertices])
+
+  
+
+  --graph:add_edge(edge_join_door, start, filler_vertices[love.math.random(1, #filler_vertices)])
   -- graph:add_edge(edge_join_door, finish, filler_vertices[love.math.random(1, #filler_vertices)])
   -- graph:add_edge(edge_join_breakable_wall, sqeeto_hive, filler_vertices[love.math.random(1, #filler_vertices)])
   -- graph:add_edge(edge_join_boss_door, spider_nest, filler_vertices[love.math.random(1, #filler_vertices)])

@@ -399,6 +399,9 @@ function Map:special_merge(graph)
 end
 
 function Map:planar_embedding(graph)
+  jit.on()
+  local start = love.timer.getTime()
+
   local function fill_vertices_info()
     local function new_chunk(params)
       params:parameters()
@@ -440,7 +443,6 @@ function Map:planar_embedding(graph)
       v.parameters.populater(v.parameters, v.chunk, path)
     end
   end
-
   local function get_id(t)
     return string.format("%p", t)
   end
@@ -456,7 +458,6 @@ function Map:planar_embedding(graph)
 
     return variables
   end
-
   local function find_domain_range_max()
     local chunk_dimensions_sum = vec2(0, 0)
     for i, v in ipairs(graph.vertices) do
@@ -489,14 +490,14 @@ function Map:planar_embedding(graph)
 
         local min = vec2(assigned_pos.x - v.chunk.width, assigned_pos.y - v.chunk.height)
         local max = vec2(assigned_pos.x + assigned_dim.x + v.chunk.width, assigned_pos.y + assigned_dim.y + v.chunk.height)
-        for x = math.max(domain_range.x, min.x), math.min(domain_range.y, max.x) do
-          for y = math.max(domain_range.x, min.y), math.min(domain_range.y, max.y) do
+        for x = math.max(domain_range.x, min.x), math.min(domain_range.y - v.chunk.width, max.x) do
+          for y = math.max(domain_range.x, min.y), math.min(domain_range.y - v.chunk.height, max.y) do
             table.insert(domain, vec2(x, y))
           end
         end
       else
-        for x = domain_range.x, domain_range.y do
-          for y = domain_range.x, domain_range.y do
+        for x = domain_range.x, domain_range.y - v.chunk.width do
+          for y = domain_range.x, domain_range.y - v.chunk.height do
             table.insert(domain, vec2(x, y))
           end
         end
@@ -508,6 +509,7 @@ function Map:planar_embedding(graph)
     return domains
   end
 
+  local edge_matches = {}
   local function get_constraints()
     local memoize = function(func)
       local cache = {}
@@ -543,27 +545,43 @@ function Map:planar_embedding(graph)
 
           return offset_edges
         end
-        local function areIntersecting(x1, y1, x2, y2, x3, y3, x4, y4)
-          local denominator = ((y4 - y3) * (x2 - x1)) - ((x4 - x3) * (y2 - y1))
-          local numerator1 = ((x4 - x3) * (y1 - y3)) - ((y4 - y3) * (x1 - x3))
-          local numerator2 = ((x2 - x1) * (y1 - y3)) - ((y2 - y1) * (x1 - x3))
-          
-          if denominator == 0 then
-            if numerator1 == 0 and numerator2 == 0 then
+
+        local function are_intersecting(p1, q1, p2, q2)
+          local function on_segment(p, q, r)
+            if (
+              q.x <= math.max(p.x, r.x) and q.x >= math.min(p.x, r.x) and
+              q.y <= math.max(p.y, r.y) and q.y >= math.min(p.y, r.y)
+            ) 
+            then
               return true
             else
               return false
             end
           end
-          
-          local r = numerator1 / denominator
-          local s = numerator2 / denominator
-          
-          if r >= 0 and r <= 1 and s >= 0 and s <= 1 then
-            return true
-          else
-            return false
+
+          local function orientation(p, q, r)
+            local val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)
+            if val == 0 then return 0
+            else return val > 0 and 1 or 2
+            end
           end
+
+          local function do_intersect(p1, q1, p2, q2)
+            local o1 = orientation(p1, q1, p2)
+            local o2 = orientation(p1, q1, q2)
+            local o3 = orientation(p2, q2, p1)
+            local o4 = orientation(p2, q2, q1)
+            
+            if (o1 ~= o2 and o3 ~= o4) then return true
+            elseif (o1 == 0 and on_segment(p1, p2, q1)) then return true
+            elseif (o2 == 0 and on_segment(p1, q2, q1)) then return true
+            elseif (o3 == 0 and on_segment(p2, p1, q2)) then return true
+            elseif (o4 == 0 and on_segment(p2, q1, q2)) then return true
+            else return false
+            end
+          end
+
+          return do_intersect(p1, q1, p2, q2)
         end
 
         local edges_1 = get_offset_edges(vertex_1, assignment_1)
@@ -578,22 +596,23 @@ function Map:planar_embedding(graph)
             
             local dx1, dy1 = p1.x - q1.x, p1.y - q1.y
             local dx2, dy2 = p2.x - q2.x, p2.y - q2.y
-            
+
+            local d1 = vec2(p1.x - q1.x, p1.y - q1.y)
+            local d2 = vec2(p2.x - q2.x, p2.y - q2.y)
+
             if math.sign(dx1) == -math.sign(dx2) and math.sign(dy1) == -math.sign(dy2) then
-              if #edge_1 > 2 and #edge_2 > 2 then
-                if areIntersecting(
-                  p1.x, p1.y, q1.x, q1.y,
-                  p2.x, p2.y, q2.x, q2.y
-                ) 
-                then
+              if 
+                p1 ~= p2 and p1 ~= q2 and q1 ~= p2 and q1 ~= q2 and
+                (edge_1[1+1] ~= p2 and edge_1[1+1] ~= q2) and (edge_1[#edge_1-1] ~= p2 and edge_1[#edge_1-1] ~= q2)
+              then
+                if are_intersecting(p1, q1, p2, q2) then
+                  edge_matches[get_id(vertex_1)..':'..get_id(vertex_2)] = {edge_1 = edge_1, edge_2 = edge_2}
                   shares_common_edge = true
                   break
                 end
               end
             end
-
           end
-
         end
 
         return shares_common_edge
@@ -604,7 +623,7 @@ function Map:planar_embedding(graph)
         local vertex_1, vertex_2 = v.vertex_1, v.vertex_2
         if assignment[vertex_1] ~= nil and assignment[vertex_2] ~= nil then
 
-          if not shares_common_edge(get_id(vertex_1), get_id(vertex_2), assignment[vertex_1].x, assignment[vertex_1].y, assignment[vertex_2].x, assignment[vertex_2].y) then
+          if shares_common_edge(get_id(vertex_1), get_id(vertex_2), assignment[vertex_1].x, assignment[vertex_1].y, assignment[vertex_2].x, assignment[vertex_2].y) == false then
             is_consistent = false
             break
           end
@@ -621,43 +640,58 @@ function Map:planar_embedding(graph)
         local assignment_1 = vec2(assignment_1_x, assignment_1_y)
         local assignment_2 = vec2(assignment_2_x, assignment_2_y)
 
-        local function get_offset_clip(vertex, assignment)
-          local clip = vertex.polygon
+        local function get_offset_path(vertex, assignment)
+          local path = vertex.polygon
           local num_of_points = vertex.num_of_points
           local offset = assignment
 
-          local offset_clip = Clipper.Path(num_of_points)
+          local offset_path = Clipper.Path(num_of_points)
           for i = 0, num_of_points-1 do
-            offset_clip[i] = Clipper.IntPoint(clip[i].X + offset.x, clip[i].Y + offset.y)
+            offset_path[i] = Clipper.IntPoint(path[i].X + offset.x, path[i].Y + offset.y)
           end
 
-          return offset_clip
+          return offset_path
         end
 
-        local subject = get_offset_clip(vertex_1, assignment_1)
-        local clip = get_offset_clip(vertex_2, assignment_2)
+        local subject = get_offset_path(vertex_1, assignment_1)
+        local clip = get_offset_path(vertex_2, assignment_2)
 
-        local solution = Clipper.Paths(1)
-        local clipper = Clipper.Clipper()
-        clipper:AddPath(subject, Clipper.ptSubject, true)
-        clipper:AddPath(clip, Clipper.ptClip, true)
-        clipper:Execute(Clipper.ctUnion, solution)
+        -- local solution = Clipper.Paths(1)
+        -- local clipper = Clipper.Clipper()
+        -- clipper:AddPath(subject, Clipper.ptSubject, true)
+        -- clipper:AddPath(clip, Clipper.ptClip, true)
+        -- clipper:Execute(Clipper.ctUnion, solution)
         
-        local is_intersect = (Clipper.Area(solution[0]) ~= Clipper.Area(subject)+Clipper.Area(clip))
-        return is_intersect
+        -- local is_intersect = (Clipper.Area(solution[0]) == Clipper.Area(clip) + Clipper.Area(subject))
+        -- if is_intersect == true then
+        --   local solution = Clipper.Paths(1)
+        --   clipper:Execute(Clipper.ctDifference, solution)
+        --   is_intersect = (Clipper.Area(solution[0]) ~= 0)
+        -- end
+
+        local is_intersect = false
+        local none_outside = true
+        for i = 0, vertex_1.num_of_points - 1 do
+          local relation = Clipper.PointInPolygon(subject[i], clip)
+          if relation == 0 then
+            none_outside = false
+          end
+          if relation == 1 then
+            is_intersect = true
+            break
+          end
+        end
+
+        return is_intersect or none_outside
       end)
 
       local is_consistent = true
       for _, vertex_1 in ipairs(graph.vertices) do
-        if assignment[vertex_1] ~= nil then
-          for _, vertex_2 in ipairs(graph.vertices) do
-            if vertex_1 ~= vertex_2 then
-              if assignment[vertex_2] ~= nil then
-                if does_intersect(get_id(vertex_1), get_id(vertex_2), assignment[vertex_1].x, assignment[vertex_1].y, assignment[vertex_2].x, assignment[vertex_2].y) then
-                  is_consistent = false
-                  break
-                end
-              end
+        for _, vertex_2 in ipairs(graph.vertices) do
+          if vertex_1 ~= vertex_2 and assignment[vertex_1] and assignment[vertex_2] then
+            if does_intersect(get_id(vertex_1), get_id(vertex_2), assignment[vertex_1].x, assignment[vertex_1].y, assignment[vertex_2].x, assignment[vertex_2].y) then
+              is_consistent = false
+              break
             end
           end
         end
@@ -672,28 +706,22 @@ function Map:planar_embedding(graph)
     return constraints
   end
 
-  local start = love.timer.getTime()
-
   fill_vertices_info()
-
   local variables = get_variables()
   local constraints = get_constraints()
   local assignment = {}
 
   local function select_unassigned_variable(vars, domains, assignment)
-    -- Select the variable with the fewest remaining values in its domain
     local min_var, min_size = nil, math.huge
     for _, var in ipairs(vars) do
-        if assignment[var] == nil and #domains[var] < min_size then
-            min_var = var
-            min_size = #domains[var]
-        end
+      if assignment[var] == nil and #domains[var] < min_size then
+        min_var = var
+        min_size = #domains[var]
+      end
     end
     return min_var
   end
-
   local function is_consistent(assignment, constraints, variables)
-    -- Check if the assignment satisfies all constraints
     local satisfied = true
     for _, clause in ipairs(constraints) do
       if clause(variables, assignment) == false then
@@ -703,54 +731,78 @@ function Map:planar_embedding(graph)
     end
     return satisfied
   end
-
-  local function backtrack_search(vars, domains, constraints, assignment)
+  local function backtrack_search(vars, constraints, assignment)
     local domains = get_domains(variables, assignment)
 
-    -- If all variables are assigned, return the solution
     if #tablex.keys(assignment) == #vars then
       return assignment
     end
     
-    -- Choose the next unassigned variable
     local var = select_unassigned_variable(vars, domains, assignment)
     
-    -- Try assigning each value in the domain of the variable
-    for _, value in ipairs(domains[var]) do
-      -- Assign the value to the variable
+    local function rpairs(t)
+      local total = #t
+      
+      return function()
+        if total > 0 then
+          local r = love.math.random(total)
+          local v = t[r]
+          
+          t[r], t[total] = t[total], t[r]
+          total = total - 1
+          
+          return v
+        end
+      end
+    end
+
+    for value in rpairs(domains[var]) do
       assignment[var] = value
         
-      -- Check if the assignment satisfies all constraints
       if is_consistent(assignment, constraints, vars) then
-        -- Recursively search with the updated assignment
-        local result = backtrack_search(vars, domains, constraints, assignment)
-            
-          -- If a solution is found, return it
+        local result = backtrack_search(vars, constraints, assignment)
         if result ~= nil then
           return result
         end
       end
         
-      -- If the assignment violates a constraint, backtrack
       assignment[var] = nil
     end
     
-    -- If no solution is found, return nil
     return nil
   end
 
-  local assignment = backtrack_search(variables, domains, constraints, assignment)
+  local assignment = backtrack_search(variables, constraints, assignment)
   assert(assignment, 'unsatisfiable')
 
   local length = find_domain_range_max()
-  local map = Map:new(length*2, length*2, 0)
-
+  local map = Map:new(length, length, 0)
   for i, v in ipairs(variables) do
     map:blit(v.chunk, assignment[v].x, assignment[v].y, false)
   end
 
-  print((love.timer.getTime() - start) * 100)
+  for k, v in pairs(edge_matches) do
+    local edge_1 = v.edge_1
+    local edge_2 = v.edge_2
 
+    local overlapping_points = {}
+
+    for i = 2, #edge_1-1 do
+      for i2 = 2, #edge_2-1 do
+        if edge_1[i] == edge_2[i2] then
+          table.insert(overlapping_points, edge_1[i])
+        end
+      end
+    end
+
+    for _, point in ipairs(overlapping_points) do
+      map:clear_cell(point.x, point.y)
+      map:insert_entity('Gate', point.x, point.y)
+    end
+  end
+
+  print((love.timer.getTime() - start) * 100)
+  jit.off()
   return map
 end
 
@@ -902,7 +954,7 @@ function Map:find_edges()
   local startPos
   for x, y in self:for_cells() do
     if self:get_cell(x, y) == 1 then
-      startPos = {x=x, y=y}
+      startPos = vec2(x, y)
     end
   end
   
@@ -923,7 +975,7 @@ function Map:find_edges()
         local x, y = start.x+v[1], start.y+v[2] -- Check from the starting point + a neighbor
         if self:get_cell(x, y) == 1 then -- If that pos is a wall
           edge.vec = {v[1],v[2]} -- Define the edges vector as the neighbor direction
-          table.insert(edge, {x=x,y=y}) -- insert the position
+          table.insert(edge, vec2(x, y)) -- insert the position
           break
         end
       end
@@ -934,7 +986,7 @@ function Map:find_edges()
     local y = edge[#edge].y + edge.vec[2]
     
     if self:get_cell(x, y) == 1 then
-      table.insert(edge, {x=x,y=y})
+      table.insert(edge, vec2(x, y))
     end
   until self:get_cell(x, y) ~= 1 
   
