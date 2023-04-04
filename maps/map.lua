@@ -466,16 +466,42 @@ function Map:planar_embedding(graph)
 
     return math.max(chunk_dimensions_sum.x, chunk_dimensions_sum.y)
   end
-  local function get_domains(variables)
+  local function get_domains(variables, assignment)
     local domains = {}
     local domain_range = vec2(0, find_domain_range_max())
+    
     for _, v in ipairs(variables) do
-      local domain = {}
-      for x = domain_range.x, domain_range.y do
-        for y = domain_range.x, domain_range.y do
-          table.insert(domain, vec2(x, y))
+      local assigned_edges = {}
+      for _, v in ipairs(v.edges) do
+        if assignment[v.vertex] then
+          table.insert(assigned_edges, v.vertex)
         end
       end
+
+      local domain = {}
+
+      if assignment[v] then
+        table.insert(domain, assignment[v])
+      elseif #assigned_edges > 0 then
+        local assigned_edge = assigned_edges[1]
+        local assigned_pos = assignment[assigned_edge]
+        local assigned_dim = vec2(assigned_edge.chunk.width, assigned_edge.chunk.height)
+
+        local min = vec2(assigned_pos.x - v.chunk.width, assigned_pos.y - v.chunk.height)
+        local max = vec2(assigned_pos.x + assigned_dim.x + v.chunk.width, assigned_pos.y + assigned_dim.y + v.chunk.height)
+        for x = math.max(domain_range.x, min.x), math.min(domain_range.y, max.x) do
+          for y = math.max(domain_range.x, min.y), math.min(domain_range.y, max.y) do
+            table.insert(domain, vec2(x, y))
+          end
+        end
+      else
+        for x = domain_range.x, domain_range.y do
+          for y = domain_range.x, domain_range.y do
+            table.insert(domain, vec2(x, y))
+          end
+        end
+      end
+
       domains[v] = domain
     end
 
@@ -651,7 +677,6 @@ function Map:planar_embedding(graph)
   fill_vertices_info()
 
   local variables = get_variables()
-  local domains = get_domains(variables)
   local constraints = get_constraints()
   local assignment = {}
 
@@ -680,6 +705,8 @@ function Map:planar_embedding(graph)
   end
 
   local function backtrack_search(vars, domains, constraints, assignment)
+    local domains = get_domains(variables, assignment)
+
     -- If all variables are assigned, return the solution
     if #tablex.keys(assignment) == #vars then
       return assignment
@@ -690,22 +717,22 @@ function Map:planar_embedding(graph)
     
     -- Try assigning each value in the domain of the variable
     for _, value in ipairs(domains[var]) do
-        -- Assign the value to the variable
-        assignment[var] = value
+      -- Assign the value to the variable
+      assignment[var] = value
         
-        -- Check if the assignment satisfies all constraints
-        if is_consistent(assignment, constraints, vars) then
-            -- Recursively search with the updated assignment
-            local result = backtrack_search(vars, domains, constraints, assignment)
+      -- Check if the assignment satisfies all constraints
+      if is_consistent(assignment, constraints, vars) then
+        -- Recursively search with the updated assignment
+        local result = backtrack_search(vars, domains, constraints, assignment)
             
-            -- If a solution is found, return it
-            if result ~= nil then
-                return result
-            end
+          -- If a solution is found, return it
+        if result ~= nil then
+          return result
         end
+      end
         
-        -- If the assignment violates a constraint, backtrack
-        assignment[var] = nil
+      -- If the assignment violates a constraint, backtrack
+      assignment[var] = nil
     end
     
     -- If no solution is found, return nil
