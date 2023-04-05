@@ -70,7 +70,6 @@ function Map:get_random_open_tile()
   local x, y = math.random(0, self.width), math.random(0, self.height)
 
   while self:get_cell(x, y) ~= 0 do
-    print("SEARCHING FOR OPEN TILE", x, y, self:get_cell(x, y))
     x, y = math.random(0, self.width), math.random(0, self.height)
   end
 
@@ -127,14 +126,17 @@ end
 
 function Map:check_adjacency(map, x, y)
   local hasOverlap = false
-  local hasAdjacentWall
+  local door_candidates = {}
 
+  -- does the map overlap with our current map?
   if self:check_overlap(map, x, y) then
     return false
   end
 
-  for i = x, x + map.width - 1 do
-    for j = y, y + map.height - 1 do
+  -- loop through each tile in the map
+  for i = x, x + map.width do
+    for j = y, y + map.height do
+      -- get the current cell and the cell in the map
       local currentCell = self:get_cell(i, j)
       local mapCell = map:get_cell(i - x, j - y)
 
@@ -149,15 +151,16 @@ function Map:check_adjacency(map, x, y)
         vec2(-1, 1),
       }
 
-      if mapCell == 0 or currentCell == 0 then
+      -- if our current cell is a floor tile and it neighbours a floor tile
+      -- on the map then we should reject it
+      if mapCell == 0 then
         for _, offset in ipairs(neighbors) do
           local ni = i + offset.x
           local nj = j + offset.y
 
-          local neighborCurrentCell = self:get_cell(ni, nj)
-          local neighborMapCell = map:get_cell(ni, nj)
+          local neighbour = self:get_cell(ni, nj)
 
-          if neighborCurrentCell == 0 or neighborMapCell == 0 then
+          if neighbour == 0 then
             hasOverlap = true
           end
         end
@@ -182,13 +185,15 @@ function Map:check_adjacency(map, x, y)
           local neighborMapCell = map:get_cell(ni1 - x, nj1 - y)
 
           if neighborCurrentCell == 0 and neighborMapCell == 0 then
-              hasAdjacentWall = {i, j}
+            table.insert(door_candidates, {i, j})
           end
         end
       end
     end
   end
 
+
+  local hasAdjacentWall = table.remove(door_candidates, math.random(1, #door_candidates))
   if not hasOverlap and hasAdjacentWall then
     return hasAdjacentWall
   end
@@ -202,15 +207,24 @@ function Map:room_accretion(map, open_tile, wall_tile)
 
   -- Find all possible starting positions
   local possible_positions = {}
-  for x = 1, self.width - map.width do
-    for y = 1, self.height - map.height do
+  for x = 1, self.height do
+    for y = 1, self.width do
       table.insert(possible_positions, {x, y})
     end
+  end
+
+  -- Shuffle the possible_positions list using the Fisher-Yates algorithm
+  for i = #possible_positions, 2, -1 do
+    local j = math.random(1, i)
+    if not possible_positions[i] or not possible_positions[j] then
+      print(i, j)
+    end
+    possible_positions[i], possible_positions[j] = possible_positions[j], possible_positions[i]
   end
   
   -- Iterate through the shuffled positions and try to place the map
   local attempts = 0
-  while attempts < 1000 and not placed do
+  while attempts < 100 and not placed do
     attempts = attempts + 1
 
     local x, y = unpack(table.remove(possible_positions, math.random(1, #possible_positions)))
@@ -219,7 +233,17 @@ function Map:room_accretion(map, open_tile, wall_tile)
 
     if adjacent then
       self:blit(map, x, y, false, 1)
-      return adjacent
+
+      local roomTiles = {}
+      for i = x, x + map.width do
+        for j = y, y + map.height do
+          if map:get_cell(i - x, j - y) == 0 then
+            table.insert(roomTiles, {i, j})
+          end
+        end
+      end
+
+      return roomTiles, adjacent
     end
   end
 end
@@ -228,7 +252,8 @@ function Map:from_chunk(chunk)
   chunk:parameters()
   local map = Map:new(chunk.width, chunk.height, 1)
   chunk:shaper(map)
-  
+  chunk:populater(map)
+
   return map
 end
 
@@ -986,7 +1011,7 @@ function Map:spacePropogation(value, neighborhood, cell, size)
       for _, v in pairs(neighborhood) do
         local x = cell.x + v[1]
         local y = cell.y + v[2]
-        if self:posIsInMap(x, y) then
+        if self:get_cell(x, y) then
           self.cells[x][y] = value
           recurse({x=x,y=y}, size - 1)
         end
@@ -1100,7 +1125,7 @@ function Map:aStar(x1,y1, x2,y2)
     end
     
     for k, v in pairs(vonNeuman) do
-      if self:posIsInMap(nextNode.x + v[1], nextNode.y + v[2]) then
+      if self:get_cell(nextNode.x + v[1], nextNode.y + v[2]) then
         if self.cells[nextNode.x + v[1]][nextNode.y + v[2]] ~= 1 then
           local newNode = {}
           newNode.x = nextNode.x + v[1]
@@ -1450,10 +1475,8 @@ function Map:tunneler(x1, y1, width, turnThreshold, steps, startingDirection, mi
     x, y = push_away_from_edge(x, y, width)
     clear_tunnel_cells(x, y, currentDirection, width)
 
-    print(step, last_turn, min_turn)
     if turnThreshold > math.random() and step - last_turn > min_turn then
       last_turn = step
-      print(last_turn)
       change_direction(x, y, width)
     end
 
@@ -1515,5 +1538,55 @@ function Map:remove_isolated_walls()
   end
 end
 
+function Map:find_wall_tiles_to_remove()
+  local wall_tiles_to_remove = {}
+  
+  local vonNeuman = {
+    n = {0, -1},
+    e = {1, 0},
+    s = {0, 1},
+    w = {-1, 0},
+  }
+  
+  -- Find wall tiles with two opposite floor tiles
+  for x = 1, self.width do
+    for y = 1, self.height do
+      if self:get_cell(x, y) == 1 then
+        local opposite_floor_tiles = {}
+        for _, dir in pairs(vonNeuman) do
+          local floor1_x = x + dir[1]
+          local floor1_y = y + dir[2]
+          local floor2_x = x - dir[1]
+          local floor2_y = y - dir[2]
+          if self:get_cell(floor1_x, floor1_y) ~= nil and self:get_cell(floor2_x, floor2_y) ~= nil and
+            self:get_cell(floor1_x, floor1_y) == 0 and self:get_cell(floor2_x, floor2_y) == 0 then
+            table.insert(opposite_floor_tiles, {{x = floor1_x, y = floor1_y}, {x = floor2_x, y = floor2_y}})
+          end
+        end
+        if #opposite_floor_tiles > 0 then
+          table.insert(wall_tiles_to_remove, {x = x, y = y, opposite_floor_tiles = opposite_floor_tiles})
+        end
+      end
+    end
+  end
+
+  -- Find and remove the walls with the greatest pathfinding distance between their neighboring floor tiles
+  local max_distance = -1
+  local wall_to_remove = nil
+  for _, wall in ipairs(wall_tiles_to_remove) do
+    for _, floor_pair in ipairs(wall.opposite_floor_tiles) do
+      local path = self:aStar(floor_pair[1].x, floor_pair[1].y, floor_pair[2].x, floor_pair[2].y)
+      local distance = #path - 1
+      if distance > max_distance then
+        max_distance = distance
+        wall_to_remove = wall
+      end
+    end
+  end
+
+  if wall_to_remove then
+    self:set_cell(wall_to_remove.x, wall_to_remove.y, 0)
+  end
+end
 
 return Map

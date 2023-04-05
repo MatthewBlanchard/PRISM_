@@ -10,7 +10,7 @@ SingOnEat:onAction(actions.Eat,
   function(self, level, actor, action)
     local effects_system = level:getSystem("Effects")
     if effects_system then
-      effects_system:addEffect(effects.CharacterDynamic(action.owner, 0, -1, Tiles["bubble_music"], {1, 1, 1}, .5))
+      effects_system:addEffect(level, effects.CharacterDynamic(action.owner, 0, -1, Tiles["bubble_music"], {1, 1, 1}, .5))
     end
   end
 ):where(Condition.ownerIsTarget)

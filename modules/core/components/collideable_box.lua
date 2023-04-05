@@ -1,4 +1,4 @@
-local BoundingBox = require "math.bounding_box"
+local BoundingBox = require "math.collision_bounding_box"
 local Collideable = require "modules.core.components.collideable"
 local Vector2 = require "math.vector"
 
@@ -7,6 +7,7 @@ CollideableBox.name = "CollideableBox"
 
 function CollideableBox:__new(size)
     self.boundingBox = BoundingBox(size or 1)
+    self.size = size or 1
 end
 
 function CollideableBox:eachCellGlobal(actor)

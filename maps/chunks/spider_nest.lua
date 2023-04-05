@@ -28,15 +28,15 @@ function spider_nest:populater(chunk, clipping)
     local x, y
     repeat
       x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
-    until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
-    --chunk:insert_actor('Webweaver', x, y)
+    until chunk:get_cell(x, y) == 0
+    chunk:insert_actor('Webweaver', x, y)
   end
 
   for i = 1, 2 do
     local x, y
     repeat
       x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
-    until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
+    until chunk:get_cell(x, y) == 0
     chunk:insert_actor('Web', x, y)
   end
 
@@ -44,7 +44,8 @@ function spider_nest:populater(chunk, clipping)
     local x, y
     repeat
       x, y = love.math.random(1, chunk.width-1)+1, love.math.random(1, chunk.height-1)+1
-    until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
+    until chunk:get_cell(x, y) == 0
+
     if love.math.random(0, 1) == 1 then
       chunk:insert_actor('Bones_1', x, y)
     else

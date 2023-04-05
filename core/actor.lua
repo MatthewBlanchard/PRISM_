@@ -81,29 +81,16 @@ function Actor:__new()
     self.actions[k] = v:extend()
   end
 
+  local components = self.components
+  self.components = {}
+  self.componentCache = {}
   if self.components then
-    local temp = {}
 
-    for k, component in ipairs(self.components) do
-      -- Catch any components that are not of the Component type on initialization to prevent errors later.
-      assert(component:is(Component), "Actor " .. self.name .. " has a component that is not of Component type!")
-
-      if not component:checkRequirements(self) then
-        error("Not all requirements present for component " .. component.name .. " in actor " .. self.name .. "!")
-      end
-
-      -- This is a hack to prevent components from being shared between actors by copying
-      -- the prototype's 
+    for k, component in ipairs(components) do
       component.owner = self
-      temp[k] = component:extend()
+      self:addComponent(component:extend())
     end
-
-    self.components = temp
-  else
-    self.components = {}
   end
-
-  self:initializeComponents()
 end
 
 --- Called after an actor is added to a level and it's components are initialized. This will
@@ -138,6 +125,15 @@ function Actor:addComponent(component)
   assert(component:is(Component), "Expected argument component to be of type Component!")
   assert(component.name, "Component must have name field!")
 
+  for k,v in pairs(components) do
+    if component:is(v) then
+      if self.componentCache[v] then
+        error("Actor already has component " .. v.name .. "!")
+      end
+      self.componentCache[v] = component
+    end
+  end
+
   if not component:checkRequirements(self) then
     error("Unsupported component added to actor!")
   end
@@ -158,6 +154,16 @@ end
 function Actor:removeComponent(component)
   assert(component:is(Component), "Expected argument component to be of type Component!")
 
+  for k,v in pairs(components) do
+    if component:is(v) then
+      if not self.componentCache[v] then
+        error("Actor does not have component " .. v.name .. "!")
+      end
+
+      self.componentCache[v] = nil
+    end
+  end
+
   for i = 1, #self.components do
     if self.components[i]:is(getmetatable(component)) then
       local component = table.remove(self.components, i)
@@ -173,22 +179,12 @@ end
 function Actor:hasComponent(type)
   assert(type:is(Component), "Expected argument type to be inherited from Component!")
 
-  for k, component in pairs(self.components) do
-    if component:is(type) then
-      return true
-    end
-  end
-
-  return false
+  return self.componentCache[type] ~= nil
 end
 
 -- Returns the first component of the given type that the actor has.
 function Actor:getComponent(type)
-  for k, component in pairs(self.components) do
-    if component:is(type) then
-      return component
-    end
-  end
+  return self.componentCache[type]
 end
 
 
@@ -336,44 +332,29 @@ function Actor:getPosition()
   return Vector2(self.position.x, self.position.y)
 end
 
+local self_tiles = {}
+local other_tiles = {}
 function Actor:getRange(type, actor)
   local lowest = math.huge
-
-  if not actor:is(Actor) then
-    assert(actor:is(Vector2))
-    return self:getRangeVec(type, actor)
-  end
 
   local collideable_component = self:getComponent(components.Collideable)
   local other_collideable_component = actor:getComponent(components.Collideable)
 
-  local self_tiles = {}
-  if collideable_component then
+  if collideable_component and other_collideable_component then
+    if collideable_component.size == 1 and other_collideable_component.size == 1 then
+      return self.position:getRange(type, actor.position)
+    end
+
     for vec in collideable_component:eachCellGlobal(self) do
-      table.insert(self_tiles, vec)
-    end
-  else
-    self_tiles = {self.position}
-  end
-
-  local other_tiles = {}
-  if other_collideable_component then
-    for vec in other_collideable_component:eachCellGlobal(actor) do
-      table.insert(other_tiles, vec)
-    end
-  else
-    other_tiles = {actor.position}
-  end
-
-  -- now that we've assembled lists of tiles, we can iterate over them and find
-  -- the lowest range.
-  for _, self_tile in pairs(self_tiles) do
-    for _, other_tile in pairs(other_tiles) do
-      local range = self_tile:getRange(type, other_tile)
-      if range < lowest then
-        lowest = range
+      for other_vec in other_collideable_component:eachCellGlobal(actor) do
+        local range = vec:getRange(type, other_vec)
+        if range < lowest then
+          lowest = range
+        end
       end
     end
+  else
+    return self.position:getRange(type, actor.position)
   end
 
   return lowest

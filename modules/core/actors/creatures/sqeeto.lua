@@ -55,7 +55,7 @@ function Sqeeto:act(level)
   local spider = actUtil.closestSeenActorByFaction(self, "arachnid")
   if spider then
     if effect_system then
-      effect_system:addEffect(effects.CharacterDynamic(self, 0, -1, Tiles["bubble_lines"], {1, 1, 1}, .5))
+      effect_system:addEffect(level, effects.CharacterDynamic(self, 0, -1, Tiles["bubble_lines"], {1, 1, 1}, .5))
     end
     return actUtil.moveAway(self, spider)
   end

@@ -26,6 +26,9 @@ function LightingSystem:initialize(level)
   self:rebuildLighting(level)
 end
 
+function LightingSystem:postInitialize(level)
+end
+
 function LightingSystem:beforeAction(level, actor, action)
   for actor in level:eachActor() do
     self.__opaqueCache[actor] = actor.opaque
@@ -54,6 +57,7 @@ function LightingSystem:onMove(level, actor)
 end
 
 function LightingSystem:onActorAdded(level, actor)
+  if not level:initialized() then return end
   self:rebuildLighting(level)
 end
 

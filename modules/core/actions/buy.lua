@@ -29,10 +29,10 @@ function Buy:perform(level)
     level:removeActor(self.product)
 
     if sellable_component.shopkeep then
-      effects_system:addEffect(sellable_component.soldEffect())
+      effects_system:addEffect(level, sellable_component.soldEffect())
     end
   elseif sellable_component.shopkeep then
-    effects_system:addEffect(sellable_component.notSoldEffect())
+    effects_system:addEffect(level, sellable_component.notSoldEffect())
   end
 end
 

@@ -7,7 +7,7 @@ Lifetime.name = "Lifetime"
 
 function Lifetime:onDurationEnd(level, actor)
   local effects_system = level:getSystem("Effects")
-  effects_system:addEffect(effects.Character(actor.position.x, actor.position.y, Tiles["poof"], {.4, .4, .4}, 0.3))
+  effects_system:addEffect(level, effects.Character(actor.position.x, actor.position.y, Tiles["poof"], {.4, .4, .4}, 0.3))
   level:removeActor(actor)
 end
 

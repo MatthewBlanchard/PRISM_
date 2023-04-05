@@ -23,7 +23,8 @@ function Throw:perform(level)
     local point = line[i]
     if level:getCellPassable(point[1], point[2]) then
       level:moveActor(thrown, Vector2(point[1], point[2]))
-      coroutine.yield("wait", 0.1)
+  
+      level:yield("wait", 0.1)
     else
       return
     end

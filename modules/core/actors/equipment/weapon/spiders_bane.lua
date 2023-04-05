@@ -44,7 +44,7 @@ SentientWeapon:afterAction(actions.Attack,
             { 0.0, 1.0, 0.0, 1.0 }
         )
 
-        effect_system:addEffect(speak_effect)
+        effect_system:addEffect(level, speak_effect)
     end
   end
 )

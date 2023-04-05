@@ -1,7 +1,10 @@
-require "export_lib"
+require "prelude"
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 math.randomseed(os.time())
+math.random(); math.random(); math.random()
+
+love.audio.setVolume(0)
 
 local Game = require "game"
 

@@ -1,4 +1,4 @@
-local BoundingBox = require "math.bounding_box"
+local BoundingBox = require "math.collision_bounding_box"
 local Collideable = require "modules.core.components.collideable"
 local CollideableBox = require "modules.core.components.collideable_box"
 local CollideableSnake = require "modules.core.components.collideable_snake"

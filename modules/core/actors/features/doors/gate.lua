@@ -12,7 +12,7 @@ Gate.remembered = true
 local targetDoor = targets.Actor:extend()
 
 function targetDoor:validate(owner, Gate)
-  return Gate:is(Gates.Gate)
+  return Gate:is(actors.Gate)
 end
 
 local Open = Action:extend()
@@ -24,9 +24,9 @@ function Open:perform(level)
 
   local collideable = door:hasComponent(components.Collideable)
   door.char = not collideable and Tiles["door_3"] or Tiles["door_1"]
-
+  
   if collideable then
-    door:removeComponent(components.Collideable)
+    door:removeComponent(components.Collideable_box)
   else
     door:addComponent(components.Collideable_box())
   end

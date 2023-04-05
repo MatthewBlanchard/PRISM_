@@ -16,6 +16,7 @@ function Level:__new(map, populater)
 
   self.actors = {}
   self.sparseMap = SparseMap() -- holds a sparse map of actors in the scene by position
+  self.componentCache = {} -- holds submaps of actors by component type
 
   -- Initialize our scheduler. This is used to keep track of time and
   -- actor turns.
@@ -25,7 +26,8 @@ function Level:__new(map, populater)
   -- damage over time effects
   self.scheduler:add("tick")
   self.exit = false
-
+  self.initialized = false
+  
   -- let's create our map and fill it with the info from the supplied
   -- rotLove map
   self.map = Grid(map._width + 1, map._height + 1, Wall())
@@ -50,6 +52,12 @@ function Level:run()
 
   if self:getSystem("Lighting") then
     self:getSystem("Lighting"):forceRebuildLighting(self)
+  end
+
+  self.initialized = true
+
+  for _, system in ipairs(self.systems) do
+    system:postInitialize(self)
   end
 
   -- no brakes baby
@@ -93,6 +101,10 @@ function Level:run()
       
       self:triggerActionEvents("onTicks")
     else
+      for _, system in ipairs(self.systems) do
+        system:onTurn(self, actor)
+      end
+
       local action
       local controller = self:getActorController(actor)
       if controller then
@@ -125,6 +137,9 @@ function Level:getActorController(actor)
   return actor:getComponent(components.Controller)
 end
 
+function Level:initialized()
+  return self.initialized
+end
 --
 -- Systems
 --
@@ -175,6 +190,13 @@ function Level:addActor(actor)
   -- some sanity checks
   assert(actor:is(Actor), "Attemped to add a non-actor object to the level with addActor")
 
+  for component, _ in pairs(actor.componentCache) do
+    if self.componentCache[component] == nil then
+      self.componentCache[component] = {}
+    end
+    self.componentCache[component][actor] = true
+  end
+
   actor:initialize(self)
   table.insert(self.actors, actor)
   
@@ -196,6 +218,15 @@ function Level:addActor(actor)
 end
 
 function Level:removeActor(actor)
+  for component, present in pairs(actor.componentCache) do
+    if self.componentCache[component] == nil then
+      print "YA"
+      self.componentCache[component] = {}
+    end
+    
+    self.componentCache[component][actor] = false
+  end
+
   for vec in self:eachActorTile(actor) do
     self.sparseMap:remove(vec.x, vec.y, actor)
   end
@@ -246,6 +277,23 @@ end
 function Level:eachActor(...)
   local n = 1
   local comp = { ... }
+  
+  if #comp == 1 and self.componentCache[comp[1]] then
+    local currentComponentCache = self.componentCache[comp[1]]
+    local key = next(currentComponentCache, key)
+
+    local function iterator()
+      while key do
+        local ractor, rcomp = key, key:getComponent(comp[1])
+        key = next(currentComponentCache, key)
+        
+        return ractor, rcomp
+      end
+    end
+
+    return iterator
+  end
+
   return function()
     for i = n, #self.actors do
       n = i + 1
@@ -275,21 +323,27 @@ function Level:eachActor(...)
   end
 end
 
+local dummy = {}
 function Level:eachActorTile(actor)
-  local list = {}
+  local count = 0
 
   local collideable_component = actor:getComponent(components.Collideable)
   if collideable_component then
     for vec in collideable_component:eachCellGlobal(actor) do
-      table.insert(list, vec)
+      count = count + 1
+      dummy[count] = vec
     end
   else
-    table.insert(list, actor.position)
+    count = 1
+    dummy[1] = actor.position
   end
 
+  local i = 1
   return function()
-    while #list > 0 do
-      return table.remove(list)
+    while i <= count do
+      local ret = dummy[i]
+      i = i + 1
+      return ret
     end
   end
 end
@@ -303,6 +357,17 @@ function Level:getActorsAt(x, y)
   return actorsAtPosition
 end
 
+function Level:eachActorAt(x, y)
+  local key
+  local actors = self.sparseMap:get(x, y)
+  local function iterator()
+    key, _ = next(actors, key)
+    if key then
+      return key
+    end
+  end
+  return iterator
+end
 
 function Level:moveActor(actor, pos, skipSparseMap)
   assert(pos.is and pos:is(Vector2), "Expected a Vector2 for pos in Level:moveActor.")
@@ -349,11 +414,9 @@ function Level:moveActorChecked(actor, direction)
 
   local collideable = actor:getComponent(components.Collideable)
   if collideable then 
-    local debug = {}
     for cell in collideable:moveCandidate(self, actor, direction) do
       local blockSelf = actor
       
-      table.insert(debug, cell)
       if collideable and collideable.blockSelf then
         blockSelf = nil
       end
@@ -364,8 +427,6 @@ function Level:moveActorChecked(actor, direction)
         table.insert(accepted, cell)
       end
     end
-
-    --self:getSystem("Effects"):addEffect(effects.tryMoveDebug(actor, debug))
   else
     if not self:getCellPassableNoActors(newPosition.x, newPosition.y, actor) then
       return
@@ -380,20 +441,14 @@ function Level:moveActorChecked(actor, direction)
     end
 
     local squeeze_success = true
-    local debug = {}
     for cell in trySqueeze do
-      table.insert(debug, cell)
       if not self:getCellPassable(cell.x, cell.y, actor) then
         squeeze_success = false
       else
       end
     end
 
-    print(#debug)
-    self:getSystem("Effects"):addEffect(effects.tryMoveDebug(actor, debug))
-
     if squeeze_success then
-      print("NEW ORIGIN", new_origin)
       self:removeSparseMapEntries(actor)
 
       collideable:acceptedSqueeze(self, actor, direction, rejected, accepted)
@@ -522,7 +577,7 @@ function Level:getAOE(type, position, range)
     return fov, seenActors
   elseif type == "box" then
     for k, other in ipairs(self.actors) do
-      if other:getRange("box", position) <= range then
+      if other:getRangeVec("box", position) <= range then
         table.insert(seenActors, other)
       end
     end
@@ -615,6 +670,14 @@ function Level:getRandomWalkableTile()
       return x, y
     end
   end
+end
+
+function Level:yield(...)
+  for _, system in ipairs(self.systems) do
+    system:onYield(self, ...)
+  end
+
+  coroutine.yield(...)
 end
 
 return Level

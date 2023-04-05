@@ -15,7 +15,7 @@ function Web:perform(level)
 
   local effects_system = level:getSystem("Effects")
   if effects_system then
-    effects_system:addEffect(effects.CharacterDynamic(creature, 0, 0, Tiles["web"], {1, 1, 1}, .5))
+    effects_system:addEffect(level, effects.CharacterDynamic(creature, 0, 0, Tiles["web"], {1, 1, 1}, .5))
   end
 end
 

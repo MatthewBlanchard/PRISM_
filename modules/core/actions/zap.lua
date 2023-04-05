@@ -10,7 +10,7 @@ function Zap:perform(level)
 
   if self:getTarget(2) then
     local effectPos = self:getTarget(2).position or self:getTarget(2)
-    level:getSystem("Effects"):addEffect(effects.Zap(wand, self.owner, effectPos))
+    level:getSystem("Effects"):addEffect(level, effects.Zap(wand, self.owner, effectPos))
   end
 end
 
