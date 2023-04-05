@@ -8,7 +8,7 @@ SlippersOfSwiftness.name = "Slippers of Swiftness"
 SlippersOfSwiftness.components = {
   components.Item(),
   components.Equipment{
-    slot = "boots",
+    slot = "feet",
     effects = {
       conditions.Swiftness
     }
