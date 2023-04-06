@@ -216,8 +216,9 @@ end
   
 -- Little factories for some callback functions we need to pass to the FOV calculator
 function SightSystem:createVisibilityClosure(level)
+    local opacityCache = level:getOpacityCache()
     return function(fov, x, y)
-        return not level:getCellOpaque(x, y)
+        return not opacityCache:get(x, y)
     end
 end
 

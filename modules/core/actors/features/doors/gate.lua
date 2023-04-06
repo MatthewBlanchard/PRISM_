@@ -6,7 +6,6 @@ local Gate = Actor:extend()
 
 Gate.char = Tiles["door_3"]
 Gate.name = "gate"
-Gate.opaque = false
 Gate.remembered = true
 
 local targetDoor = targets.Actor:extend()
@@ -30,8 +29,6 @@ function Open:perform(level)
   else
     level:removeComponent(door, components.Collideable_box())
   end
-
-  door.opaque = not collideable
 end
 
 

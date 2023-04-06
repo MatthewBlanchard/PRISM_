@@ -27,7 +27,7 @@ function LightingSystem:initialize(level)
 end
 
 function LightingSystem:beforeAction(level, actor, action)
-  for actor in level:eachActor() do
+  for actor in level:eachActor(components.Opaq) do
     self.__opaqueCache[actor] = actor.opaque
   end
 end

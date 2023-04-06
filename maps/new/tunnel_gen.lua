@@ -106,7 +106,7 @@ function TunnelGen:create(callback)
 
     print "FINDING WALL TILES TO REMOVE"
 
-    for i = 1, 20 do
+    for i = 1, 10 do
         local x, y = self._map:get_random_open_tile()
         local light_sources = {
             "Glowshroom_1",

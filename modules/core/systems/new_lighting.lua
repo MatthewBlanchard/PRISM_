@@ -22,7 +22,6 @@ end
 function LightingSystem:initialize(level)
     self.__lightMap = LightBuffer(level.width, level.height)
     self.__effectLightMap = LightBuffer(level.width, level.height)
-    self.__fov = ROT.FOV.Recursive(self:createVisibilityClosure(level))
 end
 
 function LightingSystem:postInitialize(level)
@@ -31,18 +30,19 @@ function LightingSystem:postInitialize(level)
 end
 
 function LightingSystem:beforeAction(level, actor, action)
-    for actor in level:eachActor() do
-        self.__opaqueCache[actor] = actor.opaque
+    for actor in level:eachActor(components.Opaque) do
+        self.__opaqueCache[actor] = true
     end
 end
 -- called when an Actor takes an Action
 function LightingSystem:afterAction(level, actor, action)
     local force_rebuild = false
-    for actor in level:eachActor() do
-        if self.__opaqueCache[actor] ~= actor.opaque then
+
+    for k, v in pairs(self.__opaqueCache) do
+        if not k:hasComponent(components.Opaque) then
+            self.__opaqueCache[k] = nil
             force_rebuild = true
         end
-        self.__opaqueCache[actor] = nil
     end
 
     if force_rebuild then
@@ -285,10 +285,6 @@ function LightingSystem:__rebuild(level, dt)
     end
 end
 
-function LightingSystem:__isOpaque(level, row, col)
-    return level:getCellOpaque(row, col)
-end
-
 function LightingSystem:__getLightReduction(level, row, col)
     local reduction = level:getCell(row, col).lightReduction or 0
     local actors = level:getActorsAt(row, col)
@@ -354,11 +350,6 @@ function LightingSystem:__spreadLight(level, row, col, offsetx, offsety, lightLe
     local maxRow = maxRow + offsetx
     local maxCol = maxCol + offsety
     return BoundingBox(minRow, minCol, maxRow, maxCol)
-end
-
-
-function LightingSystem:createVisibilityClosure(level)
-    return function(fov, x, y) return not level:getCellOpaque(x, y) end
 end
 
 return LightingSystem
