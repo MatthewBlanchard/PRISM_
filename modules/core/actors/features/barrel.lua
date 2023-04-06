@@ -28,7 +28,6 @@ local Barrel = Actor:extend()
 
 Barrel.char = Tiles["barrel"]
 Barrel.name = "barrel"
-Barrel.opaque = false
 
 Barrel.components = {
   components.Collideable_box(),

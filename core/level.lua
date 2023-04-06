@@ -483,8 +483,8 @@ function Level:removeSparseMapEntries(actor)
 
     local opaque = false
     for actor, _ in pairs(self.sparseMap:get(vec.x, vec.y)) do
-      opaque = opaque or actor.opaque
-      if actor.opaque then
+      opaque = opaque or actor:hasComponent(components.Opaque)
+      if opaque then
         break
       end
     end
@@ -500,8 +500,8 @@ function Level:insertSparseMapEntries(actor)
 
     local opaque = false
     for actor, _ in pairs(self.sparseMap:get(vec.x, vec.y)) do
-      opaque = opaque or actor.opaque
-      if actor.opaque then
+      opaque = opaque or actor:hasComponent(components.Opaque)
+      if opaque then
         break
       end
     end
@@ -654,6 +654,19 @@ function Level:initializeOpacityCache()
       self.opacityCache:set(x, y, self.cellOpacityCache:get(x, y))
     end
   end
+end
+
+function Level:updateOpacityCache(x, y)
+  local opaque = false
+  for actor, _ in pairs(self.sparseMap:get(x, y)) do
+    opaque = opaque or actor:hasComponent(components.Opaque)
+    if opaque then
+      break
+    end
+  end
+
+  opaque = opaque or self.cellOpacityCache:get(x, y)
+  self.opacityCache:set(x, y, opaque)
 end
 
 -- TODO: Replace with global system.

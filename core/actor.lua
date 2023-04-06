@@ -85,7 +85,6 @@ function Actor:__new()
   self.components = {}
   self.componentCache = {}
   if self.components then
-
     for k, component in ipairs(components) do
       component.owner = self
       self:__addComponent(component:extend())
@@ -156,12 +155,15 @@ function Actor:__removeComponent(component)
 
   for k,v in pairs(components) do
     if component:is(v) then
-      print(v.name)
       if not self.componentCache[v] then
         error("Actor does not have component " .. v.name .. "!")
       end
 
-      self.componentCache[v] = nil
+      for cached_component, _ in pairs(self.componentCache) do
+        if cached_component:is(v) then
+          self.componentCache[cached_component] = nil
+        end
+      end
     end
   end
 

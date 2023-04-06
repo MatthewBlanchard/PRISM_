@@ -19,22 +19,22 @@ function Open:perform(level)
   door.char = not collideable and Tiles["door_2"] or Tiles["door_1"]
 
   if collideable then
+    level:removeComponent(door, components.Opaque)
     level:removeComponent(door, components.Collideable)
   else
-    level:removeComponent(door, components.Collideable_box())
+    level:addComponent(door, components.Opaque())
+    level:addComponent(door, components.Collideable_box())
   end
-
-  door.opaque = not collideable
 end
 
 local Door = Actor:extend()
 
 Door.char = Tiles["door_2"]
 Door.name = "door"
-Door.opaque = true
 Door.remembered = true
 
 Door.components = {
+  components.Opaque(),
   components.Collideable_box(),
   components.Usable({Open}, Open),
   components.Stats{

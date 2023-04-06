@@ -6,10 +6,10 @@ local actor = Actor:extend()
 actor.name = "rock"
 actor.char = Tiles["rocks_2"]
 actor.color = {0.8, 0.5, 0.1, 0}
-actor.opaque = true
 actor.remembered = true
 
 actor.components = {
+  components.Opaque(),
   components.Collideable_box(),
 }
 

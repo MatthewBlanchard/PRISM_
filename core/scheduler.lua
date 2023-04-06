@@ -56,17 +56,20 @@ local function sortFunction(a, b)
 end
 
 function insert_sorted(list, value)
-  local index = 1
-  local length = #list
+  local left = 1
+  local right = #list
+  local mid
 
-  while index <= length do
-    if sortFunction(value, list[index]) then
-      break
+  while left <= right do
+    mid = math.floor((left + right) / 2)
+    if sortFunction(value, list[mid]) then
+      right = mid - 1
+    else
+      left = mid + 1
     end
-    index = index + 1
   end
 
-  table.insert(list, index, value)
+  table.insert(list, left, value)
 end
 
 function Scheduler:next()

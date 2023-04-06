@@ -10,6 +10,7 @@ actor.opaque = true
 actor.remembered = true
 
 actor.components = {
+  components.Opaque(),
   components.Collideable_box(),
 }
 
