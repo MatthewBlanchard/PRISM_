@@ -12,7 +12,7 @@ function Read:perform(level)
     local familiar = actors.Gloop()
     familiar.position.x = self.owner.position.x
     familiar.position.y = self.owner.position.y
-    familiar:addComponent(components.Lifetime{duration = 1000})
+    level:addComponent(familiar, components.Lifetime{duration = 1000})
 
     local mind_control = conditions.Mind_control()
     familiar:applyCondition(mind_control)

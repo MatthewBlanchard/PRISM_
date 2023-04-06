@@ -2,6 +2,8 @@ local Object = require "object"
 local LightColor = require "lighting.lightcolor"
 local ffi = require "ffi"
 
+local _max, _min = math.max, math.min
+
 local LightBuffer = Object:extend()
 
 function LightBuffer:__new(w, h)
@@ -23,6 +25,21 @@ function LightBuffer:clear()
     ffi.fill(self.buffer, ffi.sizeof("LightColor") * self.w * self.h)
 end
 
+function LightBuffer:clear_rect(bbox)
+    local startX, startY = _max(1, bbox.x), _max(1, bbox.y)
+    local endX, endY = _min(self.w, bbox.i), _min(self.h, bbox.j)
+
+    local zeroColor = LightColor(0, 0, 0)
+
+    for i = startX, endX do
+        for j = startY, endY do
+            local index = self:getIndex(i, j)
+            self:setWithFFIStructIndex(index, zeroColor)
+        end
+    end
+end
+
+
 function LightBuffer:getColor(x, y)
     local color = self.buffer[self:getIndex(x, y)]
     return LightColor(color.r, color.g, color.b)
@@ -43,6 +60,11 @@ function LightBuffer:setWithFFIStruct(x, y, color)
     ffi.copy(self.buffer[index], color, ffi.sizeof("LightColor"))
 end
 
+function LightBuffer:setWithFFIStructIndex(index, color)
+    ffi.copy(self.buffer[index], color, ffi.sizeof("LightColor"))
+end
+
+local _lightColor = LightColor(0, 0, 0)
 function LightBuffer:accumulate_buffer(x, y, buffer)
     for i = 0, buffer.w - 1 do
         for j = 0, buffer.h - 1 do
@@ -50,17 +72,34 @@ function LightBuffer:accumulate_buffer(x, y, buffer)
                 local index = self:getIndex(x + i, y + j)
                 local bufIndex = buffer:getIndex(i + 1, j + 1)
 
-                local r = math.max(0, math.min(31, self.buffer[index].r + buffer.buffer[bufIndex].r))
-                local g = math.max(0, math.min(31, self.buffer[index].g + buffer.buffer[bufIndex].g))
-                local b = math.max(0, math.min(31, self.buffer[index].b + buffer.buffer[bufIndex].b))
+                _lightColor.r = _max(0, _min(31, self.buffer[index].r + buffer.buffer[bufIndex].r))
+                _lightColor.g = _max(0, _min(31, self.buffer[index].g + buffer.buffer[bufIndex].g))
+                _lightColor.b = _max(0, _min(31, self.buffer[index].b + buffer.buffer[bufIndex].b))
 
-                self.buffer[index].r = r
-                self.buffer[index].g = g
-                self.buffer[index].b = b
+                self:setWithFFIStructIndex(index, _lightColor)
             end
         end
     end
 end
+
+function LightBuffer:accumulate_buffer_masked(x, y, buffer, mask)
+    local startX, startY = _max(x, mask.x), _max(y, mask.y)
+    local endX, endY = _min(x + buffer.w, mask.i), _min(y + buffer.h, mask.j)
+
+    for i = startX, endX do
+        for j = startY, endY do
+            local index = self:getIndex(i, j)
+            local bufIndex = buffer:getIndex(i - x + 1, j - y + 1)
+
+            _lightColor.r = _max(0, _min(31, self.buffer[index].r + buffer.buffer[bufIndex].r))
+            _lightColor.g = _max(0, _min(31, self.buffer[index].g + buffer.buffer[bufIndex].g))
+            _lightColor.b = _max(0, _min(31, self.buffer[index].b + buffer.buffer[bufIndex].b))
+
+            self:setWithFFIStructIndex(index, _lightColor)
+        end
+    end
+end
+
 
 function LightBuffer:fill(r, g, b)
     for i = 0, self.w * self.h - 1 do

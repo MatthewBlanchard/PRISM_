@@ -50,7 +50,7 @@ function Open:perform(level)
   end
 
   message_system:add(level, message, self.owner)
-  effects_system:addEffect(effects.OpenEffect(chest))
+  effects_system:addEffect(level, effects.OpenEffect(chest))
 end
 
 local Chest = Actor:extend()

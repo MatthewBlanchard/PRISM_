@@ -1,6 +1,5 @@
 local Actor = require "core.actor"
 local Tiles = require "display.tiles"
-local Box = require "math.bounding_box"
 
 local Cube = Actor:extend()
 Cube.name = "Cube"

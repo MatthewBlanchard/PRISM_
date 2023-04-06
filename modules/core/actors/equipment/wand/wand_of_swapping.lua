@@ -31,7 +31,7 @@ function Zap:perform(level)
   local position = self.owner.position
 
   self.owner.position, target.position = target.position, self.owner.position
-  level:addEffect(PoofEffect(self.owner.position, target.position))
+  level:addEffect(level, PoofEffect(self.owner.position, target.position))
 end
 
 local WandOfSwapping = Actor:extend()

@@ -30,7 +30,7 @@ function Blast:perform(level)
     wizard_component:modifyCharges(-1)
 
     local target = self:getTarget(1)
-    level:getSystem("Effects"):addEffect(effects.Zap(self.owner, self.owner, target.position))
+    level:getSystem("Effects"):addEffect(level, effects.Zap(self.owner, self.owner, target.position))
 
     actions.Attack(self.owner, target, BlastWeapon):perform(level)
 end

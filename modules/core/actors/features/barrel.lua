@@ -19,7 +19,7 @@ Explode:afterReaction(reactions.Die,
       end
     end
 
-    level:addEffect(effects.ExplosionEffect(fov, actor.position, Explode.range))
+    level:addEffect(level, effects.ExplosionEffect(fov, actor.position, Explode.range))
     table.insert(level.temporaryLights, effects.LightEffect(actor.position.x, actor.position.y, 0.6, Explode.color))
   end
 )

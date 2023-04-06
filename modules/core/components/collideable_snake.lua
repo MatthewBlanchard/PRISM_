@@ -1,4 +1,3 @@
-local BoundingBox = require "math.bounding_box"
 local Collideable = require "modules.core.components.collideable"
 local Vector2 = require "math.vector"
 

@@ -19,65 +19,15 @@ SightSystem.softRequirements = {
 --- the visibility the cache is cleared for that actor.
 SightSystem.__visibilityCheck = nil
 
-function SightSystem:__new()
-    self.__visibilityCheck = {}
-    self.__opaqueCheck = {}
-end
-
-function SightSystem:beforeAction(level, actor, action)
-    for actor in level:eachActor() do
-        self.__visibilityCheck[actor] = actor:isVisible()
-        self.__opaqueCheck[actor] = actor.opaque
+function SightSystem:onTurn(level, actor)
+    if actor:hasComponent(components.Sight) then
+        self:updateFOV(level, actor)
     end
 end
 
-function SightSystem:afterAction(level, actor, action)
-    if action:is(actions.Move) then return end
-
-    local should_rebuild_seen = false
-    local should_rebuild_fov = false
-    -- if the actor's visibility has changed we need to update the visibility of all actors
-    -- who can see the actor
-    for actor in level:eachActor() do
-        if self.__visibilityCheck[actor] ~= actor:isVisible() then
-            should_rebuild_seen = true
-            self.__visibilityCheck[actor] = nil
-        end
-
-        if self.__opaqueCheck[actor] ~= actor.opaque then
-            should_rebuild_fov = true
-            self.__opaqueCheck[actor] = nil
-        end
-    end
-
-    local lighting_system = level:getSystem("Lighting")
-    if lighting_system and lighting_system.rebuilt then
-        should_rebuild_fov = true
-    end
-
-    if should_rebuild_fov then
-        for actor in level:eachActor() do
-            self:updateFOV(level, actor)
-        end
-    elseif should_rebuild_seen then
-        for actor in level:eachActor() do
-            self:updateSeenActors(level, actor)
-        end
-    end
-end
-
-function SightSystem:onMove(level, actor, from, to)
-    self:updateFOV(level, actor)
-
-    local lighting_system = level:getSystem("Lighting")
-    for other_actor in level:eachActor() do
-        if other_actor ~= actor then
-            if actor.opaque or (lighting_system and lighting_system.rebuilt) then
-                self:updateFOV(level, other_actor)
-            else
-                self:updateSeenActors(level, other_actor)
-            end
-        end
+function SightSystem:onYield(level)
+    for actor in level:eachActor(components.Controller) do
+        self:updateFOV(level, actor)
     end
 end
 
@@ -118,6 +68,7 @@ function SightSystem:updateFOV(level, actor)
 
     -- we check if the sight component has a fov and if so we clear it
     if sight_component.fov then
+        sight_component.raw_fov = {}
         sight_component.fov = {}
 
         local sightLimit = sight_component.range
@@ -128,32 +79,18 @@ function SightSystem:updateFOV(level, actor)
         end
     
         fovCalculator:compute(actor.position.x, actor.position.y, sightLimit, self:createFOVClosure(level, sight_component))
-    
-        -- if the level has the lighting system we check if the actor has a darkvision value and if so we update the fov
-        -- to remove any cells that are in darkness
-        local light_system = level:getSystem("Lighting")
-        if light_system and sight_component.darkvision ~= 0 then 
-            for x, _ in pairs(sight_component.fov) do
-                for y, _ in pairs(sight_component.fov[x]) do
-                    local fov = sight_component.fov
-                    local lightval = light_system:getLightingAt(x, y, fov):average_brightness()
-                    if lightval < sight_component.darkvision and not (actor:getRange("box", Vector2(x, y)) <= 1) then
-                        sight_component.fov[x][y] = nil
-                    end
-                end
-            end
-        end
     else
         -- we have a sight component but no fov which essentially means the actor has blind sight and can see
         -- all cells within a certain radius only generally only simple actors have this vision type
         for x = actor.position.x - sightLimit, actor.position.x + sightLimit do
             for y = actor.position.y - sightLimit, actor.position.y + sightLimit do
-                if not sight_component.fov[x] then sight_component.fov[x] = {} end
-                sight_component.fov[x][y] = level:getCell(x, y)
+                if not sight_component.raw_fov[x] then sight_component.raw_fov[x] = {} end
+                sight_component.raw_fov[x][y] = level:getCell(x, y)
             end
         end
     end
   
+    self:updateLighting(level, actor)
     self:updateExplored(actor)
     self:updateSeenActors(level, actor)
     self:updateScryActors(level, actor)
@@ -167,29 +104,60 @@ function SightSystem:updateSeenActors(level, actor)
     -- clear the actor visibility cache
     sight_component.seenActors = {}
 
-    -- we loop through all the actors on the level and check if they are visible to the actor
-    for k, other in ipairs(level.actors) do
-        -- Check visibility for each tile of the actor
-        local isVisible = false
-        for vec in level:eachActorTile(other) do
-            local other_cell = level:getCell(vec.x, vec.y)
-            local actor_cell = level:getCell(actor.position.x, actor.position.y)
-            if  (other:isVisible() or actor == other) and
-                sight_component:canSeeCell(vec.x, vec.y) and
-                actor_cell:visibleFromCell(level, other_cell) and
-                other_cell:visibleFromCell(level, actor_cell)
-            then
-                isVisible = true
-                break
+    for x, _ in pairs(sight_component.fov) do
+        for y, _ in pairs(sight_component.fov[x]) do
+            -- we loop through all the actors on the level and check if they are visible to the actor
+            for other in level:eachActorAt(x, y) do
+                -- Check visibility for each tile of the actor
+                local isVisible = false
+                local other_cell = level:getCell(other.position.x, other.position.y)
+                local actor_cell = level:getCell(actor.position.x, actor.position.y)
+                if  (other:isVisible() or actor == other) and
+                    actor_cell:visibleFromCell(level, other_cell) and
+                    other_cell:visibleFromCell(level, actor_cell)
+                then
+                    isVisible = true
+                end
+
+                if isVisible then
+                    table.insert(sight_component.seenActors, other)
+                end
             end
         end
-
-        if isVisible then
-            table.insert(sight_component.seenActors, other)
-        end
-    end
+      end
 
     self:updateRememberedActors(level, actor)
+end
+
+-- this is called by the lighting system when the lighting changes it removes
+-- any cells that are in darkness from the fov unless they are within 1 cell
+-- of the actor
+function SightSystem:updateLighting(level, actor)
+    local sight_component = actor:getComponent(components.Sight)
+
+    -- if the level has the lighting system we check if the actor has a darkvision value and if so we update the fov
+    -- to remove any cells that are in darkness
+    local light_system = level:getSystem("Lighting")
+    if light_system and sight_component.darkvision ~= 0 then 
+        for x, _ in pairs(sight_component.raw_fov) do
+            for y, _ in pairs(sight_component.raw_fov[x]) do
+                local fov = sight_component.raw_fov
+                local lightval = light_system:getLightingAt(x, y, fov):average_brightness()
+                local darkvision = sight_component.darkvision
+                if lightval > darkvision or actor:getRangeVec("box", Vector2(x, y)) == 1 then
+                    if not sight_component.fov[x] then sight_component.fov[x] = {} end
+                    sight_component.fov[x][y] = sight_component.raw_fov[x][y]
+                end
+            end
+        end
+    else
+        for x, _ in pairs(sight_component.raw_fov) do
+            for y, _ in pairs(sight_component.raw_fov[x]) do
+                if not sight_component.fov[x] then sight_component.fov[x] = {} end
+                sight_component.fov[x][y] = sight_component.raw_fov[x][y]
+            end
+        end
+    end
 end
 
 function SightSystem:updateRememberedActors(level, actor)
@@ -249,14 +217,14 @@ end
 -- Little factories for some callback functions we need to pass to the FOV calculator
 function SightSystem:createVisibilityClosure(level)
     return function(fov, x, y)
-        return level:getCellVisibility(x, y)
+        return not level:getCellOpaque(x, y)
     end
 end
 
 function SightSystem:createFOVClosure(level, sight_component)
     return function(x, y, z)
-        if not sight_component.fov[x] then sight_component.fov[x] = {} end
-        sight_component.fov[x][y] = level:getCell(x, y)
+        if not sight_component.raw_fov[x] then sight_component.raw_fov[x] = {} end
+        sight_component.raw_fov[x][y] = level:getCell(x, y)
     end
 end
 

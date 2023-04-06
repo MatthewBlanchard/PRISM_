@@ -1,5 +1,4 @@
 local Actor = require "core.actor"
-local Box = require "math.bounding_box"
 local Vector2 = require "math.vector"
 local Tiles = require "display.tiles"
 local Shard = require "modules.core.actors.other.shard"
