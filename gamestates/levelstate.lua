@@ -3,6 +3,8 @@ local Interface = require "interface"
 local Display = require "display.display"
 local Start = require "panels.start"
 
+local PROFILE = false
+
 local LevelState = GameState:extend()
 -- This state is passed a Level object and sets up the interface and main loop for
 -- the level.
@@ -13,6 +15,8 @@ function LevelState:__new(level, depth)
     self.updateCoroutine = coroutine.create(level.run)
     self.waiting = false
     self.skipAnimation = false
+    self.dt = 0
+    self.turnDT = 0
 end
 
 function LevelState:load()
@@ -27,12 +31,13 @@ function LevelState:load()
   
     local torch = actors.Torch()
     table.insert(player:getComponent(components.Inventory).inventory, torch)
-    table.insert(player:getComponent(components.Inventory).inventory, actors.Lightning_blade())
+    table.insert(player:getComponent(components.Inventory).inventory, actors.Tiara_of_telepathy())
   
     love.keyboard.setKeyRepeat(true)
 end
 
 function LevelState:update(dt)
+    self.dt = dt
     local effects = game.level:getSystem("Effects")
 
     game.music:update(dt)
@@ -55,11 +60,18 @@ function LevelState:update(dt)
     end
 
     local success, ret
+    local startTime = love.timer.getTime()
     -- when we press a key during animations we want to skip them
     repeat
+        if PROFILE and awaitedAction then profiler.start() end
+        startTime = love.timer.getTime()
         success, ret, time = coroutine.resume(self.updateCoroutine, game.level, awaitedAction)
         if success == false then
         error(ret .. "\n" .. debug.traceback(self.updateCoroutine))
+        end
+        if PROFILE and awaitedAction then 
+            profiler.stop()
+            print(profiler.report(20))
         end
     until not (ret == "effect" and self.skipAnimation)
 
@@ -68,6 +80,7 @@ function LevelState:update(dt)
     if coroutine_status == "suspended" and ret.is and ret:is(Actor) then
         -- if level update returns a table we know we've got out guy so we set
         -- curActor to let the interface know to unlock input
+        self.turnDT = love.timer.getTime() - startTime
         assert(ret:is(Actor))
         game.curActor = ret
         self.waiting = true
@@ -98,6 +111,9 @@ function LevelState:draw()
     game.interface:draw(game.display)
     game.viewDisplay:draw()
     game.display:draw("UI")
+
+    love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 10)
+    love.graphics.print("TurnDT: " .. self.turnDT, 10, 20)
 end
 
 function LevelState:keypressed(key, scancode)

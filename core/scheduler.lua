@@ -8,12 +8,13 @@ function Scheduler:__new()
 end
 
 function Scheduler:add(actor, time, lastAct)
-  local schedTable = {}
-  schedTable.actor = actor
-  schedTable.time = 0 or time
-  schedTable.lastAct = 0 or lastAct
+  local schedTable = {
+    actor = actor,
+    time = time or 0,
+    lastAct = lastAct or 0,
+  }
 
-  table.insert(self.queue, schedTable)
+  insert_sorted(self.queue, schedTable)
 end
 
 function Scheduler:remove(actor)
@@ -37,6 +38,9 @@ function Scheduler:addTime(actor, time)
   for i, schedTable in ipairs(self.queue) do
     if schedTable.actor == actor then
       schedTable.time = schedTable.time + time
+      -- Re-insert the updated schedTable into the sorted queue
+      table.remove(self.queue, i)
+      insert_sorted(self.queue, schedTable)
       return
     end
   end
@@ -45,32 +49,31 @@ function Scheduler:addTime(actor, time)
 end
 
 local function sortFunction(a, b)
-  -- handling ties in a consistent way is important to us
-  -- if two actors are tied the one who acted most recently goes second
   if a.time == b.time then
     return a.lastAct < b.lastAct
   end
-
   return a.time < b.time
 end
 
+function insert_sorted(list, value)
+  local index = 1
+  local length = #list
+
+  while index <= length do
+    if sortFunction(value, list[index]) then
+      break
+    end
+    index = index + 1
+  end
+
+  table.insert(list, index, value)
+end
+
 function Scheduler:next()
-  -- we sort our queue so that those with the least time left to act
-  -- end up on top
-  table.sort(self.queue, sortFunction)
-
-  -- next we increment our actCount which is essentially used as a timestamp
-  -- to consistently break ties
   self.actCount = self.actCount + 1
-
-  -- update this actor's lastAct so that we know when he last acted for tie breaking
   self.queue[1].lastAct = self.actCount
-
-  -- and finally before we return we make a call to updateTime which will
-  -- lower all of the actor's time by the amount of the one who's taking it's turn
   self:updateTime(self.queue[1].time)
 
-  --self:debugPrint()
   return self.queue[1].actor
 end
 

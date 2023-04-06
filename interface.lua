@@ -111,21 +111,25 @@ function Interface:draw()
   lighting_system:rebuildLighting(game.level, self.dt)
   local ambientValue = sight_component.darkvision / 31
 
+  local function tileLightingFormula(color, brightness)
+    local finalColor
+    local t = math.min(1, math.max(brightness - ambientValue, 0))
+    t = math.min(t / (1 - ambientValue), 1)
+    finalColor = clerp(ambientColor, color, t)
+
+    if brightness ~= brightness then finalColor = ambientColor end
+    return finalColor
+  end
+
   local viewX, viewY = game.viewDisplay.widthInChars, game.viewDisplay.heightInChars
   local sx, sy = game.curActor.position.x, game.curActor.position.y
   for x = sx - viewX, sx + viewX do
     for y = sy - viewY, sy + viewY do
       if fov[x] and fov[x][y] then
         local lightCol = lighting_system:getLightingAt(x, y, fov, self.dt):to_rgb()
-        -- okay we're gonna first establish our light color and then
-        -- do a bit of blending to keep it in line with the ambient
-        -- fog of war
-        local finalColor
         local lightValue = lighting_system:getBrightness(x, y, fov) / 31
 
-        local t = math.min(1, math.max(lightValue - ambientValue, 0))
-        t = math.min(t / (1 - ambientValue), 1)
-        finalColor = clerp(ambientColor, lightCol, t)
+        local finalColor = tileLightingFormula(lightCol, lightValue)
 
         if lightValue ~= lightValue then finalColor = ambientColor end
         self:writeOffset(fov[x][y].tile, x, y, finalColor)
@@ -167,13 +171,19 @@ function Interface:draw()
       if conditional and conditional(actor) or true then
         for vec in game.level:eachActorTile(actor) do
           local x, y = vec.x, vec.y
+          local lightcolor = lighting_system:getLightingAt(x, y, fov, self.dt):to_rgb()
           if actorTable == scryActors then
             self:writeOffset(char, x, y, actor.color)
-          elseif lighting_system:getLightingAt(x, y, fov) then
+          elseif lightcolor then
             local lightValue = lighting_system:getBrightness(x, y, fov) / 31
             local t = math.max(lightValue - ambientValue, 0)
             t = math.min(t / (1 - ambientValue), 1)
-            self:writeOffset(char, x, y, clerp(ambientColor, actor.color, t))
+
+            local finalColor = clerp(ambientColor, actor.color, t)
+            if actor.tileLighting then
+              finalColor = tileLightingFormula(lightcolor, lightValue)
+            end
+            self:writeOffset(char, x, y, finalColor)
           end
         end
       end

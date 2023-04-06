@@ -38,9 +38,9 @@ function Game:generateLevel(depth)
     -- TODO: The module should be able to specify the level generator and populater
     -- to use. And which generators to use on which depth somehow.
 
-    local map, populater = ROT.Map.Brogue(50, 50), require "populater" -- Brogue Gen
+    --local map, populater = ROT.Map.Brogue(50, 50), require "populater" -- Brogue Gen
     --local map, populater = require "maps.new.level_gen"(), require "maps.new.populater" -- Dim Gen
-
+    local map, populater = require "maps.new.tunnel_gen"(), require "maps.new.populater"
     local level = Level(map, populater)
         level:addSystem(systems.Message())
         level:addSystem(systems.Inventory())
@@ -74,15 +74,6 @@ function Game:__exportModule(name)
     self:__loadItems(module_path .. "/systems", systems, true)
 
     Loot = require "loot"
-
-    --[[ Don't think this is needed, but we'll see.
-        for _, actor in ipairs(actors) do
-            for i, component in ipairs(actor.components) do
-                actor.component[i] = component:extend()
-            end
-        end
-    ]]--
-
 end
 
 function Game:__loadItems(directoryName, items, recurse)

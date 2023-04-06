@@ -4,6 +4,7 @@ local System = require "core.system"
 local Scheduler = require "core.scheduler"
 local SparseMap = require "structures.sparsemap"
 local Vector2 = require "math.vector"
+local DenseMap = require "structures.densemap"
 
 local Grid = require "structures.grid"
 local Cell = require "core.cell"
@@ -16,6 +17,7 @@ function Level:__new(map, populater)
 
   self.actors = {}
   self.sparseMap = SparseMap() -- holds a sparse map of actors in the scene by position
+  self.componentCache = {} -- holds submaps of actors by component type
 
   -- Initialize our scheduler. This is used to keep track of time and
   -- actor turns.
@@ -33,6 +35,9 @@ function Level:__new(map, populater)
   self.height = map._height + 1
   self.__map = map
   self.populater = populater
+
+  self.cellOpacityCache = DenseMap(map._width + 1, map._height + 1) -- holds a cache of cell's opacity
+  self.opacityCache = DenseMap(map._width + 1, map._height + 1) -- holds a cache of actor's opacity
 end
 
 --- Update is the main game loop for a level. It's a coroutine that yields
@@ -41,6 +46,8 @@ end
 function Level:run()
   self.__map = self.__map:create(self:getMapCallback())
 
+  self:initializeOpacityCache()
+
   -- we need to initialize all of our systems
   for _, system in pairs(self.systems) do
     system:initialize(self)
@@ -48,8 +55,8 @@ function Level:run()
 
   self.populater(self, self.__map)
 
-  if self:getSystem("Lighting") then
-    self:getSystem("Lighting"):forceRebuildLighting(self)
+  for _, system in ipairs(self.systems) do
+    system:postInitialize(self)
   end
 
   -- no brakes baby
@@ -93,6 +100,10 @@ function Level:run()
       
       self:triggerActionEvents("onTicks")
     else
+      for _, system in ipairs(self.systems) do
+        system:onTurn(self, actor)
+      end
+
       local action
       local controller = self:getActorController(actor)
       if controller then
@@ -170,17 +181,30 @@ end
 -- Actors
 --
 
+function Level:updateComponentCache(actor)
+  for _, component in pairs(components) do
+    if not self.componentCache[component] then
+      self.componentCache[component] = {}
+    end
+
+    if actor:hasComponent(component) then
+      self.componentCache[component][actor] = true
+    else
+      self.componentCache[component][actor] = nil
+    end
+  end
+end
 
 function Level:addActor(actor)
   -- some sanity checks
   assert(actor:is(Actor), "Attemped to add a non-actor object to the level with addActor")
 
+  self:updateComponentCache(actor)
+
   actor:initialize(self)
   table.insert(self.actors, actor)
   
-  for vec in self:eachActorTile(actor) do
-    self.sparseMap:insert(vec.x, vec.y, actor)
-  end
+  self:insertSparseMapEntries(actor)
 
   if actor:hasComponent(components.Aicontroller) or
       actor:hasComponent(components.Controller)
@@ -196,9 +220,9 @@ function Level:addActor(actor)
 end
 
 function Level:removeActor(actor)
-  for vec in self:eachActorTile(actor) do
-    self.sparseMap:remove(vec.x, vec.y, actor)
-  end
+  self:updateComponentCache(actor)
+
+  self:removeSparseMapEntries(actor)
 
   self.scheduler:remove(actor)
 
@@ -215,6 +239,16 @@ function Level:removeActor(actor)
   for _, condition in ipairs(actor:getConditions()) do
     condition:onActorRemoved(self, actor)
   end
+end
+
+function Level:removeComponent(actor, component)
+  actor:__removeComponent(component)
+  self:updateComponentCache(actor)
+end
+
+function Level:addComponent(actor, component)
+  actor:__addComponent(component)
+  self:updateComponentCache(actor)
 end
 
 --- A utility function that returns true if the level contains the given
@@ -246,6 +280,23 @@ end
 function Level:eachActor(...)
   local n = 1
   local comp = { ... }
+  
+  if #comp == 1 and self.componentCache[comp[1]] then
+    local currentComponentCache = self.componentCache[comp[1]]
+    local key = next(currentComponentCache, key)
+
+    local function iterator()
+      while key do
+        local ractor, rcomp = key, key:getComponent(comp[1])
+        key = next(currentComponentCache, key)
+        
+        return ractor, rcomp
+      end
+    end
+
+    return iterator
+  end
+
   return function()
     for i = n, #self.actors do
       n = i + 1
@@ -275,21 +326,27 @@ function Level:eachActor(...)
   end
 end
 
+local dummy = {}
 function Level:eachActorTile(actor)
-  local list = {}
+  local count = 0
 
   local collideable_component = actor:getComponent(components.Collideable)
   if collideable_component then
     for vec in collideable_component:eachCellGlobal(actor) do
-      table.insert(list, vec)
+      count = count + 1
+      dummy[count] = vec
     end
   else
-    table.insert(list, actor.position)
+    count = 1
+    dummy[1] = actor.position
   end
 
+  local i = 1
   return function()
-    while #list > 0 do
-      return table.remove(list)
+    while i <= count do
+      local ret = dummy[i]
+      i = i + 1
+      return ret
     end
   end
 end
@@ -303,6 +360,17 @@ function Level:getActorsAt(x, y)
   return actorsAtPosition
 end
 
+function Level:eachActorAt(x, y)
+  local key
+  local actors = self.sparseMap:get(x, y)
+  local function iterator()
+    key, _ = next(actors, key)
+    if key then
+      return key
+    end
+  end
+  return iterator
+end
 
 function Level:moveActor(actor, pos, skipSparseMap)
   assert(pos.is and pos:is(Vector2), "Expected a Vector2 for pos in Level:moveActor.")
@@ -349,11 +417,9 @@ function Level:moveActorChecked(actor, direction)
 
   local collideable = actor:getComponent(components.Collideable)
   if collideable then 
-    local debug = {}
     for cell in collideable:moveCandidate(self, actor, direction) do
       local blockSelf = actor
       
-      table.insert(debug, cell)
       if collideable and collideable.blockSelf then
         blockSelf = nil
       end
@@ -364,8 +430,6 @@ function Level:moveActorChecked(actor, direction)
         table.insert(accepted, cell)
       end
     end
-
-    --self:getSystem("Effects"):addEffect(effects.tryMoveDebug(actor, debug))
   else
     if not self:getCellPassableNoActors(newPosition.x, newPosition.y, actor) then
       return
@@ -380,20 +444,14 @@ function Level:moveActorChecked(actor, direction)
     end
 
     local squeeze_success = true
-    local debug = {}
     for cell in trySqueeze do
-      table.insert(debug, cell)
       if not self:getCellPassable(cell.x, cell.y, actor) then
         squeeze_success = false
       else
       end
     end
 
-    print(#debug)
-    self:getSystem("Effects"):addEffect(effects.tryMoveDebug(actor, debug))
-
     if squeeze_success then
-      print("NEW ORIGIN", new_origin)
       self:removeSparseMapEntries(actor)
 
       collideable:acceptedSqueeze(self, actor, direction, rejected, accepted)
@@ -422,12 +480,34 @@ end
 function Level:removeSparseMapEntries(actor)
   for vec in self:eachActorTile(actor) do
     self.sparseMap:remove(vec.x, vec.y, actor)
+
+    local opaque = false
+    for actor, _ in pairs(self.sparseMap:get(vec.x, vec.y)) do
+      opaque = opaque or actor.opaque
+      if actor.opaque then
+        break
+      end
+    end
+
+    opaque = opaque or self.cellOpacityCache:get(vec.x, vec.y)
+    self.opacityCache:set(vec.x, vec.y, opaque)
   end
 end
 
 function Level:insertSparseMapEntries(actor)
   for vec in self:eachActorTile(actor) do
     self.sparseMap:insert(vec.x, vec.y, actor)
+
+    local opaque = false
+    for actor, _ in pairs(self.sparseMap:get(vec.x, vec.y)) do
+      opaque = opaque or actor.opaque
+      if actor.opaque then
+        break
+      end
+    end
+
+    opaque = opaque or self.cellOpacityCache:get(vec.x, vec.y)
+    self.opacityCache:set(vec.x, vec.y, opaque)
   end
 end
 
@@ -522,7 +602,7 @@ function Level:getAOE(type, position, range)
     return fov, seenActors
   elseif type == "box" then
     for k, other in ipairs(self.actors) do
-      if other:getRange("box", position) <= range then
+      if other:getRangeVec("box", position) <= range then
         table.insert(seenActors, other)
       end
     end
@@ -534,6 +614,7 @@ end
 
 
 function Level:setCell(x, y, cell)
+  self.cellOpacityCache:set(x, y, cell.opaque and 1 or 0)
   self.map:set(x, y, cell)
 end
 
@@ -559,18 +640,20 @@ function Level:getCellPassableNoActors(x, y)
   return self:getCell(x, y).passable
 end
 
-function Level:getCellVisibility(x, y)
-  if not self:getCell(x, y) or self:getCell(x, y).opaque then
-    return false
-  else
-    for actor, _ in pairs(self.sparseMap:get(x, y)) do
-      if actor.opaque == true then
-        return false
-      end
+function Level:getCellOpaque(x, y)
+  return self.opacityCache:get(x, y)
+end
+
+function Level:getOpacityCache()
+  return self.opacityCache
+end
+
+function Level:initializeOpacityCache()
+  for x = 1, self.width do
+    for y = 1, self.height do
+      self.opacityCache:set(x, y, self.cellOpacityCache:get(x, y))
     end
   end
-
-  return true
 end
 
 -- TODO: Replace with global system.
@@ -586,16 +669,16 @@ end
 function Level:getMapCallback()
   return function(x, y, val)    
     if val == 0 then
-      self.map:set(x, y, Cell())
+      self:setCell(x, y, Cell())
     else
-      self.map:set(x, y, Wall())
+      self:setCell(x, y, Wall())
     end
   end
 end
 
 function Level:createVisibilityClosure()
   return function(fov, x, y)
-      return self:getCellVisibility(x, y)
+      return not self:getCellOpaque(x, y)
   end
 end
 
@@ -615,6 +698,14 @@ function Level:getRandomWalkableTile()
       return x, y
     end
   end
+end
+
+function Level:yield(...)
+  for _, system in ipairs(self.systems) do
+    system:onYield(self, ...)
+  end
+
+  coroutine.yield(...)
 end
 
 return Level

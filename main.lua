@@ -1,7 +1,10 @@
-require "export_lib"
+require "prelude"
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 math.randomseed(os.time())
+math.random(); math.random(); math.random()
+
+love.audio.setVolume(0.2)
 
 local Game = require "game"
 
@@ -26,6 +29,9 @@ end
 
 function love.draw()
     manager:draw()
+    local stats = love.graphics.getStats( )
+
+    love.graphics.print("Draw Calls:" .. stats.drawcalls, 10, 30)
 end
 
 

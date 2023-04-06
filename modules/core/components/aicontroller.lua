@@ -86,7 +86,7 @@ function AIController:moveTowardPosition(actor, pos)
   for x = actor.position.x - 1, actor.position.x + 1 do
     for y = actor.position.y - 1, actor.position.y + 1 do
       current.x, current.y = x, y
-      local dist = vec:getRange("box", current)
+      local dist = vec:getRangec("box", current)
 
       if dist < closestDist and AIController.isPassable(actor, current) and not (x == target.position.x or y == target.position.y) then
         closestDist = dist
@@ -170,7 +170,12 @@ function AIController.crowdAround(actor, target, avoidCreatures)
   local closestVec = Vector2(actor.position.x, actor.position.y)
 
   for i = 1, #openTiles do
-    local range = math.max(target:getRange("box", openTiles[i]), 1)
+    local range
+    if target:is(Vector2) then
+      range = math.max(target:getRange("box", openTiles[i]), 1)
+    else
+      range = math.max(target:getRangeVec("box", openTiles[i]), 1)
+    end
     if openTiles[i].x == actor.position.x and openTiles.y == actor.position.y then
       if range <= closest then
         closest = range
@@ -204,7 +209,7 @@ function AIController.moveAway(actor, target)
   for x = actor.position.x - 1, actor.position.x + 1 do
     for y = actor.position.y - 1, actor.position.y + 1 do
       current.x, current.y = x, y
-      local dist = target:getRange("box", current)
+      local dist = target.position:getRange("box", current)
 
       if dist > furthestDist and AIController.isPassable(actor, current) then
         furthestDist = dist
@@ -342,6 +347,10 @@ end
 
 function AIController.moveTowardLight(level, actor)
   local x, y, lightVal = AIController.getLightestTile(level, actor)
+
+  if lightVal == 0 then
+    return AIController.randomMove(level, actor)
+  end
 
   local moveVec = Vector2(-(actor.position.x - x), -(actor.position.y - y))
   return actor:getAction(actions.Move)(actor, moveVec)

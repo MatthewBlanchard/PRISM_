@@ -16,7 +16,7 @@ function Explode:onDurationEnd(level, actor)
 
   level:removeActor(actor)
   table.insert(lighting_system.__temporaryLights, effects.LightEffect(actor.position.x, actor.position.y, 0.6, Explode.color))
-  effects_system:addEffect(effects.ExplosionEffect(fov, actor.position, Explode.range))
+  effects_system:addEffect(level, effects.ExplosionEffect(fov, actor.position, Explode.range))
 
   effects_system:suppressEffects()
   	for _, a in ipairs(actors) do

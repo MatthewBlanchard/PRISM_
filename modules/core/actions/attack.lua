@@ -40,7 +40,7 @@ function Attack:perform(level)
     if critical then
       self.crit = true
       dmg = dmg * 2
-      effects_system:addEffect(effects.CritEffect(defender))
+      effects_system:addEffect(level, effects.CritEffect(defender))
     end
 
     local damage = defender:getReaction(reactions.Damage)(defender, {self.owner}, dmg)
@@ -50,7 +50,7 @@ function Attack:perform(level)
   end
 
   if effects_system then
-    effects_system:addEffect(effects.DamageEffect(self.owner.position, defender, dmg, false))
+    effects_system:addEffect(level, effects.DamageEffect(self.owner.position, defender, dmg, false))
   end
 end
 

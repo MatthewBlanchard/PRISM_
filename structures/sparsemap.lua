@@ -1,18 +1,21 @@
 local Object = require "object"
 
+local math_floor = math.floor
 local function hash(x, y)
-    return x and y * 0x4000000 + x or false --  26-bit x and y
+    return x and y * 0x4000000 + x --  26-bit x and y
 end
 
 local function unhash(hash)
-    return hash % 0x4000000, math.floor(hash / 0x4000000)
+    return hash % 0x4000000, math_floor(hash / 0x4000000)
 end
 
 local dummy = {}
 local SparseMap = Object:extend()
 
 function SparseMap:__new()
+    self.__count = 0
     self.map = {}
+    self.list = {}
 end
 
 function SparseMap:get(x, y)
@@ -24,39 +27,19 @@ function SparseMap:getByHash(hash)
 end
 
 function SparseMap:each()
-    local k, v = next(self.map, nil)
-    local i, j
-
-    return function ()
-        if k then
-            i, j = next(v, i)
-            if i then
-                local x, y = unhash(k)
-                return x, y, i
-            else
-                k, v = next(self.map, k)
-
-                if k then
-                    i, j = next(v, i)
-                    local x, y = unhash(k)
-                    return x, y, i
-                end
-            end
-        end  
+    local key, val
+    return function()
+        key, val = next(self.list, key)
+        if key then
+            return val[1], val[2], key
+        end
+        return nil
     end
 end
 
 -- This shouldn't be called often as it's going to be relatively expensive.
 function SparseMap:count()
-    local count = 0
-
-    for _, v in pairs(self.map) do
-        for _, _ in pairs(v) do
-            count = count + 1
-        end
-    end
-
-    return count
+    return self.__count
 end
 
 function SparseMap:countCell(x, y)
@@ -70,19 +53,27 @@ function SparseMap:countCell(x, y)
 end
 
 function SparseMap:has(x, y, value)
-    if not self.map[hash(x, y)] then return false end
-    return self.map[hash(x, y)][value] or false
+    local xyhash = hash(x, y)
+    if not self.map[xyhash] then return false end
+    return self.map[xyhash][value] or false
 end
 
 function SparseMap:insert(x, y, val)
-    if not self.map[hash(x, y)] then self.map[hash(x, y)] = {} end
+    local xyhash = hash(x, y)
+    if not self.map[xyhash] then self.map[xyhash] = {} end
 
-    self.map[hash(x, y)][val] = true
+    self.__count = self.__count + 1
+    self.list[val] = {x, y}
+    self.map[xyhash][val] = true
 end
 
 function SparseMap:remove(x, y, val)
-    if not self.map[hash(x, y)] then return false end
-    self.map[hash(x, y)][val] = nil
+    local xyhash = hash(x, y)
+    if not self.map[xyhash] then return false end
+    
+    self.__count = self.__count - 1
+    self.list[val] = nil
+    self.map[xyhash][val] = nil
     return true
 end
 

@@ -18,7 +18,7 @@ function Tongue:perform(level)
                 local damageAmount = ROT.Dice.roll("1d1")
                 local damageAction = target:getReaction(reactions.Damage)(target, {self.owner}, damageAmount)
                 level:performAction(damageAction)
-                --level:addEffect(effects.LineEffect(goalpos, Vector2(point[1], point[2])))
+                --level:addEffect(level, effects.LineEffect(goalpos, Vector2(point[1], point[2])))
                 level:moveActor(target, goalpos)
                 return
             end

@@ -9,7 +9,7 @@ Player.char = Tiles["player"]
 
 Player.components = {
   components.Collideable_box(),
-  components.Sight{ range = 30, fov = true, explored = true},
+  components.Sight{ range = 16, fov = true, explored = true},
   components.Message(),
   components.Move{ speed = 100 },
   components.Inventory(),
@@ -19,7 +19,7 @@ Player.components = {
   components.Stats{
     ATK = 0,
     MGK = 0,
-    PR = 0,
+    PR = 100,
     MR = 0,
     maxHP = 10,
     AC = 0

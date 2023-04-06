@@ -14,7 +14,7 @@ Explode:afterAction(actions.Throw,
   	local damage = ROT.Dice.roll(self.damage) + 1
 
     local effects_system = level:getSystem("Effects")
-    effects_system:addEffect(effects.ExplosionEffect(fov, actor.position, Explode.range, Explode.color))
+    effects_system:addEffect(level, effects.ExplosionEffect(fov, actor.position, Explode.range, Explode.color))
 
     local lighting_system = level:getSystem("Lighting")
     if lighting_system then

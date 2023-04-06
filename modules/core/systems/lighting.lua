@@ -201,7 +201,7 @@ end
 -- Takes a fov because wall lighting uses the fov to determine how to light the walls
 function LightingSystem:getLightingAt(x, y, fov, light)
   local light = light or self.__lightMap
-  if fov[x] and fov[x][y] and self.owner:getCellVisibility(x, y) then
+  if fov[x] and fov[x][y] and self.owner:getCellOpaque(x, y) then
     if light[x] and light[x][y] then
       return light[x][y]
     end
@@ -270,7 +270,7 @@ end
 -- Little factories for some callback functions we need to pass to the FOV calculator
 function LightingSystem:createVisibilityClosure(level)
   return function(fov, x, y)
-      return level:getCellVisibility(x, y)
+      return level:getCellOpaque(x, y)
   end
 end
 

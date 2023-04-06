@@ -12,7 +12,7 @@ end
 function ChooseClass:perform(level)
   local actor = self.owner
 
-  actor:addComponent(self.class())
+  level:addComponent(actor, self.class())
 end
 
 return ChooseClass

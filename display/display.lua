@@ -85,6 +85,17 @@ function Display:draw(noDraw)
 
    self.graphics.setCanvas(self.canvas)
    self.graphics.clear()
+
+   for x = startX, endX do
+      for y = startY, endY do
+         local bg = self.backgroundColors[x][y]
+         local px = (x - 1) * self.charWidth
+         local py = (y - 1) * self.charHeight
+         self:_setColor(bg)
+         self.graphics.rectangle('fill', px, py, self.charWidth, self.charHeight)
+      end
+   end
+
    for x = startX, endX do
       for y = startY, endY do
          local c = self.chars[x][y]
@@ -92,8 +103,7 @@ function Display:draw(noDraw)
          local fg = self.foregroundColors[x][y]
          local px = (x - 1) * self.charWidth
          local py = (y - 1) * self.charHeight
-         self:_setColor(bg)
-         self.graphics.rectangle('fill', px, py, self.charWidth, self.charHeight)
+
          if c ~= 32 and c ~= 255 then
             local qd = self.glyphs[c]
             self:_setColor(fg)

@@ -14,7 +14,7 @@ function Heal:perform(level)
   self.owner.HP = math.min(self.owner.HP + self.heal, self.owner:getMaxHP())
   local effects_system = level:getSystem("Effects")
   if effects_system then
-    effects_system:addEffect(effects.HealEffect(self.owner, self.heal))
+    effects_system:addEffect(level, effects.HealEffect(self.owner, self.heal))
   end
 end
 

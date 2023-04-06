@@ -32,7 +32,7 @@ function Zap:perform(level)
   table.insert(level:getSystem("Lighting").__temporaryLights, FireballLightEffect(target.x, target.y, 0.6))
 
   local effects_system = level:getSystem("Effects")
-  effects_system:addEffect(effects.ExplosionEffect(fov, target, self.aoeRange))
+  effects_system:addEffect(level, effects.ExplosionEffect(fov, target, self.aoeRange))
 
   effects_system:suppressEffects()
   for i, actor in ipairs(actors) do

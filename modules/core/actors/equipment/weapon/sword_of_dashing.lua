@@ -52,7 +52,7 @@ Dash:onAction(actions.Move,
       local pos = actor.position + (action.direction * (i - 2))
       actor.position = pos
       level:performAction(actions.Attack(actor, {target}))
-      level:addEffect(DashEffect(old, pos))
+      level:addEffect(level, DashEffect(old, pos))
     end
   end
 )

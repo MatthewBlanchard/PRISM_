@@ -39,6 +39,10 @@ System.softRequirements = nil
 -- @tparam Level level The Level object this System is attached to.
 function System:initialize(level)
 end
+
+function System:postInitialize(level)
+end
+
 --- This method is called after an actor has selected an action, but before it is executed.
 -- @tparam Level level The Level object this System is attached to.
 -- @tparam Actor actor The Actor object that has selected an action.
@@ -77,6 +81,16 @@ end
 --- This method is called every 100 units of time, a second, and can be used for mechanics such as hunger and fire spreading.
 -- @tparam Level level The Level object this System is attached to.
 function System:onTick(level)
+end
+
+-- This method is called when a new turn begins. The actor is the actor that is about to take their turn.
+function System:onTurn(level, actor)
+end
+
+-- This method is called whenever the level yields back to the interface.
+-- The most common usage for this right now is updating the sight component of any
+-- input controlled actors in the Sight system.
+function System:onYield(level, event)
 end
 
 function System:onDescend(level)

@@ -6,5 +6,6 @@ require 'lib.safe_require'
 ROT = require 'lib.rot.rot'
 MusicManager = require "music.musicmanager"
 Actor = require "core.actor"
+profiler = require "lib.profile"
 
 require "lib.batteries":export()

@@ -63,7 +63,7 @@ local PointTarget = Target:extend()
 
 function PointTarget:validate(owner, vec2)
   if not vec2 or not vec2.is or not vec2:is(Vector2) then return false end
-  return owner:getRange(self.rtype, vec2)
+  return owner:getRangeVec(self.rtype, vec2)
 end
 
 function PointTarget:checkRequirements(vec2)
