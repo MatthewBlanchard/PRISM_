@@ -25,32 +25,18 @@ function LightingSystem:initialize(level)
 end
 
 function LightingSystem:postInitialize(level)
+    -- rebuild the lighting map after all actors have been added
+    -- we pass in a dt of 0 to trigger the effect lighting map rebuild
     self:forceRebuildLighting(level)
     self:forceRebuildLighting(level, 0)
 end
 
-function LightingSystem:beforeAction(level, actor, action)
-    for actor in level:eachActor(components.Opaque) do
-        self.__opaqueCache[actor] = true
-    end
+function LightingSystem:afterOpacityChanged(level, x, y)
+    self:forceRebuildLighting(level)
 end
+
 -- called when an Actor takes an Action
-function LightingSystem:afterAction(level, actor, action)
-    local force_rebuild = false
-
-    for k, v in pairs(self.__opaqueCache) do
-        if not k:hasComponent(components.Opaque) then
-            self.__opaqueCache[k] = nil
-            force_rebuild = true
-        end
-    end
-
-    if force_rebuild then
-        self:forceRebuildLighting(level)
-    else
-        self:rebuildLighting(level)
-    end
-end
+function LightingSystem:afterAction(level, actor, action) self:rebuildLighting(level) end
 
 -- called after an actor has moved
 function LightingSystem:onMove(level, actor) self:rebuildLighting(level) end

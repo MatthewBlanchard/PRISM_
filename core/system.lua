@@ -78,6 +78,10 @@ end
 function System:onActorRemoved(level, actor)
 end
 
+-- Called when an actor or tile has it's opacity changed.
+function System:afterOpacityChanged(level, x, y)
+end
+
 --- This method is called every 100 units of time, a second, and can be used for mechanics such as hunger and fire spreading.
 -- @tparam Level level The Level object this System is attached to.
 function System:onTick(level)

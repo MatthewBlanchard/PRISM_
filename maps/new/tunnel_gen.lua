@@ -78,7 +78,8 @@ function TunnelGen:create(callback)
             "Breakable_wall"
         }
 
-        local cave_map = Map:from_chunk(maps[math.random(1, #maps)])
+        local map_type = maps[math.random(1, #maps)]
+        local cave_map = Map:from_chunk(map_type)
 
         if #special_maps > 0 then
             cave_map = Map:from_chunk(special_maps[math.random(1, #special_maps)])

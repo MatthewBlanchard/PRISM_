@@ -244,13 +244,19 @@ end
 function Level:removeComponent(actor, component)
   actor:__removeComponent(component)
   self:updateComponentCache(actor)
-  self:updateOpacityCache(actor.position.x, actor.position.y)
+  
+  if component:is(components.Opaque) then
+    self:updateOpacityCache(actor.position.x, actor.position.y)
+  end
 end
 
 function Level:addComponent(actor, component)
   actor:__addComponent(component)
   self:updateComponentCache(actor)
-  self:updateOpacityCache(actor.position.x, actor.position.y)
+  print(component.name)
+  if component:is(components.Opaque) then
+    self:updateOpacityCache(actor.position.x, actor.position.y)
+  end
 end
 
 --- A utility function that returns true if the level contains the given
@@ -482,14 +488,18 @@ end
 function Level:removeSparseMapEntries(actor)
   for vec in self:eachActorTile(actor) do
     self.sparseMap:remove(vec.x, vec.y, actor)
-    self:updateOpacityCache(vec.x, vec.y)
+    if actor:getComponent(components.Opaque) then
+      self:updateOpacityCache(vec.x, vec.y)
+    end
   end
 end
 
 function Level:insertSparseMapEntries(actor)
   for vec in self:eachActorTile(actor) do
     self.sparseMap:insert(vec.x, vec.y, actor)
-    self:updateOpacityCache(vec.x, vec.y)
+    if actor:getComponent(components.Opaque) then
+      self:updateOpacityCache(vec.x, vec.y)
+    end
   end
 end
 
@@ -647,6 +657,10 @@ function Level:updateOpacityCache(x, y)
 
   opaque = opaque or self.cellOpacityCache:get(x, y)
   self.opacityCache:set(x, y, opaque)
+
+  for _, system in ipairs(self.systems) do
+    system:afterOpacityChanged(self, x, y)
+  end
 end
 
 -- TODO: Replace with global system.
