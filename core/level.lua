@@ -376,7 +376,7 @@ end
 
 function Level:moveActor(actor, pos, skipSparseMap)
   assert(pos.is and pos:is(Vector2), "Expected a Vector2 for pos in Level:moveActor.")
-
+  
   local oldpos = actor.position
   -- we copy the position here so that the caller doesn't have to worry about
   -- allocating a new table
@@ -388,6 +388,7 @@ function Level:moveActor(actor, pos, skipSparseMap)
 
   -- if the actor isn't in the level, we don't do anything
   if not self:hasActor(actor) then
+    print("yeet")
     return
   end
 
