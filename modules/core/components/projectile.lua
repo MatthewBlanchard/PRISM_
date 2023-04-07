@@ -7,6 +7,7 @@ Projectile.name = "Projectile"
 
 function Projectile:__new(options)
     self.range = options.range or 5
+    self.traveled = 0
     self.bounce = options.bounce or 0
     self.damage = options.damage or "1d2"
     self.effects = options.effects or {}

@@ -27,7 +27,7 @@ function Open:perform(level)
   if collideable then
     level:removeComponent(door, components.Collideable)
   else
-    level:removeComponent(door, components.Collideable_box())
+    level:addComponent(door, components.Collideable_box())
   end
 end
 
