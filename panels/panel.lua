@@ -100,7 +100,7 @@ function Panel:effectWriteOffset(toWrite, x, y, fg, bg)
   end
 
   local sight_component = game.curActor:getComponent(components.Sight)
-  if not sight_component.fov[x] or not sight_component.fov[x][y] then
+  if not sight_component.fov:get(x, y) then
     self.effectWrite = false
     return
   end
@@ -120,7 +120,7 @@ function Panel:effectWriteOffsetUI(toWrite, x, y, ofx, ofy, fg, bg)
   end
 
   local sight_component = game.curActor:getComponent(components.Sight)
-  if not sight_component.fov[x] or not sight_component.fov[x][y] then
+  if not sight_component.fov:get(x, y) then
     return
   end
 

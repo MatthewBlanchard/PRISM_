@@ -244,11 +244,13 @@ end
 function Level:removeComponent(actor, component)
   actor:__removeComponent(component)
   self:updateComponentCache(actor)
+  self:updateOpacityCache(actor.position.x, actor.position.y)
 end
 
 function Level:addComponent(actor, component)
   actor:__addComponent(component)
   self:updateComponentCache(actor)
+  self:updateOpacityCache(actor.position.x, actor.position.y)
 end
 
 --- A utility function that returns true if the level contains the given
@@ -480,34 +482,14 @@ end
 function Level:removeSparseMapEntries(actor)
   for vec in self:eachActorTile(actor) do
     self.sparseMap:remove(vec.x, vec.y, actor)
-
-    local opaque = false
-    for actor, _ in pairs(self.sparseMap:get(vec.x, vec.y)) do
-      opaque = opaque or actor:hasComponent(components.Opaque)
-      if opaque then
-        break
-      end
-    end
-
-    opaque = opaque or self.cellOpacityCache:get(vec.x, vec.y)
-    self.opacityCache:set(vec.x, vec.y, opaque)
+    self:updateOpacityCache(vec.x, vec.y)
   end
 end
 
 function Level:insertSparseMapEntries(actor)
   for vec in self:eachActorTile(actor) do
     self.sparseMap:insert(vec.x, vec.y, actor)
-
-    local opaque = false
-    for actor, _ in pairs(self.sparseMap:get(vec.x, vec.y)) do
-      opaque = opaque or actor:hasComponent(components.Opaque)
-      if opaque then
-        break
-      end
-    end
-
-    opaque = opaque or self.cellOpacityCache:get(vec.x, vec.y)
-    self.opacityCache:set(vec.x, vec.y, opaque)
+    self:updateOpacityCache(vec.x, vec.y)
   end
 end
 
@@ -592,9 +574,7 @@ function Level:getAOE(type, position, range)
     local fovCalculator = ROT.FOV.Recursive(self:createVisibilityClosure())
     fovCalculator:compute(position.x, position.y, range, self:getAOEFOVCallback(fov))
     for k, other in ipairs(self.actors) do
-      if fov[other.position.x] and
-          fov[other.position.x][other.position.y]
-      then
+      if fov:get(other.position.x, other.position.y) then
         table.insert(seenActors, other)
       end
     end

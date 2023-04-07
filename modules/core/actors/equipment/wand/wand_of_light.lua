@@ -2,7 +2,7 @@ local Actor = require "core.actor"
 local Action = require "core.action"
 local Condition = require "core.condition"
 local Tiles = require "display.tiles"
-local LightColor = require "lighting.lightcolor"
+local LightColor = require "structures.lighting.lightcolor"
 -- The light actor
 -- Not super reusable so we define the light actor here.
 local Orb = Actor:extend()

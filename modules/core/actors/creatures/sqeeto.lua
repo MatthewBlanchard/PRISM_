@@ -1,7 +1,7 @@
 local Actor = require "core.actor"
 local Vector2 = require "math.vector"
 local Tiles = require "display.tiles"
-local LightColor = require "lighting.lightcolor"
+local LightColor = require "structures.lighting.lightcolor"
 
 local Sqeeto = Actor:extend()
 
@@ -70,17 +70,15 @@ function Sqeeto:act(level)
   local lighting_system = level:getSystem("Lighting")
   local lights = lighting_system:getLights()
   local sight_component = self:getComponent(components.Sight)
-  for x, _ in pairs(sight_component.fov) do
-    for y, _ in pairs(sight_component.fov[x]) do
-      local local_lights = lights:get(x, y)
-      for light, _ in pairs(local_lights) do
-        local value = light.color:average_brightness()
+  for x, y in sight_component.fov:each() do
+    local local_lights = lights:get(x, y)
+    for light, _ in pairs(local_lights) do
+      local value = light.color:average_brightness()
 
-        if value > highest then
-          highest = value
-          highestLocation = Vector2(x, y)
-          highestComponent = light 
-        end
+      if value > highest then
+        highest = value
+        highestLocation = Vector2(x, y)
+        highestComponent = light 
       end
     end
   end

@@ -1,6 +1,6 @@
 local Actor = require "core.actor"
 local Tiles = require "display.tiles"
-local LightColor = require "lighting.lightcolor"
+local LightColor = require "structures.lighting.lightcolor"
 
 local StationaryTorch = Actor:extend()
 StationaryTorch.char = Tiles["stationarytorch"]

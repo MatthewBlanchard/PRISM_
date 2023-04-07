@@ -22,13 +22,10 @@ function AIController.isPassable(actor, vec)
     return false
   end
 
-  if not sight_component.fov[vec.x] or not sight_component.fov[vec.x][vec.y] then
-    return false
-  end
+  local cell = sight_component.fov:get(vec.x, vec.y)
+  if not cell then return false end
 
-  if not sight_component.fov[vec.x][vec.y].passable then
-    return false
-  end
+  if not cell.passable then return false end
 
   for _, seen in ipairs(sight_component.seenActors) do
     local seen_passable = seen:hasComponent(components.Collideable)

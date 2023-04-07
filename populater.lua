@@ -189,9 +189,9 @@ function Populater(level, map)
         components.Readable
       }
     }
-    for i = 1, 3 do
+    --[[for i = 1, 3 do
       local itemTable =shopItems[i]
-      local item = Loot.generateLoot(itemTable[love.math.random(1, #itemTable)])
+      --local item = Loot.generateLoot(itemTable[love.math.random(1, #itemTable)])
       local product = actors.Product()
       product.position.x = shop.position.x + i*2
       product.position.y = shop.position.y
@@ -201,7 +201,7 @@ function Populater(level, map)
       sellable_component:setPrice(actors.Shard, item:getComponent(components.Cost).cost)
       sellable_component:setShopkeep(shop)
       level:addActor(product)
-    end
+    end--]]
   end
 
   local function populateTreasureRoom(room)

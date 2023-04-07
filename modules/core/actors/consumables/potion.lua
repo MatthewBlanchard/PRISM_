@@ -2,7 +2,7 @@ local Actor = require "core.actor"
 local Action = require "core.action"
 local Condition = require "core.condition"
 local Tiles = require "display.tiles"
-local LightColor = require "lighting.lightcolor"
+local LightColor = require "structures.lighting.lightcolor"
 
 local Drink = actions.Drink:extend()
 Drink.name = "drink"

@@ -29,7 +29,7 @@ function shop:populater(chunk, clipping)
     }
   }
 
-  for i = 1, 3 do
+  --[[for i = 1, 3 do
     local itemTable = shopItems[i]
     local item = Loot.generateLoot(itemTable[love.math.random(1, #itemTable)])
 
@@ -49,7 +49,7 @@ function shop:populater(chunk, clipping)
       return status
     end
     chunk:insert_actor('Product', cx-2+i, cy, callback)
-  end
+  end]]--
 end
 
 return shop

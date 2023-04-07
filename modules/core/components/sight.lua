@@ -1,4 +1,5 @@
 local Component = require "core.component"
+local SparseGrid = require "structures.sparsegrid"
 
 local Sight = Component:extend()
 Sight.name = "Sight"
@@ -11,7 +12,7 @@ function Sight:__new(options)
   self.explored = options.explored
 
   -- remembered actors that have been seen by the player
-  self.rememberedActors = ROT.Type.Grid:new()
+  self.rememberedActors = SparseGrid()
 
   if options.darkvision and math.floor(options.darkvision) ~= options.darkvision then
     error("Darkvision must be an integer")
@@ -25,9 +26,10 @@ function Sight:initialize(actor)
   self.scryActors = {}
 
   if self.fov then
-    self.fov = {}
+    self.fov = SparseGrid()
+    self.raw_fov = SparseGrid()
     if self.explored then
-      self.explored = {}
+      self.explored = SparseGrid()
     end
   end
 end
@@ -37,14 +39,24 @@ function Sight:getRevealedActors()
 end
 
 function Sight:setCellExplored(x, y, explored)
-  if self.explored then
-    self.explored[x] = self.explored[x] or {}
-    self.explored[x][y] = explored
-  end
+  self.explored:set(x, y, explored)
 end
 
-function Sight:canSeeCell(x, y)
-  return self.fov[x] and self.fov[x][y]
+function Sight:getFOVCell(x, y)
+  return self.fov:get(x, y)
+end
+
+function Sight:setFOVCell(x, y, value)
+  self.fov:set(x, y, value)
+end
+
+
+function Sight:getRawFOVCell(x, y)
+  return self.raw_fov:get(x, y)
+end
+
+function Sight:setRawFOVCell(x, y, value)
+  self.raw_fov:set(x, y, value)
 end
 
 return Sight

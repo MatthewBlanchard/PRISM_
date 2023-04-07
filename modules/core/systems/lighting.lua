@@ -1,277 +1,355 @@
 local System = require "core.system"
+local Grid = require "structures.grid"
+local LightColor = require "structures.lighting.lightcolor"
+local LightBuffer = require "structures.lighting.lightbuffer"
 local SparseMap = require "structures.sparsemap"
+local BoundingBox = require "math.bounding_box"
 
--- TODO: Rip out the current lighting system and do something more similar to Minecraft's
--- simple lighting system but with 3 channels r,g,b each consisting of an integer from 0-31.
 local LightingSystem = System:extend()
-LightingSystem.name = "OldLighting"
+LightingSystem.name = "Lighting"
 
 LightingSystem.__lights = nil
+LightingSystem.__submaps = nil
 LightingSystem.__lightMap = nil
-LightingSystem.__temporaryLights = nil
 
-function LightingSystem:__new()
+function LightingSystem:__new(level)
     self.__lights = SparseMap()
-    self.__lightMap = {}
-    self.__effectLightMap = {}
     self.__temporaryLights = {}
     self.__opaqueCache = {}
     self.rebuilt = false
 end
 
 function LightingSystem:initialize(level)
-  self.__fov = ROT.FOV.Recursive(self:createVisibilityClosure(level))
-  self.lighting = ROT.Lighting(self:getLightReflectivityCallback(), { range = 50, passes = 3 })
-  self.lighting:setFOV(self.__fov)
-  self:rebuildLighting(level)
+    self.__lightMap = LightBuffer(level.width, level.height)
+    self.__effectLightMap = LightBuffer(level.width, level.height)
+end
+
+function LightingSystem:postInitialize(level)
+    self:forceRebuildLighting(level)
+    self:forceRebuildLighting(level, 0)
 end
 
 function LightingSystem:beforeAction(level, actor, action)
-  for actor in level:eachActor(components.Opaq) do
-    self.__opaqueCache[actor] = actor.opaque
-  end
-end
--- called when an Actor takes an Action 
-function LightingSystem:afterAction(level, actor, action)
-  local force_rebuild = false
-  for actor in level:eachActor() do
-    if self.__opaqueCache[actor] ~= actor.opaque then
-      force_rebuild = true
+    for actor in level:eachActor(components.Opaque) do
+        self.__opaqueCache[actor] = true
     end
-    self.__opaqueCache[actor] = nil
-  end
+end
+-- called when an Actor takes an Action
+function LightingSystem:afterAction(level, actor, action)
+    local force_rebuild = false
 
-  if force_rebuild then
-    self:forceRebuildLighting(level)
-  else
-    self:rebuildLighting(level)
-  end
+    for k, v in pairs(self.__opaqueCache) do
+        if not k:hasComponent(components.Opaque) then
+            self.__opaqueCache[k] = nil
+            force_rebuild = true
+        end
+    end
+
+    if force_rebuild then
+        self:forceRebuildLighting(level)
+    else
+        self:rebuildLighting(level)
+    end
 end
 
 -- called after an actor has moved
-function LightingSystem:onMove(level, actor)
-  self:rebuildLighting(level)
+function LightingSystem:onMove(level, actor) self:rebuildLighting(level) end
+
+function LightingSystem:onActorAdded(level, actor) self:rebuildLighting(level) end
+
+function LightingSystem:onActorRemoved(level, actor) self:rebuildLighting(level) end
+
+function LightingSystem:getLight(x, y, dt)
+    local lightMap = self.__lightMap
+    if dt then
+        lightMap = self.__effectLightMap
+    end
+
+    return lightMap:getLight(x, y)
 end
 
-function LightingSystem:onActorAdded(level, actor)
-  self:rebuildLighting(level)
+function LightingSystem:getLightingAt(x, y, fov, dt)
+    local foundOpaqueActor = false
+
+    if fov:get(x, y) and not self.owner:getCellOpaque(x, y) then
+        return self:getLight(x, y, dt)
+    end
+
+    local cols = {}
+
+    for i = -1, 1, 1 do
+        for j = -1, 1, 1 do
+            if not (i == 0 and j == 0) then
+                if fov:get(x + i, y + j) and not self.owner:getCellOpaque(x + i, y + j) then
+                    table.insert(cols, self:getLight(x + i, y + j, dt))
+                end
+            end
+        end
+    end
+
+    local finalCol = {0, 0, 0}
+    local count = #cols
+    for _, col in ipairs(cols) do 
+        finalCol[1] = finalCol[1] + col.r
+        finalCol[2] = finalCol[2] + col.g
+        finalCol[3] = finalCol[3] + col.b
+    end
+
+    if count > 0 then 
+        finalCol[1] = math.floor(finalCol[1] / count)
+        finalCol[2] = math.floor(finalCol[2] / count)
+        finalCol[3] = math.floor(finalCol[3] / count)
+    end
+
+    return LightColor(finalCol[1], finalCol[2], finalCol[3])
 end
 
-function LightingSystem:onActorRemoved(level, actor)
-  self:rebuildLighting(level)
+function LightingSystem:getBrightness(x, y, fov, seen)
+    local lcolor = self:getLightingAt(x, y, fov, seen)
+    return lcolor:average_brightness()
 end
 
 function LightingSystem:invalidateLighting(level)
-  if not self.light or not self.lighting.setFOV then return end -- check if lighting is initialized
+    if not self.light or not self.lighting.setFOV then return end -- check if lighting is initialized
 
-  -- This resets our lighting. rotLove doesn't offer a better way to do this.
-  self:updateLighting(false)
+    -- This resets our lighting. rotLove doesn't offer a better way to do this.
+    self:updateLighting(false)
 end
 
 -- Returns the actual lights that are in the level not the lightmap which holds post-spread light values.
-function LightingSystem:getLights(level)
-  return self.__lights
-end
+function LightingSystem:getLights(level) return self.__lights end
 
 --- Creates a list of all of the light components in the level and returns it.
 function LightingSystem:__buildLightList(level)
-  local lights = SparseMap()
+    local lights = SparseMap()
 
-  for actor, light_component in level:eachActor(components.Light) do
-    local x, y = actor.position.x, actor.position.y
-
-    assert(light_component.color)
-    lights:insert(x, y, light_component)
-  end
-
-  for _, system in ipairs(level.systems) do
-    if system.registerLights then
-      -- Systems can register their own lights by implementing a registerLights function
-      -- TODO: move from actors with light components to a system that registers lights 
-      -- directly with the lighting system.
-      for _, light_tuple in ipairs(system:registerLights(level)) do
-        local light_component = light_tuple[3]
-        local x, y = light_tuple[1], light_tuple[2]
-
-        assert(light_component.color)
+    for actor, light_component in level:eachActor(components.Light) do
+        local x, y = actor.position.x, actor.position.y
         lights:insert(x, y, light_component)
-      end
     end
-  end
 
-  return lights
-end
+    for _, system in ipairs(level.systems) do
+        if system.registerLights then
+            -- Systems can register their own lights by implementing a registerLights function
+            -- TODO: move from actors with light components to a system that registers lights
+            -- directly with the lighting system.
+            for _, light_tuple in ipairs(system:registerLights(level)) do
+                local light_component = light_tuple[3]
+                local x, y = light_tuple[1], light_tuple[2]
 
-function LightingSystem:__checkLightList(candidate)
-  local candidate_count = candidate:count()
-  local light_count = self.__lights:count()
-
-  if candidate_count ~= light_count then
-    return false
-  end
-
-  for x, y, candidate_cell in candidate:each() do
-    if not self.__lights:has(x, y, candidate_cell) then
-      return false
+                lights:insert(x, y, light_component)
+            end
+        end
     end
-  end
 
-  return true
+    return lights
 end
 
-local function cmul(col, scalar)
-  return { col[1] * scalar, col[2] * scalar, col[3] * scalar }
-end
+function LightingSystem:__checkLightList(candidate, dt)
+    local candidate_count = candidate:count()
+    local light_count = self.__lights:count()
 
-function LightingSystem:rebuildLighting(level, dt)
-  local candidate = self:__buildLightList(level)
+    local needs_update = {}
+    local previous = {}
+    local missing = {}
+    
+    for x, y, cell in self.__lights:each() do
+        if not candidate:has(x, y, cell) then
+            table.insert(missing, {x, y, cell})
+        end
+    end
 
-  -- if our light list hasn't changed, we don't need to rebuild the lighting
-  -- looping through the qctors and building a list is way cheaper than rebuilding the lighting
-  -- so we do this check first.
-  if self:__checkLightList(candidate) and not dt then
-    self.rebuilt = false
-    return
-  end
+    -- Find new lights or lights that have changed position
+    for x, y, candidate_cell in candidate:each() do
+        if not self.__lights:has(x, y, candidate_cell) or (dt and candidate_cell.effect) then
+            table.insert(needs_update, {x, y, candidate_cell})
+        end
+    end
 
-  self.__lights = candidate
-  self:__rebuild(level, dt)
+    local should_rebuild = #needs_update > 0
+
+    if candidate_count < light_count then
+        should_rebuild = true
+    end
+
+    return should_rebuild, needs_update, missing
 end
 
 function LightingSystem:forceRebuildLighting(level, dt)
-  self.__lights = self:__buildLightList(level)
-  self:__rebuild(level, dt)
+    self.__needsUpdate = nil
+    self.__lights = self:__buildLightList(level)
+    self:__rebuild(level, dt)
+end
+
+function LightingSystem:rebuildLighting(level, dt)
+    local candidate = self:__buildLightList(level)
+    self.__needsUpdate = nil
+
+    -- if our light list hasn't changed, we don't need to rebuild the lighting
+    -- looping through the qctors and building a list is way cheaper than rebuilding the lighting
+    -- so we do this check first.
+    local should_update, needs_update, missing = self:__checkLightList(candidate, dt)
+    if not should_update and not dt then
+        self.rebuilt = false
+        return
+    end
+
+    self.__needsUpdate = needs_update
+    self.__missing = missing
+    self.__lights = candidate
+    self:__rebuild(level, dt)
 end
 
 function LightingSystem:__rebuild(level, dt)
-  self.rebuilt = true
-  self.lighting = ROT.Lighting(self:getLightReflectivityCallback(), { range = 50, passes = 3 })
-  self.lighting:setFOV(self.__fov)
-
-  for x, y, light_component in self.__lights:each() do
-    assert(light_component.is and light_component:is(components.Light))
-    local light
-    -- Check if we should be manipulating the light with lightingEffects
-    -- like flickering or pulsing.
-    if light_component.effect and dt then
-      light = cmul(light_component.effect(dt), light_component.intensity)
-    else
-      light = cmul(light_component.color, light_component.intensity)
+    local lightMap = self.__lightMap
+    if dt then
+        lightMap = self.__effectLightMap
     end
 
-    -- We don't want to overwrite an exisitng light so if light exists in that cell
-    -- we add the two together instead
-    local curLight = self.lighting:getLight(x, y)
-    if curLight then
-      self.lighting:setLight(x, y, ROT.Color.add(light, curLight))
-    else
-      self.lighting:setLight(x, y, light)
-    end
-  end
+    self.rebuilt = true
 
-  local lightsToClean = {}
+    local rects = {}
 
-  if dt and #self.__temporaryLights > 0 then
-    for i = #self.__temporaryLights, 1, -1 do
-      local light = self.__temporaryLights[i]
-      local x, y, color = light(dt)
+    if self.__needsUpdate == nil then
+        for x, y, light in self.__lights:each() do
+            -- If we have a cache clear it, if not create one.
+            if light.__cache == nil then
+                light.__cache = LightBuffer(61, 61)
+            else
+                light.__cache:clear()
+            end
 
-      if not color then table.remove(self.__temporaryLights, i) end
-
-      local curLight = self.lighting:getLight(x, y)
-      if curLight then
-        self.lighting:setLight(x, y, ROT.Color.add(color, curLight))
-      else
-        self.lighting:setLight(x, y, color)
-      end
-    end
-  end
-
-  -- We maintain two seperate light buffers. If effect is truthy we give the lighting engine
-  -- a callback that fills the effects buffer which does not get used in gameplay and is for
-  -- display purposes.
-  local callback = dt and self:getLightingEffectCallback() or self:getLightingCallback()
-  self.lighting:compute(callback)
-end
-
-function LightingSystem:at(x, y)
-  return self.__lightMap[x] and self.__lightMap[x][y]
-end
-
--- Takes a fov because wall lighting uses the fov to determine how to light the walls
-function LightingSystem:getLightingAt(x, y, fov, light)
-  local light = light or self.__lightMap
-  if fov[x] and fov[x][y] and self.owner:getCellOpaque(x, y) then
-    if light[x] and light[x][y] then
-      return light[x][y]
-    end
-
-    return { 0, 0, 0 }
-  end
-
-  local finalCol = { 0, 0, 0 }
-  local cols = {}
-
-  for i = -1, 1, 1 do
-    for j = -1, 1, 1 do
-      if fov[x + i] and fov[x + i][y + j] and fov[x + i][y + j].passable then
-        if light[x + i] and light[x + i][y + j] then
-            table.insert(cols, light[x + i][y + j])
+            self.x = x
+            self.y = y
+            local color = light.color
+            if dt and light.effect then
+                color = light.effect(dt, light.color)
+            end
+            
+            local falloff = light.falloff
+            local cache = light.__cache
+            light.__bounds = self:__spreadLight(level, 31, 31, x - 31, y - 31, color, cache, falloff)
         end
-      end
+    else
+        for _, updateEntry in ipairs(self.__needsUpdate) do
+            local x, y, light = updateEntry[1], updateEntry[2], updateEntry[3]
+            local bounds = light.__bounds
+
+            -- If we have a cache clear it, if not create one.
+            if light.__cache == nil then
+                light.__cache = LightBuffer(61, 61)
+            else
+                light.__cache:clear()
+            end
+
+            local color = light.color
+            if dt and light.effect then
+                color = light.effect(dt, light.color)
+            end
+
+            local falloff = light.falloff
+            local cache = light.__cache
+            light.__bounds = self:__spreadLight(level, 31, 31, x - 31, y - 31, color, cache, falloff)
+
+            if bounds then
+                table.insert(rects, bounds:union(light.__bounds))
+            else
+                table.insert(rects, light.__bounds)
+            end
+        end
     end
-  end
 
-  local count = #cols
-  for i = 1, count do
-    for j = 1, 3 do
-      finalCol[j] = finalCol[j] + cols[i][j]
+    for _, missing in ipairs(self.__missing) do
+        local x, y, light = missing[1], missing[2], missing[3]
+        local bounds = light.__bounds
+
+        if bounds then
+            table.insert(rects, bounds)
+        end
     end
-  end
 
-  if count > 0 then
-    for j = 1, 3 do
-      finalCol[j] = finalCol[j] / count
+    if #rects == 0 then
+        lightMap:clear()
+        for x, y, light in self.__lights:each() do
+            lightMap:accumulate_buffer(x - 30, y - 30, light.__cache)
+        end
+    else
+        for _, rect in ipairs(rects) do
+            lightMap:clear_rect(rect)
+            for x, y, light in self.__lights:each() do
+                if rect:intersects(light.__bounds) then
+                    lightMap:accumulate_buffer_masked(x - 30, y - 30, light.__cache, rect)
+                end
+            end
+        end
     end
-  end
-
-  return finalCol
 end
 
-function LightingSystem:addTemporaryLight(light)
-  table.insert(self.__temporaryLights, light)
+function LightingSystem:__getLightReduction(level, row, col)
+    local reduction = level:getCell(row, col).lightReduction or 0
+    local actors = level:getActorsAt(row, col)
+
+    for _, actor in ipairs(actors) do
+        local lightOccluderComponent = actor:getComponent(components.Light_occluder)
+        if lightOccluderComponent then
+            reduction = reduction + lightOccluderComponent.reduction
+        end
+    end
+
+    return reduction
 end
 
+local rowDirections = {-1, 1, 0, 0, -1, -1, 1, 1}
+local colDirections = {0, 0, -1, 1, -1, 1, -1, 1}
 
-function LightingSystem:getLightingCallback()
-  self.__lightMap = {}
+function LightingSystem:__spreadLight(level, row, col, offsetx, offsety, lightLevel, lightMap, falloffFactor)
+    local queue = {{row, col, lightLevel, 0}}
+    local visited = ROT.Type.Grid:new()
 
-  return function(x, y, color)
-    if not self.__lightMap[x] then self.__lightMap[x] = {} end
-    self.__lightMap[x][y] = color
-  end
-end
+    local minRow, maxRow, minCol, maxCol = row, row, col, col
 
-function LightingSystem:getLightingEffectCallback()
-  self.__effectLightMap = {}
+    local function processCell(curRow, curCol, curLightLevel, depth)
+        if  level:getCellOpaque(curRow + offsetx, curCol + offsety) or
+            visited:getCell(curRow, curCol)
+        then 
+            return
+        end
 
-  return function(x, y, color)
-    if not self.__effectLightMap[x] then self.__effectLightMap[x] = {} end
-    self.__effectLightMap[x][y] = color
-  end
-end
+        lightMap:setWithFFIStruct(curRow, curCol, curLightLevel)
+        visited:setCell(curRow, curCol, true)
 
-function LightingSystem:getLightReflectivityCallback()
-  return function(lighting, x, y)
-    return 0
-  end
-end
+        minRow, maxRow = math.min(minRow, curRow), math.max(maxRow, curRow)
+        minCol, maxCol = math.min(minCol, curCol), math.max(maxCol, curCol)
 
--- Little factories for some callback functions we need to pass to the FOV calculator
-function LightingSystem:createVisibilityClosure(level)
-  return function(fov, x, y)
-      return level:getCellOpaque(x, y)
-  end
+        for i = 1, 8 do
+            local newRow = curRow + rowDirections[i]
+            local newCol = curCol + colDirections[i]
+            if not visited:getCell(newRow, newCol) then
+                local reducedLightLevel
+
+                reducedLightLevel = curLightLevel:subtract_scalar(
+                    math.floor(depth * falloffFactor) + 
+                    self:__getLightReduction(level, curRow + offsetx, curCol + offsety)
+                )
+
+                if reducedLightLevel.r > 0 or reducedLightLevel.g > 0 or reducedLightLevel.b > 0 then
+                    table.insert(queue, {newRow, newCol, reducedLightLevel, depth + 1})
+                end
+            end
+        end
+    end
+
+    while #queue > 0 do
+        local current = table.remove(queue, 1)
+        local curRow, curCol, curLightLevel, depth = current[1], current[2], current[3], current[4]
+        processCell(curRow, curCol, curLightLevel, depth + 1)
+    end
+
+    local minRow = minRow + offsetx
+    local minCol = minCol + offsety
+    local maxRow = maxRow + offsetx
+    local maxCol = maxCol + offsety
+    return BoundingBox(minRow, minCol, maxRow, maxCol)
 end
 
 return LightingSystem

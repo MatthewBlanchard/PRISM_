@@ -7,6 +7,7 @@ local Inventory = require "panels.inventory"
 local Status = require "panels.status"
 local Message = require "panels.message"
 local Selector = require "panels.selector"
+local SparseGrid = require "structures.sparsegrid"
 
 local Interface = Panel()
 
@@ -36,7 +37,7 @@ function Interface:update(dt)
 
   self.messagePanel:update(dt)
 
-  self.fov = {}
+  self.fov = SparseGrid()
   self.seenActors = {}
 
 
@@ -51,11 +52,8 @@ function Interface:update(dt)
         if not found then table.insert(self.seenActors, actor) end
       end
 
-      for x, t in pairs(sight_component.fov) do
-        for y, c in pairs(t) do
-          if not self.fov[x] then self.fov[x] = {} end
-          self.fov[x][y] = c
-        end
+      for x, y, cell in sight_component.fov:each() do
+        self.fov:set(x, y, cell)
       end
     end
   end
@@ -79,15 +77,15 @@ local function clerp(start, finish, t)
 end
 
 local function shouldDrawExplored(explored, x, y)
-  if not explored or not explored[x] or not explored[x][y] then return false end
-  if explored[x][y].passable then return true end
+  local cell = explored:get(x, y)
+  if not cell then return false end
+  if cell.passable then return true end
 
   for i = -1, 1 do
     for j = -1, 1 do
-      if explored[x + i] then
-        if explored[x + i][y + j] and explored[x + i][y + j].passable then
-          return true
-        end
+      local neighbor = explored:get(x + i, y + j)
+      if neighbor and neighbor.passable then
+        return true
       end
     end
   end
@@ -103,7 +101,7 @@ function Interface:draw()
 
   local rememberedActors = {}
 
-  for _, _, _, actor in sight_component.rememberedActors:each() do
+  for _, _, actor in sight_component.rememberedActors:each() do
     table.insert(rememberedActors, actor)
   end
 
@@ -125,16 +123,17 @@ function Interface:draw()
   local sx, sy = game.curActor.position.x, game.curActor.position.y
   for x = sx - viewX, sx + viewX do
     for y = sy - viewY, sy + viewY do
-      if fov[x] and fov[x][y] then
+      local cell = fov:get(x, y)
+      if cell then
         local lightCol = lighting_system:getLightingAt(x, y, fov, self.dt):to_rgb()
         local lightValue = lighting_system:getBrightness(x, y, fov) / 31
 
         local finalColor = tileLightingFormula(lightCol, lightValue)
 
         if lightValue ~= lightValue then finalColor = ambientColor end
-        self:writeOffset(fov[x][y].tile, x, y, finalColor)
+        self:writeOffset(cell.tile, x, y, finalColor)
       elseif shouldDrawExplored(explored, x, y) then
-        self:writeOffset(explored[x][y].tile, x, y, ambientColor)
+        self:writeOffset(explored:get(x, y).tile, x, y, ambientColor)
       end
     end
   end

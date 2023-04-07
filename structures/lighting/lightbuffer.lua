@@ -1,5 +1,5 @@
 local Object = require "object"
-local LightColor = require "lighting.lightcolor"
+local LightColor = require "structures.lighting.lightcolor"
 local ffi = require "ffi"
 
 local _max, _min = math.max, math.min

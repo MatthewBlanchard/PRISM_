@@ -1,5 +1,5 @@
 local Component = require "core.component"
-local LightColor = require "lighting.lightcolor"
+local LightColor = require "structures.lighting.lightcolor"
 
 local function randBiDirectional()
   return (math.random() - .5) * 2

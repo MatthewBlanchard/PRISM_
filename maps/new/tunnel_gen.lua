@@ -118,7 +118,7 @@ function TunnelGen:create(callback)
 
     for i = 1, 100 do
         local x, y = self._map:get_random_open_tile()
-        self._map:insert_actor('Snip', x, y)
+        self._map:insert_actor('Gloop', x, y)
     end
 
     for x, y, cell in self._map:for_cells() do

@@ -4,7 +4,7 @@ local Tiles = require "display.tiles"
 local FeatsPanel = require "panels.feats"
 local SwirlPanel = require "panels.swirl"
 local ClassSelectPanel = require "panels.class_select"
-local LightColor = require "lighting.lightcolor"
+local LightColor = require "structures.lighting.lightcolor"
 
 local Gaze = Action:extend()
 Gaze.name = "gaze"
