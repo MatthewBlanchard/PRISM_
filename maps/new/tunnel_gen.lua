@@ -101,7 +101,7 @@ function TunnelGen:create(callback)
     print "FINISHED ROOM ACCRETION"
 
     for i = 1, 20 do
-        local x, y = self._map:find_wall_tiles_to_remove()
+        --local x, y = self._map:find_wall_tiles_to_remove()
         self:debugYield()
     end
 
@@ -119,7 +119,7 @@ function TunnelGen:create(callback)
 
     for i = 1, 100 do
         local x, y = self._map:get_random_open_tile()
-        self._map:insert_actor('Gloop', x, y)
+        --self._map:insert_actor('Gloop', x, y)
     end
 
     for x, y, cell in self._map:for_cells() do

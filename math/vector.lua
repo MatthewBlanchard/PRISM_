@@ -68,6 +68,10 @@ function Vector2.__mul(a, b)
   return Vector2(a.x * b, a.y * b)
 end
 
+function Vector2.__unm(a)
+  return Vector2(-a.x, -a.y)
+end
+
 --- Creates a string representation of the vector.
 --@treturn string The string representation of the vector.
 function Vector2:__tostring()

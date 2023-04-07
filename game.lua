@@ -50,7 +50,7 @@ function Game:generateLevel(depth)
         level:addSystem(systems.Equipment())
         level:addSystem(systems.Weapon())
         level:addSystem(systems.Lose_condition())
-
+        level:addSystem(systems.Projectile())
     return level
 end
 

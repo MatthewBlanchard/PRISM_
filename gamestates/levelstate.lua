@@ -45,19 +45,19 @@ function LevelState:update(dt)
 
     local awaitedAction = game.interface:getAction()
 
-    -- we're waiting and there's no input so stop advancing
-    if self.waiting and not awaitedAction then return end
-    self.waiting = false
-
-    -- don't advance game state while we're rendering effects please
-    if effects and #effects.effects ~= 0 then
-        return
-    end
-
     -- the game has told us to pause execution and draw frames for a while
     if game.interface.waitTime and game.interface.waitTime > 0 and not self.skipAnimation then
         return
     end
+
+    -- don't advance game state while we're rendering effects please
+    if effects and #effects.effects ~= 0 then
+        return
+    end    
+
+    -- we're waiting and there's no input so stop advancing
+    if self.waiting and not awaitedAction then return end
+    self.waiting = false
 
     local success, ret
     local startTime = love.timer.getTime()

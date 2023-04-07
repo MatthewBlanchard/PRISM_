@@ -195,6 +195,14 @@ function Level:updateComponentCache(actor)
   end
 end
 
+function Level:removeComponentCache(actor)
+  for _, component in pairs(components) do
+    if self.componentCache[component] then
+      self.componentCache[component][actor] = nil
+    end
+  end
+end
+
 function Level:addActor(actor)
   -- some sanity checks
   assert(actor:is(Actor), "Attemped to add a non-actor object to the level with addActor")
@@ -220,7 +228,7 @@ function Level:addActor(actor)
 end
 
 function Level:removeActor(actor)
-  self:updateComponentCache(actor)
+  self:removeComponentCache(actor)
 
   self:removeSparseMapEntries(actor)
 
@@ -266,6 +274,14 @@ function Level:hasActor(actor)
     if candidate_actor == actor then
       return true
     end
+  end
+
+  return false
+end
+
+function Level:hasActorWithComponent(component)
+  for actor, _ in self:eachActor(component) do
+    return true
   end
 
   return false
@@ -373,20 +389,13 @@ function Level:eachActorAt(x, y)
   local actors = self.sparseMap:get(x, y)
   local function iterator()
     key, _ = next(actors, key)
-    if key then
-      return key
-    end
+    return key
   end
   return iterator
 end
 
 function Level:moveActor(actor, pos, skipSparseMap)
   assert(pos.is and pos:is(Vector2), "Expected a Vector2 for pos in Level:moveActor.")
-  
-  local oldpos = actor.position
-  -- we copy the position here so that the caller doesn't have to worry about
-  -- allocating a new table
-  actor.position = pos:copy()
 
   for _, system in ipairs(self.systems)  do
     system:beforeMove(self, actor, oldpos, pos)
@@ -394,13 +403,17 @@ function Level:moveActor(actor, pos, skipSparseMap)
 
   -- if the actor isn't in the level, we don't do anything
   if not self:hasActor(actor) then
-    print("yeet")
     return
   end
 
   if not skipSparseMap then
     self:removeSparseMapEntries(actor)
   end
+  
+  local oldpos = actor.position
+  -- we copy the position here so that the caller doesn't have to worry about
+  -- allocating a new table
+  actor.position = pos:copy()
 
   if not skipSparseMap then
     self:insertSparseMapEntries(actor)
