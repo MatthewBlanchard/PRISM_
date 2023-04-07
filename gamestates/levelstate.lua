@@ -71,7 +71,7 @@ function LevelState:update(dt)
         end
         if PROFILE and awaitedAction then 
             profiler.stop()
-            print(profiler.report(20))
+            profiler.writeReport("profile.txt")
         end
     until not (ret == "effect" and self.skipAnimation)
 

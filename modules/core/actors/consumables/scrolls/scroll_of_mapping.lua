@@ -14,8 +14,7 @@ function Read:perform(level)
 
   for x = 1, level.width do
     for y = 1, level.height do
-      if not sight_component.explored[x] then sight_component.explored[x] = {} end
-      sight_component.explored[x][y] = level.map[x][y]
+      sight_component.explored:set(x, y, level:getCell(x, y))
     end
   end
 end

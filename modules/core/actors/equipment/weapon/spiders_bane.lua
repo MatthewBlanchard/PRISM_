@@ -1,7 +1,7 @@
 local Actor = require "core.actor"
 local Tiles = require "display.tiles"
 local Condition = require "core.condition"
-local LightColor = require "lighting.lightcolor"
+local LightColor = require "structures.lighting.lightcolor"
 
 local onkill_messages = {
     "Well done, old sport! That's one less spider to ruin a perfectly good afternoon tea.",

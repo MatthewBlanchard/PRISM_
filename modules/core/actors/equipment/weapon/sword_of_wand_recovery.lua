@@ -1,7 +1,7 @@
 local Actor = require "core.actor"
 local Tiles = require "display.tiles"
 local OnCrit = require "modules.core.conditions.oncrit"
-local LightColor = require "lighting.lightcolor"
+local LightColor = require "structures.lighting.lightcolor"
 
 local WandSword = Actor:extend()
 WandSword.char = Tiles["shortsword"]
