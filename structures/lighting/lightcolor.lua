@@ -53,7 +53,7 @@ function LightColor:subtract_scalar(scalar)
     local g = math.floor(math.min(31, math.max(self.g - scalar, 0)))
     local b = math.floor(math.min(31, math.max(self.b - scalar, 0)))
 
-    return  LightColor:__call(r, g, b)
+    return LightColor:__call(r, g, b)
 end
 
 -- Helper function to clamp values

@@ -245,12 +245,14 @@ function LightingSystem:__rebuild(level, dt)
         end
     end
 
-    for _, missing in ipairs(self.__missing) do
-        local x, y, light = missing[1], missing[2], missing[3]
-        local bounds = light.__bounds
+    if missing then
+        for _, missing in ipairs(self.__missing) do
+            local x, y, light = missing[1], missing[2], missing[3]
+            local bounds = light.__bounds
 
-        if bounds then
-            table.insert(rects, bounds)
+            if bounds then
+                table.insert(rects, bounds)
+            end
         end
     end
 
@@ -272,6 +274,7 @@ function LightingSystem:__rebuild(level, dt)
 end
 
 function LightingSystem:__getLightReduction(level, row, col)
+    if not level:getCell(row, col) then return 0 end
     local reduction = level:getCell(row, col).lightReduction or 0
     local actors = level:getActorsAt(row, col)
 

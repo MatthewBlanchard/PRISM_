@@ -165,7 +165,7 @@ function Interface:draw()
   end
 
   local function drawActors(actorTable, conditional)
-    for k, actor in pairs(actorTable) do
+    for k, actor in ipairs(actorTable) do
       local char = getAnimationChar(actor)
       if conditional and conditional(actor) or true then
         for vec in game.level:eachActorTile(actor) do
