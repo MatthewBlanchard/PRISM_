@@ -325,10 +325,10 @@ function AIController.getDarkestTile(level, actor)
 
   for x = actor.position.x - 1, actor.position.x + 1 do
     for y = actor.position.y - 1, actor.position.y + 1 do
-      local light_value = light_system:at(x, y)
+      local light_value = light_system:getLight(x, y)
       if light_value then
-        local lightval = ROT.Color.value(light_value)
-
+        local lightval = light_value:average_brightness()
+        
         if lightval < lowestLightValue and
           AIController.isPassable(actor, Vector2(x, y))
         then
