@@ -52,7 +52,7 @@ end
 
 local Bone_Dagger = Actor:extend()
 Bone_Dagger.char = Tiles["shortsword"]
-Bone_Dagger.name = "Rib Ripper"
+Bone_Dagger.name = "Skeletal Shiv"
 Bone_Dagger.color = { 0.89, 0.855, 0.788, 1}
 
 Bone_Dagger.components = {
