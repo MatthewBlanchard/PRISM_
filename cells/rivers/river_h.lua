@@ -2,10 +2,19 @@ local Cell = require "cell"
 local Tiles = require "tiles"
 
 local River = Cell:extend()
-River.name = "River" -- displayed in the user interface
-River.passable = true -- defines whether a cell is passable
-River.opaque = false -- defines whether a cell can be seen through
-River.sightLimit = nil -- if set to an integer an actor standing on this tile's sight range will be limited to this number
+River.name = "River"
+River.passable = true
+River.opaque = false
+River.sightLimit = nil
 River.tile = Tiles["river_h_1"]
+
+local vec2 = require 'vector'
+function River:onEnter(level, actor)
+  local move = actor:getComponent(components.Move)
+  if move then
+    local move = actions.Move(actor, vec2(0,1))
+    level:performAction(move)
+  end
+end
 
 return River

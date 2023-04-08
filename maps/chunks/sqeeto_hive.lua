@@ -2,16 +2,7 @@ local Chunk = require 'maps.chunk'
 local Clipper = require('maps.clipper.clipper')
 
 local sqeeto_hive = Chunk:extend()
-function sqeeto_hive:parameters()
-  self.width, self.height = 20, 20
-end
-function sqeeto_hive:shaper(chunk)
-  local cx, cy = chunk:get_center()
-  chunk:clear_ellipse(cx-1, cx-1, 5, 5)
-  for i = 1, 20 do
-    chunk:DLAInOut()
-  end
-end
+
 function sqeeto_hive:populater(chunk, clipping)
   local cx, cy = chunk:get_center()
   

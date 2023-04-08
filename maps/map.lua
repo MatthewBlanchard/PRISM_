@@ -114,292 +114,15 @@ function Map:blit(map, x, y, is_destructive)
   self.entities.list = tablex.overlay(self.entities.list, copy.list)
 
   for x2, y2, k in copy.sparsemap:each() do
-    self.entities.sparsemap:insert(x2+x, y2+y, k)
+    if k then
+      self.entities.sparsemap:insert(x2+x, y2+y, k)
+    end
   end
 
   return self
 end
 
-function Map:special_merge(graph)
-  local function new_chunk(params)
-    params:parameters()
-    local chunk = Map:new(params.width, params.height, 1)
-    params:shaper(chunk)
-
-    local overlay = Map:new(params.width+1, params.height+1, 0)
-    overlay:fill_perimeter(0, 0, params.width+1, params.height+1) 
-    overlay:blit(chunk, 0, 0) 
-    
-    return overlay:new_from_outline()
-  end
-  
-  for _, v in ipairs(graph.vertices) do
-    local chunk = new_chunk(v.parameters)
-    local outline = chunk:new_from_outline_strict()
-    local edge = outline:find_edges()
-
-    local num_of_points = 0
-    for _, v2 in ipairs(edge) do
-      for _, v3 in ipairs(v2) do
-        num_of_points = num_of_points + 1
-      end
-    end
-    local path = Clipper.Path(num_of_points)
-    local i = 0
-    for _, v2 in ipairs(edge) do
-      for _, v3 in ipairs(v2) do
-        path[i] = Clipper.IntPoint(v3.x, v3.y)
-        i = i + 1
-      end
-    end
-    
-    v.chunk = chunk
-    v.outline_edges = edge
-    v.num_of_points = num_of_points
-    v.polygon = path
-    
-    v.parameters.populater(v.parameters, v.chunk, path)
-  end
-  
-  local function get_matching_edges(edges1, edges2)
-    local matches = {}
-    for _, edge1 in ipairs(edges1) do
-      for _, edge2 in ipairs(edges2) do
-        local p1, q1 = edge1[1], edge1[#edge1]
-        local p2, q2 = edge2[1], edge2[#edge2]
-        
-        local dx1, dy1 = p1.x - q1.x, p1.y - q1.y
-        local dx2, dy2 = p2.x - q2.x, p2.y - q2.y
-        
-        if math.sign(dx1) == -math.sign(dx2) and math.sign(dy1) == -math.sign(dy2) then
-          if #edge1 > 2 and #edge2 > 2 then
-            table.insert(matches, {edge1, edge2})
-          end
-        end
-      end
-    end
-    
-    return matches
-  end
-  local function does_intersect(subject, clip, num_of_points, offset)
-    local offset_clip = Clipper.Path(num_of_points)
-    for i = 0, num_of_points-1 do
-      offset_clip[i] = Clipper.IntPoint(clip[i].X + offset.x, clip[i].Y + offset.y)
-    end
-    
-    local solution = Clipper.Paths(1)
-    
-    local clipper = Clipper.Clipper()
-    clipper:AddPath(subject, Clipper.ptSubject, true)
-    clipper:AddPath(offset_clip, Clipper.ptClip, true)
-    clipper:Execute(Clipper.ctUnion, solution)
-    
-    local is_intersect = (Clipper.Area(solution[0]) ~= Clipper.Area(subject)+Clipper.Area(offset_clip))
-    
-    return is_intersect, offset_clip
-  end
-  local function find_valid_matches(vertex1, vertex2, edge_meta_info)
-    local matches = get_matching_edges(vertex1.outline_edges, vertex2.outline_edges)
-    local matches_without_intersections = {}
-    
-    for _, v in ipairs(matches) do
-      for i = 2, #v[1]-1 do
-        for i2 = 2, #v[2]-1 do
-          local segment_index_1 = i
-          local segment_index_2 = i2
-          
-          local offset = vec2(v[1][segment_index_1].x - v[2][segment_index_2].x, v[1][segment_index_1].y - v[2][segment_index_2].y)
-          local connection_point_1 = vec2(v[1][segment_index_1].x, v[1][segment_index_1].y)
-          local connection_point_2 = vec2(v[2][segment_index_2].x, v[2][segment_index_2].y)
-          local is_intersect, offset_clip = does_intersect(vertex1.polygon, vertex2.polygon, vertex2.num_of_points, offset)
-          if (not is_intersect) then
-            table.insert(matches_without_intersections, {
-              v, segment_index_1, segment_index_2, offset_clip, vertex2, offset, num_of_points, connection_point_1, connection_point_2,
-              
-              segment_index_1 = segment_index_1,
-              segment_index_2 = segment_index_2,
-              
-              offset = offset,
-              offset_clip = offset_clip,
-              clip = vertex2.polygon,
-              num_of_points = vertex2.num_of_points,
-              edge_meta_info = edge_meta_info
-              
-            })
-          end
-
-
-        end
-      end
-    end
-    
-    local matches = matches_without_intersections
-    assert(#matches > 0, "no matches found")
-    return matches
-  end
-  
-  local function solve_for_room_positions()
-    local function build_queue_and_matches()
-      local travelled = {[graph.vertices[1]] = true}
-      local matches = {}
-      local queue = {{parent = nil, self = graph.vertices[1]}}
-      
-      local function recursion(vertex)
-        for i, v in ipairs(vertex.edges) do
-          if (not travelled[v.vertex]) and v.meta.type == 'Join' then
-            travelled[v.vertex] = true
-            table.insert(queue, {parent = vertex, self = v.vertex})
-            matches[tostring(vertex)..' '..tostring(v.vertex)] = find_valid_matches(vertex, v.vertex, v.meta)
-            recursion(v.vertex)
-          end
-        end
-      end
-      recursion(graph.vertices[1])
-      
-      return queue, matches
-    end
-    
-    local function build_clip_sets(queue, matches)
-      local offsets = {}
-      local clip_buffer = {}
-      local input_matches = {}
-      
-      local exit = false
-      
-      local cycles = 0
-      local function recursion(n)
-        if exit then goto exit end
-        if n ~= #queue+1 then
-          --cycles = cycles + 1
-          --print(cycles, n)
-          local vertex, parent = queue[n].self, queue[n].parent
-          local parent_offset = offsets[parent] or vec2(0, 0)
-          local match = {}
-          if parent ~= nil then
-            match = matches[tostring(parent)..' '..tostring(vertex)]
-          else
-            clip_buffer[n] = vertex
-            recursion(n+1)
-          end
-          
-          local function rpairs(t)
-            local total = #t
-            
-            return function()
-              if total > 0 then
-                local r = math.random(total)
-                local v = t[r]
-                
-                t[r], t[total] = t[total], t[r]
-                total = total - 1
-                
-                return v
-              end
-            end
-          end
-          
-          for v2 in rpairs(match) do
-            local clip = tablex.copy(v2)
-            
-            clip.offset_clip = Clipper.Path(clip.num_of_points)
-            
-            local offset = parent_offset
-            clip.offset, offset = clip.offset + offset, offset + clip.offset
-            offsets[vertex] = offset
-            for i3 = 0, clip.num_of_points-1 do
-              clip.offset_clip[i3] = Clipper.IntPoint(clip.clip[i3].X + offset.x, clip.clip[i3].Y + offset.y)
-            end
-            clip_buffer[n] = clip
-            
-            
-            local clips = clip_buffer
-            local clipper = Clipper.Clipper()
-            local subject = clips[1].polygon
-            clipper:AddPath(subject, Clipper.ptSubject, true)
-            for i = 2, n do
-              clipper:AddPath(clips[i].offset_clip, Clipper.ptClip, true)
-            end
-            local solution = Clipper.Paths(1)
-            clipper:Execute(Clipper.ctUnion, solution)
-            
-            local sum = Clipper.Area(subject)
-            for i = 2, n do
-              sum = sum + Clipper.Area(clips[i].offset_clip)
-            end
-            
-            if Clipper.Area(solution[0]) == sum then
-              recursion(n+1)
-            end
-          end
-        else
-          table.insert(input_matches, tablex.copy(clip_buffer))
-          exit = true
-        end
-        
-        ::exit::
-      end
-      recursion(1)
-      
-      return input_matches
-    end
-    
-    return build_clip_sets(build_queue_and_matches())
-  end
-
-  local start = love.timer.getTime()
-  local matches, loop_points = solve_for_room_positions()
-  local match_index = 1
-  local connections = {}
-  assert(#matches > 0, 'no complex matches!')
-  
-  print((love.timer.getTime() - start) * 100)
-  
-  local clip_width_sum, clip_height_sum = 0, 0
-  for i, v in ipairs(graph.vertices) do
-    clip_width_sum = clip_width_sum + v.chunk.width
-    clip_height_sum = clip_height_sum + v.chunk.height
-  end
-  local clip_dimension_sum = vec2(clip_width_sum, clip_height_sum)
-  
-  local map = Map:new(clip_width_sum*2, clip_height_sum*2, 0)
-  
-  map:blit(matches[match_index][1].chunk, clip_width_sum, clip_height_sum, false)
-  for i = 2, #matches[match_index] do
-    local match = matches[match_index][i]
-    local segment_index_1 = match.segment_index_1
-    local segment_index_2 = match.segment_index_2
-    local vec = match[1][1].vec
-    local offset = match.offset
-    local connection_point = match[8]
-    
-    table.insert(connections, {
-      segment_1 = match[1][1],
-      segment_2 = match[1][2],
-      
-      segment_index_1 = segment_index_1,
-      segment_index_2 = segment_index_2,
-      
-      match_point_1 = match[1][1][segment_index_1],
-      match_point_2 = match[1][2][segment_index_2],
-      
-      offset = vec2(offset.x, offset.y),
-      clip_dimension_sum = clip_dimension_sum,
-      
-      vec = vec,
-      edge_meta_info = match.edge_meta_info,
-    })
-    map:blit(match[5].chunk, offset.x+clip_width_sum, offset.y+clip_height_sum, false)
-  end
-  
-  for i, v in ipairs(connections) do
-    v.edge_meta_info.callback(map, v)
-  end
-
-  return map
-end
-
 function Map:planar_embedding(graph)
-  --jit.on()
   local start = love.timer.getTime()
 
   local function fill_vertices_info()
@@ -439,8 +162,6 @@ function Map:planar_embedding(graph)
       v.outline_edges = edges
       v.num_of_points = num_of_points
       v.polygon = path
-      
-      v.parameters.populater(v.parameters, v.chunk, path)
     end
   end
   local function get_id(t)
@@ -777,61 +498,86 @@ function Map:planar_embedding(graph)
 
   local length = find_domain_range_max()
   local map = Map:new(length, length, 0)
+
   for i, v in ipairs(variables) do
     map:blit(v.chunk, assignment[v].x, assignment[v].y, false)
   end
 
-  local function mysplit(inputstr, sep)
-    local sep = sep or '%s'
-    local t = {}
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-      table.insert(t, str)
-    end
-    return t
-  end
-  for k, v in pairs(edge_matches) do
-    local split_string = mysplit(k, ':')
-    local edge_1 = v.edge_1
-    local edge_2 = v.edge_2
+  local function vertex_edge_and_populator()
 
-    local slope = edge_1[1] - edge_1[2]
-    local overlapping_points = {}
-    for i = 2, #edge_1-1 do
-      for i2 = 2, #edge_2-1 do
-        if edge_1[i] == edge_2[i2] then
-          table.insert(overlapping_points, edge_1[i])
+    local vertex_edge_info = {}
+    for _, v in ipairs(variables) do
+      vertex_edge_info[v] = {}
+    end
+
+    local function mysplit(inputstr, sep)
+      local sep = sep or '%s'
+      local t = {}
+      for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+        table.insert(t, str)
+      end
+      return t
+    end
+    for k, v in pairs(edge_matches) do
+      local split_string = mysplit(k, ':')
+      local edge_1 = v.edge_1
+      local edge_2 = v.edge_2
+
+      local slope = edge_1[1] - edge_1[2]
+      local overlapping_points = {}
+      for i = 2, #edge_1-1 do
+        for i2 = 2, #edge_2-1 do
+          if edge_1[i] == edge_2[i2] then
+            table.insert(overlapping_points, edge_1[i])
+          end
+        end
+      end
+
+      table.sort(overlapping_points, function(a, b) 
+        if a.x == b.x then
+          return a.y < b.y
+        else
+          return a.x < b.x
+        end
+      end)
+
+      local vertex = variables[split_string[1]]
+      for _, edge in ipairs(vertex.edges) do
+        if variables[split_string[2]] == edge.vertex then
+          local info = {
+            chunk_offset = assignment[vertex],
+            points = overlapping_points,
+            slope = slope
+          }
+
+          
+
+          vertex_edge_info[variables[split_string[1]]][variables[split_string[2]]] = info
+          vertex_edge_info[variables[split_string[2]]][variables[split_string[1]]] = info
+
+          
+          edge.meta.callback(map, info)
         end
       end
     end
 
-    table.sort(overlapping_points, function(a, b) 
-      if a.x == b.x then
-        return a.y < b.y
-      else
-        return a.x < b.x
-      end
-    end)
-
-    local vertex = variables[split_string[1]]
-    for _, edge in ipairs(vertex.edges) do
-      if variables[split_string[2]] == edge.vertex then
-        local info = {
-          chunk_offset = assignment[vertex],
-          points = overlapping_points,
-          slope = slope
-        }
-        edge.meta.callback(map, info)
-      end
+    for i, v in ipairs(graph.vertices) do
+      local info = {
+        vertex = v,
+        map = map,
+        chunk = v.chunk,
+        offset = assignment[v],
+        polygon = v.polygon,
+        edges = vertex_edge_info,
+      }
+      v.parameters:populater(info)
     end
 
-    -- for _, point in ipairs(overlapping_points) do
-    --   map:clear_cell(point.x, point.y)
-    --   map:insert_entity('Gate', point.x, point.y)
-    -- end
   end
 
+  vertex_edge_and_populator()
+
   print((love.timer.getTime() - start) * 100)
-  --jit.off()
   return map
 end
 
@@ -1200,6 +946,10 @@ function Map:new_path()
   function path:add_point(vec)
     table.insert(self.points, vec)
   end
+
+  function path:get_slope(i, i2)
+    return self.points[i] - self.points[i+1]
+  end
   
   return path
 end
@@ -1336,118 +1086,112 @@ function Map:dijkstra(start, neighborhood)
 end
 
 
--- function Map:aStar(x1,y1, x2,y2)
+function Map:aStar(x1,y1, x2,y2)
+  local vonNeuman = Map:getNeighborhood('vonNeuman')
+  local aStar_map = Map:new(self.width, self.height, 0)
+
+  local toTravel = {}
+  local travelled = {}
+  local function MDistance(x1,y1, x2,y2)
+    return math.abs(x1 - x2) + math.abs(y1 - y2)
+  end
   
---   local vonNeuman = {
---     n = {0, -1},
---     e = {1, 0},
---     s = {0, 1},
---     w = {-1, 0},
---   }
+  local SEMDistance = MDistance(x1,y1, x2,y2)
+  local startNode = {x = x1, y = y1, s = 0, e = SEMDistance, t = SEMDistance}
+  table.insert(toTravel, startNode)
   
---   local aMap = {}
---   for x = 1, self.width do
---     aMap[x] = {}
---     for y = 1, self.height do
---       aMap[x][y] = 0
---     end
---   end
-  
---   local toTravel = {}
---   local travelled = {}
---   local function MDistance(x1,y1, x2,y2)
---     return math.abs(x1 - x2) + math.abs(y1 - y2)
---   end
-  
---   local SEMDistance = MDistance(x1,y1, x2,y2)
---   local startNode = {x = x1, y = y1, s = 0, e = SEMDistance, t = SEMDistance}
---   table.insert(toTravel, startNode)
-  
---   while true do
---     local nextNode = nil
---     local vertexIndex = nil
+  while true do
+    local nextNode = nil
+    local vertexIndex = nil
     
---     for i, v in ipairs(toTravel) do
---       if aMap[v.x][v.y] == 0 then
+    for i, v in ipairs(toTravel) do
+      if aStar_map.cells[v.x][v.y] == 0 then
         
---         if nextNode == nil then
---           nextNode = v
---           vertexIndex = i
---         elseif  v.t < nextNode.t then
---           nextNode = v
---           vertexIndex = i
---         elseif v.t == nextNode.t and v.e < nextNode.e then
---           nextNode = v
---           vertexIndex = i
---         end
+        if nextNode == nil then
+          nextNode = v
+          vertexIndex = i
+        elseif  v.t < nextNode.t then
+          nextNode = v
+          vertexIndex = i
+        elseif v.t == nextNode.t and v.e < nextNode.e then
+          nextNode = v
+          vertexIndex = i
+        end
         
---       end
---     end
+      end
+    end
     
---     table.remove(toTravel, vertexIndex)
---     table.insert(travelled, nextNode)
---     aMap[nextNode.x][nextNode.y] = nextNode.s
+    table.remove(toTravel, vertexIndex)
+    table.insert(travelled, nextNode)
+    aStar_map.cells[nextNode.x][nextNode.y] = nextNode.s
     
---     if nextNode.x == x2 and nextNode.y == y2 then
---       break
---     end
+    if nextNode.x == x2 and nextNode.y == y2 then
+      break
+    end
     
---     for k, v in pairs(vonNeuman) do
---       if self:posIsInMap(nextNode.x + v[1], nextNode.y + v[2]) then
---         if self.cells[nextNode.x + v[1]][nextNode.y + v[2]] ~= 1 then
---           local newNode = {}
---           newNode.x = nextNode.x + v[1]
---           newNode.y = nextNode.y + v[2]
---           newNode.s = nextNode.s + 1
---           newNode.e = MDistance(newNode.x,newNode.y, x2,y2)
---           newNode.t = newNode.s + newNode.e
+    for k, v in pairs(vonNeuman) do
+        if 
+          self:get_cell(nextNode.x + v[1], nextNode.y + v[2]) ~= 1 and 
+          self:get_cell(nextNode.x + v[1], nextNode.y + v[2]) ~= nil 
+        then
+          local newNode = {}
+          newNode.x = nextNode.x + v[1]
+          newNode.y = nextNode.y + v[2]
+          newNode.s = nextNode.s + 1
+          newNode.e = MDistance(newNode.x,newNode.y, x2,y2)
+          newNode.t = newNode.s + newNode.e
           
---           local match = nil
---           for i, v in ipairs(toTravel) do
---             if v.x == newNode.x and v.y == newNode.y then
---               match = {s = v.s, i = i}
---             end
---           end
+          local match = nil
+          for i, v in ipairs(toTravel) do
+            if v.x == newNode.x and v.y == newNode.y then
+              match = {s = v.s, i = i}
+            end
+          end
           
---           if match ~= nil then
---             if match.s > newNode.s then
---               table.remove(toTravel, match.i)
---               table.insert(toTravel, newNode)
---             end
---           else
---             table.insert(toTravel, newNode)
---           end
+          if match ~= nil then
+            if match.s > newNode.s then
+              table.remove(toTravel, match.i)
+              table.insert(toTravel, newNode)
+            end
+          else
+            table.insert(toTravel, newNode)
+          end
           
---         end
---       end
---     end
---   end
+        end
+    end
+  end
   
   
---   local aPath = {}
+  local aStar_path = {}
   
---   local furthestS = -1
---   for i, v in ipairs(travelled) do
---     if v.s > furthestS then
---       furthestS = v.s
---     end
---   end
   
---   local endNode = {x = x2, y = y2, s = furthestS, e = 0, t = furthestS}
---   table.insert(aPath, endNode)
+  local furthestS = -1
+  for i, v in ipairs(travelled) do
+    if v.s > furthestS then
+      furthestS = v.s
+    end
+  end
   
---   while #aPath ~= furthestS + 1  do
---     for i, v in ipairs(travelled) do
---       if v.s == aPath[#aPath].s - 1 then
---         if MDistance(v.x, v.y, aPath[#aPath].x, aPath[#aPath].y) == 1  then
---           table.insert(aPath, v)
---         end
---       end
---     end
---   end
+  local endNode = {x = x2, y = y2, s = furthestS, e = 0, t = furthestS}
+  table.insert(aStar_path, endNode)
   
---   return aPath
--- end
+  while #aStar_path ~= furthestS + 1  do
+    for i, v in ipairs(travelled) do
+      if v.s == aStar_path[#aStar_path].s - 1 then
+        if MDistance(v.x, v.y, aStar_path[#aStar_path].x, aStar_path[#aStar_path].y) == 1  then
+          table.insert(aStar_path, v)
+        end
+      end
+    end
+  end
+
+  local path = Map:new_path()
+  for i, v in ipairs(aStar_path) do
+    path:add_point(vec2(v.x, v.y))
+  end
+  
+  return path
+end
 
 -- function Map:automata(map)
 --   local neighbors = {

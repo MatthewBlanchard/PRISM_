@@ -33,15 +33,15 @@ function shop:populater(chunk, clipping)
     local itemTable = shopItems[i]
     local item = Loot.generateLoot(itemTable[love.math.random(1, #itemTable)])
 
-    local callback = function(actor, actors_by_unique_id)
+    local callback = function(actor, entities_by_unique_id)
       local status = ''
 
       local sellable_component = actor:getComponent(components.Sellable)
       sellable_component:setItem(item)
       sellable_component:setPrice(actors.Shard, item:getComponent(components.Cost).cost)
 
-      if actors_by_unique_id[shopkeep_id] then
-        sellable_component:setShopkeep(actors_by_unique_id[shopkeep_id])
+      if entities_by_unique_id[shopkeep_id] then
+        sellable_component:setShopkeep(entities_by_unique_id[shopkeep_id])
       else
         status = 'Delay'
       end
