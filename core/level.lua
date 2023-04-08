@@ -396,6 +396,7 @@ end
 
 function Level:moveActor(actor, pos, skipSparseMap)
   assert(pos.is and pos:is(Vector2), "Expected a Vector2 for pos in Level:moveActor.")
+  assert(math.floor(pos.x) == pos.x and math.floor(pos.y) == pos.y, "Expected integer values for pos in Level:moveActor.")
 
   for _, system in ipairs(self.systems)  do
     system:beforeMove(self, actor, oldpos, pos)
