@@ -1282,6 +1282,7 @@ end
 -- DLA needs a cleared cell to start from and a space to clear
 function Map:DLAInOut(attempts)
   local attempts = attempts or 1000
+  local attempt_counter = 0
 
   local function clamp(n, min, max)
     local n = math.max(math.min(n, max), min)
@@ -1293,12 +1294,11 @@ function Map:DLAInOut(attempts)
     local x1,y1 = nil,nil
     local x2,y2 = nil,nil
     
-    local n = 0
     repeat
       x1 = love.math.random(2, self.width - 2)
       y1 = love.math.random(2, self.height - 2)
-      n = n + 1
-    until self.cells[x1][y1] == 0 or n > attempts
+      attempt_counter = attempt_counter + 1
+    until self.cells[x1][y1] == 0 or attempt_counter > attempts
     
     
     local n = 0
