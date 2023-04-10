@@ -71,6 +71,7 @@ function Game:__exportModule(name)
     self:__loadItems(module_path .. "/components", components, true)
     self:__loadItems(module_path .. "/conditions", conditions, true)
     self:__loadItems(module_path .. "/actors", actors, true)
+    self:__loadItems(module_path .. "/cells", cells, true)
     self:__loadItems(module_path .. "/systems", systems, true)
 
     Loot = require "loot"
@@ -108,6 +109,7 @@ function Game:__initializeExports()
     actions = {}
     components = {}
     actors = {}
+    cells = {}
 end
 
 return Game
