@@ -225,6 +225,10 @@ function Level:create(callback)
   -- Start.key_id = id_generator()
   -- boss_key_uuid = Start.key_id
 
+  chunks.newFiller = chunks.Filler:extend()
+  function chunks.newFiller:populater()
+  end
+
   local telepad_1_id = id_generator()
   local telepad_2_id = id_generator()
 
@@ -235,26 +239,6 @@ function Level:create(callback)
 
     local center = vec2(chunk:get_center()) + offset
     map:insert_entity('Player', center.x, center.y)
-    map:insert_entity('Telepad', 5, 5, function(entity, entities_by_unique_id)
-      if entities_by_unique_id[telepad_2_id] then
-        local destination = entities_by_unique_id[telepad_2_id].position
-        entity.teleport_destination = vec2(destination.x, destination.y)
-      else
-        status = 'Delay'
-      end
-      return status
-    end, telepad_1_id)
-
-    map:insert_entity('Telepad', center.x-1, center.y, function(entity, entities_by_unique_id)
-      if entities_by_unique_id[telepad_1_id] then
-        local destination = entities_by_unique_id[telepad_1_id].position
-        entity.teleport_destination = vec2(destination.x, destination.y)
-      else
-        status = 'Delay'
-      end
-      return status
-  end, telepad_2_id)
-
 
     local walls = {'Rocks_1', 'Rocks_2', 'Rocks_3'}
     for x, y, cell in chunk:for_cells() do
@@ -265,13 +249,45 @@ function Level:create(callback)
     end
   end
 
-  local portal_room = graph:add_vertex(chunks.Filler:extend())
-  function portal_room.parameters:populater(info)
-    local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
+  -- Portal
 
-    local center = vec2(chunk:get_center()) + offset
-    --map:insert_entity('Telepad', center.x, center.y)
-  end
+  -- local portal_room_1 = graph:add_vertex(chunks.Filler:extend())
+  -- function portal_room_1.parameters:populater(info)
+  --   local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
+
+  --   local center = vec2(chunk:get_center()) + offset
+  --   map:insert_entity('Telepad', center.x-1, center.y, function(entity, entities_by_unique_id)
+  --     if entities_by_unique_id[telepad_1_id] then
+  --       local destination = entities_by_unique_id[telepad_1_id].position
+  --       entity.teleport_destination = vec2(destination.x, destination.y)
+  --     else
+  --       status = 'Delay'
+  --     end
+  --     return status
+  --   end, telepad_2_id)
+  -- end
+
+  -- local portal_room_2 = graph:add_vertex(chunks.Filler:extend())
+  -- function portal_room_2.parameters:populater(info)
+  --   local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
+
+  --   local center = vec2(chunk:get_center()) + offset
+  --   map:insert_entity('Telepad', center.x, center.y, function(entity, entities_by_unique_id)
+  --     if entities_by_unique_id[telepad_2_id] then
+  --       local destination = entities_by_unique_id[telepad_2_id].position
+  --       entity.teleport_destination = vec2(destination.x, destination.y)
+  --     else
+  --       status = 'Delay'
+  --     end
+  --     return status
+  --   end, telepad_1_id)
+  -- end
+
+  -- graph:add_edge(edges.door, start, portal_room_1)
+
+  --
+
+  -- Lake
 
   -- local lake = graph:add_vertex(chunks.Filler:extend())
   -- function lake.parameters:parameters()
@@ -323,40 +339,45 @@ function Level:create(callback)
 
   -- end
 
-  -- local entrance = graph:add_vertex(chunks.Filler:extend())
-  -- local exit = graph:add_vertex(chunks.Filler:extend())
-  -- local finish = graph:add_vertex(chunks.Filler:extend())
+  -- local entrance = graph:add_vertex(chunks.newFiller:extend())
+  -- local exit = graph:add_vertex(chunks.newFiller:extend())
+  -- local finish = graph:add_vertex(chunks.newFiller:extend())
 
   -- graph:add_edge(edges.door, start, entrance)
   -- graph:add_edge(edges.wide, entrance, lake)
   -- graph:add_edge(edges.wide, lake, exit)
   -- graph:add_edge(edges.door, exit, finish)
 
+  --
 
-  -- local spider_room = graph:add_vertex(chunks.Filler:extend())
-  -- function spider_room.parameters:populater(info)
-  --   local chunk, map, offset = info.chunk, info.map, info.offset
+  -- Window Loop
 
-  --   local center = vec2(chunk:get_center()) + offset
-  --   map:insert_entity('Webweaver', center.x, center.y)
+  local spider_room = graph:add_vertex(chunks.newFiller:extend())
+  function spider_room.parameters:populater(info)
+    local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
 
-  --   local walls = {'Rocks_1', 'Rocks_2', 'Rocks_3'}
-  --   for x, y, cell in chunk:for_cells() do
-  --     local x, y = x + offset.x, y + offset.y
-  --     if cell == 1 then
-  --       map:insert_entity(walls[love.math.random(1, 3)], x, y)
-  --     end
-  --   end
-  -- end
+    local center = vec2(chunk:get_center()) + offset
+    map:insert_entity('Webweaver', center.x, center.y)
+
+    local walls = {'Rocks_1', 'Rocks_2', 'Rocks_3'}
+    for x, y, cell in chunk:for_cells() do
+      if map:get_cell(x + offset.x, y + offset.y) == 1 and Clipper.PointInPolygon(Clipper.IntPoint(x, y), polygon) == -1 then
+        local x, y = x + offset.x, y + offset.y
+        map:insert_entity(walls[love.math.random(1, 3)], x, y)
+      end
+    end
+  end
 
 
-  -- local filler_1 = graph:add_vertex(chunks.Filler)
-  -- local filler_2 = graph:add_vertex(chunks.Filler)
+  local filler_1 = graph:add_vertex(chunks.newFiller)
+  local filler_2 = graph:add_vertex(chunks.newFiller)
 
-  -- graph:add_edge(edges.window, start, spider_room)
-  -- graph:add_edge(edges.narrow, start, filler_1)
-  -- graph:add_edge(edges.narrow, filler_1, filler_2)
-  -- graph:add_edge(edges.door, filler_2, spider_room)
+  graph:add_edge(edges.window, start, spider_room)
+  graph:add_edge(edges.narrow, start, filler_1)
+  graph:add_edge(edges.narrow, filler_1, filler_2)
+  graph:add_edge(edges.door, filler_2, spider_room)
+
+  --
 
 
   local merged_room = Map:planar_embedding(graph)
@@ -364,7 +385,7 @@ function Level:create(callback)
 
 
   local player_pos
-  for k, v in pairs(map.entities.list) do
+  for x, y, v in map.entities.sparsemap:each() do
     if v.id == 'Player' then
       player_pos = v.pos
       break
@@ -383,26 +404,32 @@ function Level:create(callback)
 
   map:fill_perimeter(0, 0, self._width, self._height)
 
-  map:target_perimeter(0, 0, self._width, self._height, function(x, y)
-    callback(x+1, y+1, map.cells[x][y])
-  end)
+  -- map:target_perimeter(0, 0, self._width, self._height, function(x, y)
+  --   callback(x+1, y+1, map.cells[x][y])
+  -- end)
 
   for x, y, cell in map:for_cells() do
-    local cell_is_occupied = false
-    for k, v in pairs(map:get_entities(x, y)) do
-      if cells[v.id] then
-        cell_is_occupied = true
-        break
-      end
-    end
-    if cell_is_occupied == false then
-      if cell == 1 then
-        map:insert_entity('Wall', x, y)
-      elseif cell == 0 then
-        map:insert_entity('Floor', x, y)
-      end
-    end
+    callback(x+1, y+1, cell)
   end
+
+  -- for x, y, cell in map:for_cells() do
+  --   local cell_is_occupied = false
+  --   for k, v in pairs(map:get_entities(x, y)) do
+  --     if cells[v.id] then
+  --       cell_is_occupied = true
+  --       break
+  --     end
+  --   end
+  --   if cell_is_occupied == false then
+  --     if cell == 1 then
+  --       map:insert_entity('Wall', x, y)
+  --     elseif cell == 0 then
+  --       map:insert_entity('Floor', x, y)
+  --     end
+  --   end
+  -- end
+
+
 
 -- local function draw_heat_map()
 --   for i, v in ipairs(heat_map.map) do

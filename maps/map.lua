@@ -32,8 +32,6 @@ function Map:init(width, height, value)
   end
   
   self.entities = {
-    list = {},
-    keys = {},
     sparsemap = Sparse_map(),
   }
   self.map = map
@@ -46,7 +44,6 @@ function Map:insert_entity(entity_id, x, y, callback, unique_id)
   local position = vec2(x, y)
   local unique_id = unique_id or id_generator()
   local entity = {id = entity_id, unique_id = unique_id, pos = position, callback = callback}
-  self.entities.list[entity] = entity
   self.entities.sparsemap:insert(x, y, entity)
   
   return self, unique_id
@@ -55,29 +52,13 @@ Map.insert_actor = Map.insert_entity -- temp alias
 
 
 function Map:remove_entities(x, y)
-  local entities = {}
   for k, v in pairs(self.entities.sparsemap:get(x, y)) do
-    table.insert(entities, k)
     self.entities.sparsemap:remove(x, y, k)
-  end
-
-  for i, v in ipairs(entities) do
-    self.entities.list[v] = nil
   end
 end
 
 function Map:get_entities(x, y)
-
-  local entities = {}
-  for k, v in pairs(self.entities.sparsemap:get(x, y)) do
-    table.insert(entities, k)
-  end
-
-  for i, v in ipairs(entities) do
-    entities[i] = self.entities.list[v]
-  end
-
-  return entities
+  return self.entities.sparsemap:get(x, y)
 end
 
 function Map:for_cells()
@@ -131,17 +112,12 @@ function Map:blit(map, x, y, is_destructive, mask)
   end
   
   local copy = tablex.deep_copy(map.entities)
-  for k, v in pairs(copy.list) do
-    v.pos = v.pos + vec2(x, y)
-  end
-  self.entities.list = tablex.overlay(self.entities.list, copy.list)
-
   for x2, y2, k in copy.sparsemap:each() do
     if k then
       self.entities.sparsemap:insert(x2+x, y2+y, k)
     end
   end
-
+  
   return self
 end
 
@@ -724,11 +700,8 @@ function Map:planar_embedding(graph)
             slope = slope
           }
 
-          
-
           vertex_edge_info[variables[split_string[1]]][variables[split_string[2]]] = info
           vertex_edge_info[variables[split_string[2]]][variables[split_string[1]]] = info
-
           
           edge.meta.callback(map, info)
         end
