@@ -546,6 +546,8 @@ function Level:performAction(action, free, animationToPlay)
   if not action.reaction and not free and self:hasActor(action.owner) then
     self.scheduler:addTime(action.owner, action.time)
   end
+
+  self:getCell(action.owner.position.x, action.owner.position.y):onAction(self, action.owner) -- Dim: placement tbd
 end
 
 local dummy = {} -- just to avoid making garbage
