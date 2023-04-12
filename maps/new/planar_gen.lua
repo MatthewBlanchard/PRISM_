@@ -9,19 +9,22 @@ local Clipper = require('maps.clipper.clipper')
 local Level = Object:extend()
 
 function Level:__new()
-  self._width = 500
-  self._height = 500
+  self._width = 300
+  self._height = 300
   self._map = Map:new(self._width, self._height, 0)
 end
 
 function Level:create(callback)
   local map = self._map
   
-  local graph = {
-    vertices = {},
-    edges = {}
-  }
-  function graph:add_vertex(parameters)
+  local Graph = Object:extend()
+  function Graph:__new()
+    self.vertices = {}
+    self.edges = {}
+
+    return self
+  end
+  function Graph:add_vertex(parameters)
     local vertex = {
       parameters = parameters,
       chunk = nil,
@@ -32,12 +35,18 @@ function Level:create(callback)
       edges = {}
     }
 
+    vertex.specify = function(self, specifications)
+      self.specifications = specifications
+
+      return self
+    end
+
     table.insert(self.vertices, vertex)
     self.vertices[vertex] = #self.vertices
     
     return vertex
   end
-  function graph:add_edge(meta, ...)
+  function Graph:add_edge(meta, ...)
     local vertices = {...}
     for i = 1, #vertices-1 do
       local vertex_1 = vertices[i]
@@ -48,6 +57,48 @@ function Level:create(callback)
       table.insert(vertex_2.edges, {meta = meta, vertex = vertex_1})
     end
   end
+  function Graph:splice(v1, v2, splicer)
+    for _, v in ipairs(v1.edges) do
+      if v.vertex == v2 then
+        v.vertex = splicer
+        break
+      end
+    end
+    for _, v in ipairs(v2.edges) do
+      if v.vertex == v1 then
+        v.vertex = splicer
+        break
+      end
+    end
+
+    for _, edge in ipairs(self.edges) do
+      if (edge.vertex_1 == v1 and edge.vertex_2 == v2) then
+        local copy = {meta = edge.meta, vertex_1 = v2, vertex_2 = v1}
+        copy.vertex_2 = splicer
+        edge.vertex_2 = splicer
+        table.insert(self.edges, copy)
+
+        table.insert(splicer.edges, {meta = edge.meta, vertex = v1} )
+        table.insert(splicer.edges, {meta = edge.meta, vertex = v2} )
+        break
+      elseif (edge.vertex_1 == v2 and edge.vertex_2 == v1) then
+        v1, v2 = v2, v1
+        local copy = {meta = edge.meta, vertex_1 = v2, vertex_2 = v1}
+        copy.vertex_2 = splicer
+        edge.vertex_2 = splicer
+        table.insert(self.edges, copy)
+
+        table.insert(splicer.edges, {meta = edge.meta, vertex = v1} )
+        table.insert(splicer.edges, {meta = edge.meta, vertex = v2} )
+        break
+      end
+    end
+
+
+  end
+
+  local graph = Graph()
+
   
   local id_generator = require 'maps.uuid'
   local boss_key_uuid
@@ -208,6 +259,137 @@ function Level:create(callback)
     end
   }
 
+  -- table in, level out
+  -- rules
+  local function graph_writer(graph)
+    local Chunk = require 'maps.chunk'
+    local level_specifications = {
+      chunk_count = 2
+    }
+
+    local shapers = {
+      square = function(self, chunk) 
+        chunk:clear_rect(0, 0, self.width, self.height) 
+      end,
+      circle = function(self, chunk)
+        local center = vec2(chunk:get_center2())
+        chunk:clear_ellipse(center.x, center.y, 2, 2) 
+      end,
+      funnel = function(self, chunk)
+      end,
+    }
+    local populaters = {
+      center = function(self, id, info) 
+        local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
+        local center = vec2(chunk:get_center2()) + offset
+
+        map:insert_entity(id, center.x, center.y)
+      end,
+      random = function(self, id, info) 
+        local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
+        local center = vec2(chunk:get_center2()) + offset
+
+        local x, y
+        repeat 
+          x = love.math.random(1, chunk.width-1)
+          y = love.math.random(1, chunk.height-1)
+        until map:get_cell(x + offset.x, y + offset.y) == 0 and Clipper.PointInPolygon(Clipper.IntPoint(x, y), polygon) == 1
+        map:insert_entity(id, x + offset.x, y + offset.y)
+      end
+
+    }
+
+    local reference_pool = {}
+
+    local function parameterize_vertex_from_specification(vertex)
+      vertex.parameters.parameters = function(self)
+        self.width = vertex.specifications.width
+        self.height = vertex.specifications.height
+      end
+      vertex.parameters.shaper = function(self, chunk)
+        for i, v in ipairs(vertex.specifications.shape) do
+          shapers[v](self, chunk)
+        end
+      end
+      vertex.parameters.populater = function(self, info)
+        for i, v in ipairs(vertex.specifications.population) do
+          populaters[v.pos](self, v.id, info)
+        end
+      end
+    end
+
+    local function clarify_level_specifications(level_specifications)
+      -- how many open tiles are there
+      -- what are the qualities of the paths between chunks
+      -- direct/winding, narrow/wide, short/long
+      -- edge specifications
+      -- local a, b, c
+      -- edges = { {a} }
+      -- patterns
+      -- goal patterns, loop patterns
+
+
+      local start = graph:add_vertex(Chunk:extend()):specify{
+        width = 5,
+        height = 5,
+    
+        shape = {'circle'},
+    
+        population = { {id = 'Player', pos = 'random'},  {id = 'Shortsword', pos = 'random'}}
+      }
+      
+      local finish = graph:add_vertex(Chunk:extend()):specify{
+        width = 5,
+        height = 5,
+    
+        shape = {'square'},
+    
+        population = { {id = 'Stairs', pos = 'random'}}
+      }
+
+      graph:add_edge(edges.narrow, start, finish)
+
+      local filler_1 = graph:add_vertex(Chunk:extend()):specify{
+        width = 5,
+        height = 5,
+    
+        shape = {'square'},
+    
+        population = { {id = 'Glowshroom_1', pos = 'random'} }
+      }
+
+      local filler_2 = graph:add_vertex(Chunk:extend()):specify{
+        width = 5,
+        height = 5,
+    
+        shape = {'square'},
+    
+        population = { {id = 'Glowshroom_2', pos = 'random'} }
+      }
+
+      local filler_3 = graph:add_vertex(Chunk:extend()):specify{
+        width = 5,
+        height = 5,
+    
+        shape = {'square'},
+    
+        population = { {id = 'Sqeeto', pos = 'random'} }
+      }
+
+      graph:splice(start, finish, filler_1)
+      graph:splice(filler_1, finish, filler_2)
+      graph:splice(filler_1, filler_2, filler_3)
+
+
+      for _, v in ipairs(graph.vertices) do
+        parameterize_vertex_from_specification(v)
+      end
+    end
+
+    clarify_level_specifications(level_specifications)
+  end
+  graph_writer(graph)
+
 
   
   -- local filler_vertices = {}
@@ -229,25 +411,25 @@ function Level:create(callback)
   function chunks.newFiller:populater()
   end
 
-  local telepad_1_id = id_generator()
-  local telepad_2_id = id_generator()
+  -- local telepad_1_id = id_generator()
+  -- local telepad_2_id = id_generator()
 
 
-  local start = graph:add_vertex(chunks.Filler:extend())
-  function start.parameters:populater(info)
-    local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
+  -- local start = graph:add_vertex(chunks.Filler:extend())
+  -- function start.parameters:populater(info)
+  --   local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
 
-    local center = vec2(chunk:get_center()) + offset
-    map:insert_entity('Player', center.x, center.y)
+  --   local center = vec2(chunk:get_center()) + offset
+  --   map:insert_entity('Player', center.x, center.y)
 
-    local walls = {'Rocks_1', 'Rocks_2', 'Rocks_3'}
-    for x, y, cell in chunk:for_cells() do
-      if map:get_cell(x + offset.x, y + offset.y) == 1 and Clipper.PointInPolygon(Clipper.IntPoint(x, y), polygon) == -1 then
-        local x, y = x + offset.x, y + offset.y
-        map:insert_entity(walls[love.math.random(1, 3)], x, y)
-      end
-    end
-  end
+  --   local walls = {'Rocks_1', 'Rocks_2', 'Rocks_3'}
+  --   for x, y, cell in chunk:for_cells() do
+  --     if map:get_cell(x + offset.x, y + offset.y) == 1 and Clipper.PointInPolygon(Clipper.IntPoint(x, y), polygon) == -1 then
+  --       local x, y = x + offset.x, y + offset.y
+  --       map:insert_entity(walls[love.math.random(1, 3)], x, y)
+  --     end
+  --   end
+  -- end
 
   -- Portal
 
@@ -352,30 +534,30 @@ function Level:create(callback)
 
   -- Window Loop
 
-  local spider_room = graph:add_vertex(chunks.newFiller:extend())
-  function spider_room.parameters:populater(info)
-    local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
+  -- local spider_room = graph:add_vertex(chunks.newFiller:extend())
+  -- function spider_room.parameters:populater(info)
+  --   local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
 
-    local center = vec2(chunk:get_center()) + offset
-    map:insert_entity('Webweaver', center.x, center.y)
+  --   local center = vec2(chunk:get_center()) + offset
+  --   map:insert_entity('Webweaver', center.x, center.y)
 
-    local walls = {'Rocks_1', 'Rocks_2', 'Rocks_3'}
-    for x, y, cell in chunk:for_cells() do
-      if map:get_cell(x + offset.x, y + offset.y) == 1 and Clipper.PointInPolygon(Clipper.IntPoint(x, y), polygon) == -1 then
-        local x, y = x + offset.x, y + offset.y
-        map:insert_entity(walls[love.math.random(1, 3)], x, y)
-      end
-    end
-  end
+  --   local walls = {'Rocks_1', 'Rocks_2', 'Rocks_3'}
+  --   for x, y, cell in chunk:for_cells() do
+  --     if map:get_cell(x + offset.x, y + offset.y) == 1 and Clipper.PointInPolygon(Clipper.IntPoint(x, y), polygon) == -1 then
+  --       local x, y = x + offset.x, y + offset.y
+  --       map:insert_entity(walls[love.math.random(1, 3)], x, y)
+  --     end
+  --   end
+  -- end
 
 
-  local filler_1 = graph:add_vertex(chunks.newFiller)
-  local filler_2 = graph:add_vertex(chunks.newFiller)
+  -- local filler_1 = graph:add_vertex(chunks.newFiller)
+  -- local filler_2 = graph:add_vertex(chunks.newFiller)
 
-  graph:add_edge(edges.window, start, spider_room)
-  graph:add_edge(edges.narrow, start, filler_1)
-  graph:add_edge(edges.narrow, filler_1, filler_2)
-  graph:add_edge(edges.door, filler_2, spider_room)
+  -- graph:add_edge(edges.window, start, spider_room)
+  -- graph:add_edge(edges.narrow, start, filler_1)
+  -- graph:add_edge(edges.narrow, filler_1, filler_2)
+  -- graph:add_edge(edges.door, filler_2, spider_room)
 
   --
 

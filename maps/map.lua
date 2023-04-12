@@ -749,6 +749,10 @@ function Map:get_center()
   return math.floor(self.width/2), math.floor(self.height/2)
 end
 
+function Map:get_center2()
+  return math.ceil(self.width/2), math.ceil(self.height/2)
+end
+
 function Map:get_cell(x, y)
   return self.cells[x] and self.cells[x][y] or nil
 end
@@ -828,8 +832,7 @@ function Map:target_perimeter(x1,y1, x2,y2, func)
     end
   end
 )
-
-return self
+  return self
 end
 function Map:clear_perimeter(x1,y1, x2,y2)
   Map:target_perimeter(
@@ -838,8 +841,7 @@ function Map:clear_perimeter(x1,y1, x2,y2)
     self:clear_cell(x, y)
   end
 )
-
-return self
+  return self
 end
 function Map:fill_perimeter(x1,y1, x2,y2)
   Map:target_perimeter(
@@ -848,8 +850,7 @@ function Map:fill_perimeter(x1,y1, x2,y2)
     self:fill_cell(x, y)
   end
 )
-
-return self
+  return self
 end
 
 -- Ellipse
