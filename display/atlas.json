@@ -1300,66 +1300,6 @@
             "rotated": false
         },
         {
-            "idx": 310,
-            "name": "176",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                510,
-                60,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 309,
-            "name": "177",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                510,
-                45,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 308,
-            "name": "178",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                510,
-                30,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 320,
-            "name": "179",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                525,
-                75,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
             "idx": 264,
             "name": "18",
             "origin": [
@@ -1375,21 +1315,6 @@
             "rotated": false
         },
         {
-            "idx": 357,
-            "name": "180",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                675,
-                15,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
             "idx": 356,
             "name": "181",
             "origin": [
@@ -1398,21 +1323,6 @@
             ],
             "rect": [
                 660,
-                15,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 355,
-            "name": "182",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                645,
                 15,
                 15,
                 15
@@ -1990,21 +1900,6 @@
             "rotated": false
         },
         {
-            "idx": 52,
-            "name": "217",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                75,
-                105,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
             "idx": 64,
             "name": "218",
             "origin": [
@@ -2179,21 +2074,6 @@
             "rect": [
                 90,
                 0,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 53,
-            "name": "229",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                75,
-                120,
                 15,
                 15
             ],
@@ -4780,6 +4660,96 @@
             "rotated": false
         },
         {
+            "idx": 310,
+            "name": "grad1",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                510,
+                60,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 309,
+            "name": "grad2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                510,
+                45,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 308,
+            "name": "grad3",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                510,
+                30,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 320,
+            "name": "grad4",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                525,
+                75,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 357,
+            "name": "grad5",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                675,
+                15,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 355,
+            "name": "grad6",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                645,
+                15,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
             "idx": 169,
             "name": "grass_1",
             "origin": [
@@ -4999,6 +4969,36 @@
             "rect": [
                 255,
                 30,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 52,
+            "name": "mimeek_1",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                75,
+                105,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
+            "idx": 53,
+            "name": "mimeek_2",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                75,
+                120,
                 15,
                 15
             ],
