@@ -75,7 +75,7 @@ function Light:__new(options)
   if options.effect then
     self.effect = options.effect[1](self.color, unpack(options.effect[2]))
   end
-  self.falloff = options.falloff or 0.4
+  self.falloff = options.falloff or 0
 end
 
 function Light:initialize(actor)
