@@ -3,6 +3,9 @@ local Object = require "object"
 local BoundingBox = Object:extend()
 
 function BoundingBox:__new(x, y, i, j)
+    assert(x <= i, "x must be less than or equal to i")
+    assert(y <= j, "y must be less than or equal to j")
+    
     self.x = x
     self.y = y
     self.i = i
