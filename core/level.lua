@@ -601,7 +601,8 @@ function Level:getAOE(type, position, range)
     local fovCalculator = ROT.FOV.Recursive(self:createVisibilityClosure())
     fovCalculator:compute(position.x, position.y, range, self:getAOEFOVCallback(fov))
     for k, other in ipairs(self.actors) do
-      if fov:get(other.position.x, other.position.y) then
+      local x, y = other.position.x, other.position.y
+      if fov[x] and fov[x][y] then
         table.insert(seenActors, other)
       end
     end
