@@ -11,6 +11,7 @@ Torch.components = {
     components.Light{
         color = LightColor(28, 16, 1),
         effect = {components.Light.effects.flicker, {0.15, 0.3}},
+        falloff = 0.4,
     },
     components.Item(),
     components.Equipment{
