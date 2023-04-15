@@ -11,7 +11,7 @@ Cell.passable = true -- defines whether a cell is passable
 Cell.opaque = false -- defines whether a cell can be seen through
 Cell.sightLimit = nil -- if set to an integer an actor standing on this tile's sight range will be limited to this number
 Cell.movePenalty = 0 -- applies a penalty to speed when moving through this cell
-Cell.lightReduction = 0 -- reduces the amount of light that passes through this cell
+Cell.lightReduction = 1 -- reduces the amount of light that passes through this cell
 
 function Cell:__new()
 end
