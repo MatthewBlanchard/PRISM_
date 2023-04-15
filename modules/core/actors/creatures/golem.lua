@@ -24,7 +24,7 @@ Golem.components = {
 }
 
 function Golem:initialize() 
-  self:applyCondition(conditions.Shield())
+  --self:applyCondition(conditions.Shield())
 end
 
 local actUtil = components.Aicontroller

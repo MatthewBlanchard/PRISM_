@@ -98,7 +98,7 @@ effects.DamageEffect = function(source, actor, dmg, hit)
     end
 
     if hit then
-      interface:effectWriteOffsetUI(181, position.x, position.y, 1, -1, color)
+      interface:effectWriteOffsetUI(Tiles['181'], position.x, position.y, 1, -1, color)
       interface:effectWriteOffsetUI(dmgstring, position.x, position.y, 2, -1, { 1, 1, 1 }, color)
     end
 
@@ -132,7 +132,7 @@ effects.SpeakEffect = function(actor, text, color)
   return function(dt, interface)
 
     for i, string in ipairs(strings) do
-      interface:effectWriteOffsetUI(181, position.x, position.y, 1, -1, color)
+      interface:effectWriteOffsetUI(Tiles['181'], position.x, position.y, 1, -1, color)
       interface:effectWriteOffsetUI(string, position.x, position.y, 2, -1 + i - 1, { 1, 1, 1 }, color)
     end
 

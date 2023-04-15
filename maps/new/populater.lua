@@ -2,6 +2,8 @@ local function New(level, map)
   local entities_by_unique_id = {}
   local callback_queue = {}
 
+  local player_info
+
   local function spawn_cell(cell, x, y, callback, unique_id)
     entities_by_unique_id[unique_id] = cell
     cell.position = {}
@@ -40,7 +42,11 @@ local function New(level, map)
       elseif game[id] == nil then
         spawn_actor(actors[id](), x, y, callback, unique_id)
       else
-        spawn_actor(game[id], x, y, callback, unique_id)
+        -- if id == 'Player' then
+        --   player_info = {x = x, y = y, id = id, unique_id = unique_id, callback = callback}
+        -- else
+          spawn_actor(game[id], x, y, callback, unique_id)
+        -- end
       end
     end
   end
@@ -50,6 +56,8 @@ local function New(level, map)
   for i, v in ipairs(callback_queue) do
     v()
   end
+
+  --spawn_actor(game[player_info.id], player_info.x, player_info.y, player_info.callback, player_info.unique_id)
 
   return map
 end

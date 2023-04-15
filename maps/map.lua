@@ -381,6 +381,7 @@ function Map:planar_embedding(graph)
   end
 
   local edge_matches = {}
+  local fast_pass = 0
   local function get_constraints()
     local memoize = function(func)
       local cache = {}
@@ -395,7 +396,6 @@ function Map:planar_embedding(graph)
     end
 
     local constraints = {}
-
     local function common_edge(variables, assignment)
       local shares_common_edge = memoize(function(vertex_1_id, vertex_2_id, assignment_1_x, assignment_1_y, assignment_2_x, assignment_2_y)
         local vertex_1, vertex_2 = variables[vertex_1_id], variables[vertex_2_id]
@@ -473,8 +473,8 @@ function Map:planar_embedding(graph)
 
             if math.sign(dx1) == -math.sign(dx2) and math.sign(dy1) == -math.sign(dy2) then
               if 
-                p1 ~= p2 and p1 ~= q2 and q1 ~= p2 and q1 ~= q2 and
-                (edge_1[1+1] ~= p2 and edge_1[1+1] ~= q2) and (edge_1[#edge_1-1] ~= p2 and edge_1[#edge_1-1] ~= q2)
+                (p1 ~= p2 and q1 ~= q2) and
+                (edge_1[1+1] ~= p2) and (edge_1[#edge_1-1] ~= q2)
               then
                 if are_intersecting(p1, q1, p2, q2) then
                   edge_matches[get_id(vertex_1)..':'..get_id(vertex_2)] = {edge_1 = edge_1, edge_2 = edge_2}
@@ -527,19 +527,6 @@ function Map:planar_embedding(graph)
         local subject = get_offset_path(vertex_1, assignment_1)
         local clip = get_offset_path(vertex_2, assignment_2)
 
-        -- local solution = Clipper.Paths(1)
-        -- local clipper = Clipper.Clipper()
-        -- clipper:AddPath(subject, Clipper.ptSubject, true)
-        -- clipper:AddPath(clip, Clipper.ptClip, true)
-        -- clipper:Execute(Clipper.ctUnion, solution)
-        
-        -- local is_intersect = (Clipper.Area(solution[0]) == Clipper.Area(clip) + Clipper.Area(subject))
-        -- if is_intersect == true then
-        --   local solution = Clipper.Paths(1)
-        --   clipper:Execute(Clipper.ctDifference, solution)
-        --   is_intersect = (Clipper.Area(solution[0]) ~= 0)
-        -- end
-
         local is_intersect = false
         local none_outside = true
         for i = 0, vertex_1.num_of_points - 1 do
@@ -562,6 +549,20 @@ function Map:planar_embedding(graph)
           if vertex_1 ~= vertex_2 and assignment[vertex_1] and assignment[vertex_2] then
             if does_intersect(get_id(vertex_1), get_id(vertex_2), assignment[vertex_1].x, assignment[vertex_1].y, assignment[vertex_2].x, assignment[vertex_2].y) then
               is_consistent = false
+
+              -- local assignment_1 = assignment[vertex_1]
+              -- local assignment_2 = assignment[vertex_2]
+              -- table.insert(constraints, 1, function(variables, assignment)
+              --   if assignment[vertex_1] and assignment[vertex_2] then
+              --     if assignment[vertex_1] - assignment[vertex_2] == assignment_1 - assignment_2 then
+              --       fast_pass = fast_pass + 1
+              --       return false
+              --     end
+              --   end
+    
+              --   return true
+              -- end)
+
               break
             end
           end
@@ -644,6 +645,7 @@ function Map:planar_embedding(graph)
   end
 
   local assignment = backtrack_search(variables, constraints, assignment)
+  print(#constraints, fast_pass)
   assert(assignment, 'unsatisfiable')
 
   local length = find_domain_range_max()
@@ -1559,8 +1561,8 @@ function Map:drunkWalk(x, y, exitFunc)
   repeat
     i = i + 1
     local vec = love.math.random(1, 4)
-    x = clamp(x + neighbors[vec][1], 1, self.width-1)
-    y = clamp(y + neighbors[vec][2], 1, self.height-1)
+    x = clamp(x + neighbors[vec][1], 0, self.width)
+    y = clamp(y + neighbors[vec][2], 0, self.height)
     
     path:add_point(vec2(x,y))
   until exitFunc(x, y, i, self) == true
