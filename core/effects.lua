@@ -196,12 +196,12 @@ effects.ExplosionEffect = function(fov, origin, range, colors)
   local chars = {}
 
   -- let's define ourselves a little gradient
-  chars[5] = 176
-  chars[4] = 176
-  chars[3] = 177
-  chars[2] = 178
-  chars[1] = 179
-  chars[0] = 180
+  chars[0] = Tiles.grad6
+  chars[1] = Tiles.grad5
+  chars[2] = Tiles.grad4
+  chars[3] = Tiles.grad3
+  chars[4] = Tiles.grad2
+  chars[5] = Tiles.grad1
 
   local color = colors or { 0.8666, 0.4509, 0.0862 }
   return function(dt, interface)
