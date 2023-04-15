@@ -36,7 +36,10 @@ function LightingSystem:afterOpacityChanged(level, x, y)
 end
 
 -- called when an Actor takes an Action
-function LightingSystem:afterAction(level, actor, action) self:rebuildLighting(level) end
+function LightingSystem:afterAction(level, actor, action)
+    if action:is(actions.Move) then return end
+    self:rebuildLighting(level) 
+end
 
 -- called after an actor has moved
 function LightingSystem:onMove(level, actor) self:rebuildLighting(level) end
@@ -184,6 +187,14 @@ function LightingSystem:rebuildLighting(level, dt)
     self.__missing = missing
     self.__lights = candidate
     self:__rebuild(level, dt)
+end    
+
+function LightingSystem:__createCache(light_component)
+    if light_component.__cache == nil then
+        light_component.__cache = LightBuffer(61, 61)
+    else
+        light_component.__cache:clear()
+    end
 end
 
 function LightingSystem:__rebuild(level, dt)
@@ -199,11 +210,7 @@ function LightingSystem:__rebuild(level, dt)
     if self.__needsUpdate == nil then
         for x, y, light in self.__lights:each() do
             -- If we have a cache clear it, if not create one.
-            if light.__cache == nil then
-                light.__cache = LightBuffer(61, 61)
-            else
-                light.__cache:clear()
-            end
+            self:__createCache(light)
 
             self.x = x
             self.y = y
@@ -222,11 +229,7 @@ function LightingSystem:__rebuild(level, dt)
             local bounds = light.__bounds
 
             -- If we have a cache clear it, if not create one.
-            if light.__cache == nil then
-                light.__cache = LightBuffer(61, 61)
-            else
-                light.__cache:clear()
-            end
+            self:__createCache(light)
 
             local color = light.color
             if dt and light.effect then
@@ -275,7 +278,7 @@ end
 
 function LightingSystem:__getLightReduction(level, row, col)
     if not level:getCell(row, col) then return 0 end
-    local reduction = level:getCell(row, col).lightReduction or 0
+    local reduction = math.max(level:getCell(row, col).lightReduction, 1)
     local actors = level:getActorsAt(row, col)
 
     for _, actor in ipairs(actors) do
@@ -317,7 +320,7 @@ function LightingSystem:__spreadLight(level, row, col, offsetx, offsety, lightLe
                 local reducedLightLevel
 
                 reducedLightLevel = curLightLevel:subtract_scalar(
-                    math.floor(depth * falloffFactor) + 
+                    math.floor(depth * falloffFactor) +
                     self:__getLightReduction(level, curRow + offsetx, curCol + offsety)
                 )
 
