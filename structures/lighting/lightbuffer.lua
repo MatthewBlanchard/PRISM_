@@ -83,7 +83,7 @@ end
 
 function LightBuffer:accumulate_buffer_masked(x, y, buffer, mask)
     local startX, startY = _max(x, mask.x), _max(y, mask.y)
-    local endX, endY = _min(x + buffer.w, mask.i), _min(y + buffer.h, mask.j)
+    local endX, endY = _min(x + buffer.w - 1, mask.i), _min(y + buffer.h - 1, mask.j)
 
     for i = startX, endX do
         for j = startY, endY do
