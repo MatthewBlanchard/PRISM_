@@ -31,7 +31,7 @@ function Open:perform(level)
 end
 
 local Mimeek = Actor:extend()
-Mimeek.char = Tiles["chest"]
+Mimeek.char = Tiles["mimeek_1"]
 Mimeek.color = {0.8, 0.8, 0.1, 1}
 Mimeek.name = "Mimeek"
 Mimeek.remembered = true
@@ -45,6 +45,9 @@ Mimeek.components = {
     components.Aicontroller(),
     components.Light{
         color = LightColor(25, 25, 3),
+    },
+    components.Animated{
+        sheet = { Tiles["mimeek_1"], Tiles["mimeek_2"] }
     }
 }
 
@@ -54,8 +57,6 @@ function Mimeek:initialize()
     for i = 1, math.random(2, 4) do
       inventory_component:addItem(actors.Shard())
     end
-
-    inventory_component:addItem(actors.Ring_of_bling())
 end
 
 local actUtil = components.Aicontroller
