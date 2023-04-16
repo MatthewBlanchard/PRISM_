@@ -25,9 +25,10 @@ end
 local Swing = conditions.Onattack:extend()
 
 function Swing:onAttack(level, attacker, defender)
+  local effects_system = level:getSystem("Effects")
   local directionsToHit = getDirections(defender.position - attacker.position)
 
-  level:suppressEffects()
+  effects_system:suppressEffects()
   for i = 1, 2 do 
     local target = directionsToHit[i] + attacker.position
     local actorsToHit = level:getActorsAt(target.x, target.y)
@@ -36,7 +37,7 @@ function Swing:onAttack(level, attacker, defender)
       level:performAction(attacker:getAction(actions.Attack)(attacker, actorsToHit[j]))
     end
   end  
-  level:resumeEffects()
+  effects_system:resumeEffects(level)
 end
 
 local Axe = Actor:extend()
