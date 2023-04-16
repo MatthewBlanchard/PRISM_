@@ -31,10 +31,10 @@ function Sellable:setPrice(currency, price)
 end
 
 function Sellable:setItem(item)
-  --self.item = item
-  --self.char = item.char
-  --self.color = item.color
-  --self.name = item.name
+  self.item = item
+  self.char = item.char
+  self.color = item.color
+  self.name = item.name
 end
 
 return Sellable
