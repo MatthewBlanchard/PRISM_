@@ -4465,6 +4465,21 @@
             "rotated": false
         },
         {
+            "idx": 123,
+            "name": "dagger",
+            "origin": [
+                7,
+                7
+            ],
+            "rect": [
+                195,
+                90,
+                15,
+                15
+            ],
+            "rotated": false
+        },
+        {
             "idx": 28,
             "name": "door_1",
             "origin": [
@@ -5464,21 +5479,6 @@
             "rect": [
                 195,
                 105,
-                15,
-                15
-            ],
-            "rotated": false
-        },
-        {
-            "idx": 123,
-            "name": "region_359",
-            "origin": [
-                7,
-                7
-            ],
-            "rect": [
-                195,
-                90,
                 15,
                 15
             ],
