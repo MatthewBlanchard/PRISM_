@@ -4,7 +4,20 @@ love.math.setRandomSeed(0)
 local Map = require "maps.map"
 local Object = require "object"
 local vec2 = require "math.vector"
-local Clipper = require('maps.clipper.clipper')
+local function point_in_polygon(point, polygon)
+  local oddNodes = false
+  local j = #polygon
+  for i = 1, #polygon do
+      if polygon[i].x == point.x and polygon[i].y == point.y then return -1 end
+      if (polygon[i].y < point.y and polygon[j].y >= point.y or polygon[j].y < point.y and polygon[i].y >= point.y) then
+          if (polygon[i].x + ( point.y - polygon[i].y ) / (polygon[j].y - polygon[i].y) * (polygon[j].x - polygon[i].x) < point.x) then
+              oddNodes = not oddNodes;
+          end
+      end
+      j = i;
+  end
+  return oddNodes and 1 or 0
+end
 local Bresenham = require 'math.bresenham'
 
 local Level = Object:extend()
@@ -363,7 +376,7 @@ function Level:create(callback)
         repeat 
           x = love.math.random(1, chunk.width-1)
           y = love.math.random(1, chunk.height-1)
-        until map:get_cell(x + offset.x, y + offset.y) == 0 and Clipper.PointInPolygon(Clipper.IntPoint(x, y), polygon) == 1
+        until map:get_cell(x + offset.x, y + offset.y) == 0 and point_in_polygon(vec2(x, y), polygon) == 1
 
         map:insert_entity(get_id(id), x + offset.x, y + offset.y)
       end,
@@ -372,7 +385,7 @@ function Level:create(callback)
         local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
 
         for x, y, cell in chunk:for_cells() do
-          if map:get_cell(x + offset.x, y + offset.y) == 1 and Clipper.PointInPolygon(Clipper.IntPoint(x, y), polygon) == -1 then
+          if map:get_cell(x + offset.x, y + offset.y) == 1 and point_in_polygon(vec2(x, y), polygon) == -1 then
             local x, y = x + offset.x, y + offset.y
             map:insert_entity(get_id(id), x, y)
             map:clear_cell(x, y)
@@ -384,7 +397,7 @@ function Level:create(callback)
         local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
 
         for x, y, cell in chunk:for_cells() do
-          if map:get_cell(x + offset.x, y + offset.y) == 1 and Clipper.PointInPolygon(Clipper.IntPoint(x, y), polygon) ~= 0 then
+          if map:get_cell(x + offset.x, y + offset.y) == 1 and point_in_polygon(vec2(x, y), polygon) ~= 0 then
             local x, y = x + offset.x, y + offset.y
             map:insert_entity(get_id(id), x, y)
             --map:clear_cell(x, y)
@@ -396,7 +409,7 @@ function Level:create(callback)
         local chunk, map, offset, polygon = info.chunk, info.map, info.offset, info.polygon
 
         for x, y, cell in chunk:for_cells() do
-          if cell == 0 and Clipper.PointInPolygon(Clipper.IntPoint(x, y), polygon) == 1 then
+          if cell == 0 and point_in_polygon(vec2(x, y), polygon) == 1 then
             local x, y = x + offset.x, y + offset.y
             map:insert_entity(id, x, y)
           end
@@ -577,81 +590,81 @@ function Level:create(callback)
       graph:splice(stack.get(), graph:get_connected_vertices(stack.get())[2], current_chunk)
       stack.push(current_chunk)
 
-      chunks.add_chunk('shop', graph:add_vertex(Chunk:extend()):specify{
-        width = 9,
-        height = 9,
+      -- chunks.add_chunk('shop', graph:add_vertex(Chunk:extend()):specify{
+      --   width = 9,
+      --   height = 9,
     
-        shape = {
-          {'circle', {size = 3}},
-        },
+      --   shape = {
+      --     {'circle', {size = 3}},
+      --   },
     
-        population = {
-          {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_4', 'Bricks_5'}, pos = 'all_wall'},
-          {id = 'Shopkeep', pos = 'center'},
-        }
-      })
-      graph:add_edge(edges.door, stack.get(), current_chunk)
-      stack.push(current_chunk)
+      --   population = {
+      --     {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_4', 'Bricks_5'}, pos = 'all_wall'},
+      --     {id = 'Shopkeep', pos = 'center'},
+      --   }
+      -- })
+      -- graph:add_edge(edges.door, stack.get(), current_chunk)
+      -- stack.push(current_chunk)
 
-      chunks.add_chunk('backroom', graph:add_vertex(Chunk:extend()):specify{
-        width = 3,
-        height = 3,
+      -- chunks.add_chunk('backroom', graph:add_vertex(Chunk:extend()):specify{
+      --   width = 3,
+      --   height = 3,
     
-        shape = {
-          {'square', {size = 3}},
-        },
+      --   shape = {
+      --     {'square', {size = 3}},
+      --   },
     
-        population = {
-          {id = 'Telepad', pos = 'center'}
-        }
-      })
-      graph:add_edge(edges.breakable_wall, stack.get(), current_chunk)
-      stack.pop()
+      --   population = {
+      --     {id = 'Telepad', pos = 'center'}
+      --   }
+      -- })
+      -- graph:add_edge(edges.breakable_wall, stack.get(), current_chunk)
+      -- stack.pop()
 
-      chunks.add_chunk('prism', graph:add_vertex(Chunk:extend()):specify{
-        width = 15,
-        height = 15,
+      -- chunks.add_chunk('prism', graph:add_vertex(Chunk:extend()):specify{
+      --   width = 15,
+      --   height = 15,
     
-        shape = {
-          {'circle', {size = 5}},
-          function(i, t)
-            for n = 1, 20 do table.insert(t, i+1, {'DLA1'}) end 
-          end,
-        },
+      --   shape = {
+      --     {'circle', {size = 5}},
+      --     function(i, t)
+      --       for n = 1, 20 do table.insert(t, i+1, {'DLA1'}) end 
+      --     end,
+      --   },
     
-        population = {
-          {id = 'Prism', pos = 'center'},
-          function(i, t)
-            for n = 1, 6 do table.insert(t, i+1, {id = 'Sqeeto', pos = 'random'}) end 
-          end,
-          {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, pos = 'all_wall'},
-        }
-      })
-      graph:add_edge(edges.door, stack.get(), current_chunk)
-      stack.push(current_chunk)
+      --   population = {
+      --     {id = 'Prism', pos = 'center'},
+      --     function(i, t)
+      --       for n = 1, 6 do table.insert(t, i+1, {id = 'Sqeeto', pos = 'random'}) end 
+      --     end,
+      --     {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, pos = 'all_wall'},
+      --   }
+      -- })
+      -- graph:add_edge(edges.door, stack.get(), current_chunk)
+      -- stack.push(current_chunk)
 
-      chunks.add_chunk('pit', graph:add_vertex(Chunk:extend()):specify{
-        width = 15,
-        height = 15,
+      -- chunks.add_chunk('pit', graph:add_vertex(Chunk:extend()):specify{
+      --   width = 15,
+      --   height = 15,
     
-        shape = {
-          {'circle', {size = 5}},
-          function(i, t)
-            for n = 1, 20 do table.insert(t, i+1, {'DLA1'}) end 
-          end,
-        },
+      --   shape = {
+      --     {'circle', {size = 5}},
+      --     function(i, t)
+      --       for n = 1, 20 do table.insert(t, i+1, {'DLA1'}) end 
+      --     end,
+      --   },
     
-        population = {
-          {id = 'Pit', pos = 'inner_floor'},
-          {id = '', pos = 'bridge'},
-          function(i, t)
-            for n = 1, 3 do table.insert(t, i+1, {id = 'Sqeeto', pos = 'random'}) end 
-          end,
-          {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, pos = 'all_wall'},
-        }
-      })
-      graph:splice(stack.get(1), stack.get(0), current_chunk)
-      stack.pop()
+      --   population = {
+      --     {id = 'Pit', pos = 'inner_floor'},
+      --     {id = '', pos = 'bridge'},
+      --     function(i, t)
+      --       for n = 1, 3 do table.insert(t, i+1, {id = 'Sqeeto', pos = 'random'}) end 
+      --     end,
+      --     {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, pos = 'all_wall'},
+      --   }
+      -- })
+      -- graph:splice(stack.get(1), stack.get(0), current_chunk)
+      -- stack.pop()
 
       -- chunks.add_chunk('crossroads', graph:add_vertex(Chunk:extend()):specify{
       --   width = 10,
@@ -668,65 +681,65 @@ function Level:create(callback)
       -- })
       -- graph:add_edge(edges.wide, stack.get(), current_chunk)
 
-      chunks.add_chunk('crystals', graph:add_vertex(Chunk:extend()):specify{
-        width = 10,
-        height = 10,
+      -- chunks.add_chunk('crystals', graph:add_vertex(Chunk:extend()):specify{
+      --   width = 10,
+      --   height = 10,
     
-        shape = {
-          {'circle', {size = 3}},
-          function(i, t)
-            for n = 1, 10 do table.insert(t, i+1, {'DLA1'}) end 
-          end,
-        },
+      --   shape = {
+      --     {'circle', {size = 3}},
+      --     function(i, t)
+      --       for n = 1, 10 do table.insert(t, i+1, {'DLA1'}) end 
+      --     end,
+      --   },
     
-        population = {
-          {id = {'Crystals_2', 'Crystals_3', 'Crystals_4', 'Rocks_1', 'Rocks_2', 'Rocks_3'}, pos = 'all_wall'},
-          {id = 'Crystal', pos = 'center'},
-          {id = 'Golem', pos = 'random'},
-          function(i, t)
-            for n = 1, 5 do table.insert(t, i+1, {id = 'Shard', pos = 'random'}) end 
-          end,
-        }
-      })
-      graph:add_edge(edges.narrow, stack.get(), current_chunk)
+      --   population = {
+      --     {id = {'Crystals_2', 'Crystals_3', 'Crystals_4', 'Rocks_1', 'Rocks_2', 'Rocks_3'}, pos = 'all_wall'},
+      --     {id = 'Crystal', pos = 'center'},
+      --     {id = 'Golem', pos = 'random'},
+      --     function(i, t)
+      --       for n = 1, 5 do table.insert(t, i+1, {id = 'Shard', pos = 'random'}) end 
+      --     end,
+      --   }
+      -- })
+      -- graph:add_edge(edges.narrow, stack.get(), current_chunk)
 
 
-      chunks.add_chunk('hall', graph:add_vertex(Chunk:extend()):specify{
-        width = 30,
-        height = 30,
+      -- chunks.add_chunk('hall', graph:add_vertex(Chunk:extend()):specify{
+      --   width = 30,
+      --   height = 30,
     
-        shape = {
-          {'tunnel'}
-        },
+      --   shape = {
+      --     {'tunnel'}
+      --   },
     
-        population = {
-          {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, pos = 'all_wall'},
-        }
-      })
-      graph:add_edge(edges.narrow, stack.get(), current_chunk)
-      stack.push(current_chunk)
+      --   population = {
+      --     {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, pos = 'all_wall'},
+      --   }
+      -- })
+      -- graph:add_edge(edges.narrow, stack.get(), current_chunk)
+      -- stack.push(current_chunk)
 
-      chunks.add_chunk('spider_nest', graph:add_vertex(Chunk:extend()):specify{
-        width = 10,
-        height = 10,
+      -- chunks.add_chunk('spider_nest', graph:add_vertex(Chunk:extend()):specify{
+      --   width = 10,
+      --   height = 10,
     
-        shape = {
-          {'circle', {size = 1}},
-          {'tunnel'},
-          function(i, t)
-            for n = 1, 10 do table.insert(t, i+1, {'DLA2'}) end 
-          end,
-        },
+      --   shape = {
+      --     {'circle', {size = 1}},
+      --     {'tunnel'},
+      --     function(i, t)
+      --       for n = 1, 10 do table.insert(t, i+1, {'DLA2'}) end 
+      --     end,
+      --   },
     
-        population = {
-          function(i, t)
-            for n = 1, 7 do table.insert(t, i+1, {id = {'Bones_1', 'Bones_2', 'Web'}, pos = 'random'}) end 
-          end,
-          {id = 'Webweaver', pos = 'random'},
-          {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, pos = 'all_wall'},
-        }
-      })
-      graph:add_edge(edges.door, stack.get(), current_chunk)
+      --   population = {
+      --     function(i, t)
+      --       for n = 1, 7 do table.insert(t, i+1, {id = {'Bones_1', 'Bones_2', 'Web'}, pos = 'random'}) end 
+      --     end,
+      --     {id = 'Webweaver', pos = 'random'},
+      --     {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, pos = 'all_wall'},
+      --   }
+      -- })
+      -- graph:add_edge(edges.door, stack.get(), current_chunk)
 
 
 
