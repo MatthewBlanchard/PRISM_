@@ -4,11 +4,6 @@ local Map = Object:extend()
 local vec2 = require "math.vector"
 local Sparse_map = require 'structures.sparsemap'
 
-local lib_path = love.filesystem.getSource() .. '/maps/clipper'
-local extension = jit.os == 'Windows' and 'dll' or jit.os == 'Linux' and 'so' or jit.os == 'OSX' and 'dylib'
-package.cpath = string.format('%s;%s/?.%s', package.cpath, lib_path, extension)
-local Clipper = require('maps.clipper.clipper')
-
 local tablex = require 'lib.batteries.tablex'
 
 local id_generator = require 'maps.uuid'
@@ -293,17 +288,12 @@ function Map:planar_embedding(graph)
       local outline = chunk:new_from_outline_strict()
       local edges = outline:find_edges()
 
-      local num_of_points = 0
-      for _, v2 in ipairs(edges) do
-        for _, v3 in ipairs(v2) do
-          num_of_points = num_of_points + 1
-        end
-      end
-      local path = Clipper.Path(num_of_points)
+
+      local path = {}
       local i = 0
       for _, v2 in ipairs(edges) do
         for _, v3 in ipairs(v2) do
-          path[i] = Clipper.IntPoint(v3.x, v3.y)
+          path[i] = vec2(v3.x, v3.y)
           i = i + 1
         end
       end
@@ -382,6 +372,20 @@ function Map:planar_embedding(graph)
 
   local edge_matches = {}
   local fast_pass = 0
+  local function point_in_polygon(point, polygon)
+    local oddNodes = false
+    local j = #polygon
+    for i = 1, #polygon do
+        if polygon[i].x == point.x and polygon[i].y == point.y then return -1 end
+        if (polygon[i].y < point.y and polygon[j].y >= point.y or polygon[j].y < point.y and polygon[i].y >= point.y) then
+            if (polygon[i].x + ( point.y - polygon[i].y ) / (polygon[j].y - polygon[i].y) * (polygon[j].x - polygon[i].x) < point.x) then
+                oddNodes = not oddNodes;
+            end
+        end
+        j = i;
+    end
+    return oddNodes and 1 or 0
+  end
   local function get_constraints()
     local memoize = function(func)
       local cache = {}
@@ -513,14 +517,12 @@ function Map:planar_embedding(graph)
 
         local function get_offset_path(vertex, assignment)
           local path = vertex.polygon
-          local num_of_points = vertex.num_of_points
           local offset = assignment
 
-          local offset_path = Clipper.Path(num_of_points)
-          for i = 0, num_of_points-1 do
-            offset_path[i] = Clipper.IntPoint(path[i].X + offset.x, path[i].Y + offset.y)
+          local offset_path = tablex.copy(path)
+          for i, v in ipairs(path) do
+            offset_path[i] = v + offset
           end
-
           return offset_path
         end
 
@@ -529,8 +531,8 @@ function Map:planar_embedding(graph)
 
         local is_intersect = false
         local none_outside = true
-        for i = 0, vertex_1.num_of_points - 1 do
-          local relation = Clipper.PointInPolygon(subject[i], clip)
+        for i, v in ipairs(subject) do
+          local relation = point_in_polygon(v, clip)
           if relation == 0 then
             none_outside = false
           end

@@ -1,5 +1,4 @@
 local Chunk = require 'maps.chunk'
-local Clipper = require 'maps.clipper.clipper'
 
 local spider_nest = Chunk:extend()
 function spider_nest:parameters()

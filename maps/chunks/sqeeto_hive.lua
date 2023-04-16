@@ -1,5 +1,4 @@
 local Cave = require "maps.chunks.cave"
-local Clipper = require('maps.clipper.clipper')
 
 local SqeetoHive = Cave:extend()
 

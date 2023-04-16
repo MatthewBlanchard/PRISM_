@@ -1,5 +1,4 @@
 local Chunk = require 'maps.map'
-local Clipper = require('maps.clipper.clipper')
 
 local Circle = Chunk:extend()
 Circle.name = "Circle"
