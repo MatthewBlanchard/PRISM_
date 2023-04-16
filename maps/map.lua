@@ -387,24 +387,12 @@ function Map:planar_embedding(graph)
     return oddNodes and 1 or 0
   end
   local function get_constraints()
-    local memoize = function(func)
-      local cache = {}
-      return function(...)
-        local args = {...}
-        local key = table.concat(args, '-')
-        if cache[key] == nil then
-          cache[key] = func(...)
-        end
-        return cache[key]
-      end
-    end
+    local memoize = require 'maps.memoize'
+    --local memoize = function(f) return f end
 
     local constraints = {}
     local function common_edge(variables, assignment)
-      local shares_common_edge = memoize(function(vertex_1_id, vertex_2_id, assignment_1_x, assignment_1_y, assignment_2_x, assignment_2_y)
-        local vertex_1, vertex_2 = variables[vertex_1_id], variables[vertex_2_id]
-        local assignment_1 = vec2(assignment_1_x, assignment_1_y)
-        local assignment_2 = vec2(assignment_2_x, assignment_2_y)
+      local shares_common_edge = memoize(function(vertex_1, vertex_2, assignment_1, assignment_2)
 
         local function get_offset_edges(vertex, assignment)
           local edges = vertex.outline_edges
@@ -498,7 +486,7 @@ function Map:planar_embedding(graph)
         local vertex_1, vertex_2 = v.vertex_1, v.vertex_2
         if assignment[vertex_1] ~= nil and assignment[vertex_2] ~= nil then
 
-          if shares_common_edge(get_id(vertex_1), get_id(vertex_2), assignment[vertex_1].x, assignment[vertex_1].y, assignment[vertex_2].x, assignment[vertex_2].y) == false then
+          if shares_common_edge(vertex_1, vertex_2, assignment[vertex_1], assignment[vertex_2]) == false then
             is_consistent = false
             break
           end
@@ -510,10 +498,7 @@ function Map:planar_embedding(graph)
     end
 
     local function no_overlap(variables, assignment)
-      local does_intersect = memoize(function(vertex_1_id, vertex_2_id, assignment_1_x, assignment_1_y, assignment_2_x, assignment_2_y)
-        local vertex_1, vertex_2 = variables[vertex_1_id], variables[vertex_2_id]
-        local assignment_1 = vec2(assignment_1_x, assignment_1_y)
-        local assignment_2 = vec2(assignment_2_x, assignment_2_y)
+      local does_intersect = memoize(function(vertex_1, vertex_2, assignment_1, assignment_2)
 
         local function get_offset_path(vertex, assignment)
           local path = vertex.polygon
@@ -549,7 +534,7 @@ function Map:planar_embedding(graph)
       for _, vertex_1 in ipairs(graph.vertices) do
         for _, vertex_2 in ipairs(graph.vertices) do
           if vertex_1 ~= vertex_2 and assignment[vertex_1] and assignment[vertex_2] then
-            if does_intersect(get_id(vertex_1), get_id(vertex_2), assignment[vertex_1].x, assignment[vertex_1].y, assignment[vertex_2].x, assignment[vertex_2].y) then
+            if does_intersect(vertex_1, vertex_2, assignment[vertex_1], assignment[vertex_2]) then
               is_consistent = false
 
               -- local assignment_1 = assignment[vertex_1]
@@ -647,7 +632,7 @@ function Map:planar_embedding(graph)
   end
 
   local assignment = backtrack_search(variables, constraints, assignment)
-  print(#constraints, fast_pass)
+  --print(#constraints, fast_pass)
   assert(assignment, 'unsatisfiable')
 
   local length = find_domain_range_max()
@@ -705,7 +690,10 @@ function Map:planar_embedding(graph)
           }
 
           vertex_edge_info[variables[split_string[1]]][variables[split_string[2]]] = info
+          table.insert(vertex_edge_info[variables[split_string[1]]], info)
+
           vertex_edge_info[variables[split_string[2]]][variables[split_string[1]]] = info
+          table.insert(vertex_edge_info[variables[split_string[2]]], info)
           
           edge.meta.callback(map, info)
         end
@@ -822,7 +810,7 @@ function Map:new_from_outline()
   
   for x, y in outline_map:for_cells() do
     local is_adjacent_to_air = false
-    for k, v in pairs(Map:getNeighborhood('moore')) do
+    for k, v in ipairs(Map:getNeighborhood('moore')) do
       if outline_map:get_cell(x+v[1], y+v[2]) == 0 then
         is_adjacent_to_air = true
         break
@@ -853,7 +841,7 @@ function Map:new_from_outline_strict()
     local current_tile = table.remove(to_check)
     local x, y = current_tile[1], current_tile[2]
     
-    for k, v in pairs(Map:getNeighborhood('moore')) do
+    for k, v in ipairs(Map:getNeighborhood('moore')) do
       local x, y = x+v[1], y+v[2]    
       if not checked[tostring(x)..','..tostring(y)] then
         if self:get_cell(x, y) == 0 then
@@ -1170,6 +1158,11 @@ function Map:getNeighborhood(choice)
   local neighborhood = {}
   
   neighborhood.vonNeuman = {
+    {0, -1},
+    {1, 0},
+    {0, 1},
+    {-1, 0},
+
     n = {0, -1},
     e = {1, 0},
     s = {0, 1},
@@ -1177,6 +1170,15 @@ function Map:getNeighborhood(choice)
   }
   
   neighborhood.moore = {
+    {0, -1},
+    {1, -1},
+    {1, 0},
+    {1, 1},
+    {0, 1},
+    {-1, 1},
+    {-1, 0},
+    {-1, -1},
+
     n = {0, -1},
     ne = {1, -1},
     e = {1, 0},
@@ -1214,7 +1216,7 @@ end
 function Map:dijkstra(start, neighborhood)
   local neighborhood = neighborhood or "vonNeuman"
   local neighbors = Map:getNeighborhood(neighborhood)
-  local map = Map:new(self.width, self.height, 999)
+  local map = Map:new(self.width, self.height, math.huge)
   
   for i, v in ipairs(start) do
     map:set_cell(v.x, v.y, 0)
@@ -1228,7 +1230,7 @@ function Map:dijkstra(start, neighborhood)
     local x, y = current_tile.x, current_tile.y
     local minimum_distance_value = map:get_cell(x, y)
     
-    for k, v in pairs(neighbors) do
+    for k, v in ipairs(neighbors) do
       local x, y = x+v[1], y+v[2]
       
       if self:get_cell(x, y) then
@@ -1253,7 +1255,7 @@ function Map:dijkstra(start, neighborhood)
     end 
   end
   
-  return map
+  return map, max
 end
 
 
@@ -1300,7 +1302,7 @@ function Map:aStar(x1,y1, x2,y2)
       break
     end
     
-    for k, v in pairs(vonNeuman) do
+    for k, v in ipairs(vonNeuman) do
         if 
           self:get_cell(nextNode.x + v[1], nextNode.y + v[2]) ~= 1 and 
           self:get_cell(nextNode.x + v[1], nextNode.y + v[2]) ~= nil 
@@ -1527,8 +1529,8 @@ function Map:DLA()
 
   local x1,y1 = nil,nil
   repeat
-    x1 = math.random(2, self.width-2)
-    y1 = math.random(2, self.height-2)
+    x1 = love.math.random(2, self.width-2)
+    y1 = love.math.random(2, self.height-2)
   until self:get_cell(x1, y1) == 1
   
   local function clamp(n, min, max)
@@ -1541,7 +1543,7 @@ function Map:DLA()
   repeat
     x2,y2 = x1,y1
     
-    local vec = math.random(1, 4)
+    local vec = love.math.random(1, 4)
     x1 = clamp(x1 + neighbors[vec][1], 2, self.width-2)
     y1 = clamp(y1 + neighbors[vec][2], 2, self.height-2)
   until self:get_cell(x1, y1) == 0

@@ -39,8 +39,8 @@ function Game:generateLevel(depth)
     -- to use. And which generators to use on which depth somehow.
 
     --local map, populater = ROT.Map.Brogue(50, 50), require "populater" -- Brogue Gen
-    local map, populater = require "maps.new.planar_gen"(), require "maps.new.populater" -- Dim Gen
-    --local map, populater = require "maps.new.tunnel_gen"(), require "maps.new.populater"
+    --Wlocal map, populater = require "maps.new.planar_gen"(), require "maps.new.populater" -- Dim Gen
+    local map, populater = require "maps.new.tunnel_gen"(), require "maps.new.populater"
     local level = Level(map, populater)
         level:addSystem(systems.Message())
         level:addSystem(systems.Inventory())
