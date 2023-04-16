@@ -28,7 +28,7 @@ Explode:afterAction(actions.Throw,
   		  level:performAction(damage)
   	  end
   	end
-    effects_system:resumeEffects()
+    effects_system:resumeEffects(level)
 
   	level:removeActor(actor)
   end
