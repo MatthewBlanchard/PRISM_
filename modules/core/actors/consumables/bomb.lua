@@ -25,7 +25,7 @@ function Explode:onDurationEnd(level, actor)
   		level:performAction(damage)
   	  end
   	end
-  effects_system:resumeEffects()
+  effects_system:resumeEffects(level)
 end
 
 local Arm = Action:extend()
