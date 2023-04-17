@@ -1,4 +1,4 @@
---love.math.setRandomSeed(2)
+love.math.setRandomSeed(2)
 --love.audio.setVolume(0) --gitignore
 
 local Map = require "maps.map"
@@ -499,35 +499,54 @@ function Level:create(callback)
       end
     }
 
-    local reference_pool = {}
-
-    local function clarify_level_specifications(level_specifications)
-      local function parameterize_vertex_from_specification(vertex)
-        vertex.parameters.parameters = function(self)
-          self.width = vertex.specifications.width
-          self.height = vertex.specifications.height
-        end
-        vertex.parameters.shaper = function(self, chunk)
-          for i, v in ipairs(vertex.specifications.shape) do
-            if type(v) == 'function' then 
-              v(i, vertex.specifications.shape)
-            else
-              shapers[v[1]](self, chunk, v[2])
-            end
-          end
-        end
-        vertex.parameters.populater = function(self, info)
-          for i, v in ipairs(vertex.specifications.population) do
-            if type(v) == 'function' then 
-              v(i, vertex.specifications.population)
-            else
-              v.info = v.info or {}
-              v.meta = v.meta or {}
-              populaters[v.type](self, info, v.id, v.info.callback, v.info.uuid, v.meta)
-            end
+    local function parameterize_vertex_from_specification(vertex)
+      vertex.parameters.parameters = function(self)
+        self.width = vertex.specifications.width
+        self.height = vertex.specifications.height
+      end
+      vertex.parameters.shaper = function(self, chunk)
+        for i, v in ipairs(vertex.specifications.shape) do
+          if type(v) == 'function' then 
+            v(i, vertex.specifications.shape)
+          else
+            shapers[v[1]](self, chunk, v[2])
           end
         end
       end
+      vertex.parameters.populater = function(self, info)
+        for i, v in ipairs(vertex.specifications.population) do
+          if type(v) == 'function' then 
+            v(i, vertex.specifications.population)
+          else
+            v.info = v.info or {}
+            v.meta = v.meta or {}
+            populaters[v.type](self, info, v.id, v.info.callback, v.info.uuid, v.meta)
+          end
+        end
+      end
+    end
+    local current_chunk
+
+    local stack = {}
+    function stack.push(v)
+      table.insert(stack, v)
+    end
+    function stack.pop()
+      return table.remove(stack)
+    end
+    function stack.get(i)
+      local n = i and #stack - i or #stack
+      return stack[n]
+    end
+
+    local chunks = {}
+    chunks.add_chunk = function(k, v)
+      last_chunk, current_chunk = current_chunk, v
+      chunks[k] = v
+    end
+
+    local function clarify_level_specifications(level_specifications)
+
       -- how many open tiles are there
       -- what are the qualities of the paths between chunks
       -- direct/winding, narrow/wide, short/long
@@ -585,26 +604,6 @@ function Level:create(callback)
           end
         end
       }
-
-      local current_chunk
-
-      local stack = {}
-      function stack.push(v)
-        table.insert(stack, v)
-      end
-      function stack.pop()
-        return table.remove(stack)
-      end
-      function stack.get(i)
-        local n = i and #stack - i or #stack
-        return stack[n]
-      end
-
-      local chunks = {}
-      chunks.add_chunk = function(k, v)
-        last_chunk, current_chunk = current_chunk, v
-        chunks[k] = v
-      end
 
 
       chunks.add_chunk('start', graph:add_vertex(Chunk:extend()):specify{
@@ -864,7 +863,101 @@ function Level:create(callback)
       end
     end
 
+    local function clarify_level_specifications(level_specifications)
+      chunks.add_chunk('start', graph:add_vertex(Chunk:extend()):specify{
+        width = 3,
+        height = 3,
+    
+        shape = {
+          {'square'}
+        },
+    
+        population = {
+          {id = 'Player', type = 'center'},
+          {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
+        }
+      })
+
+      stack.push(current_chunk)
+
+      chunks.add_chunk('hub', graph:add_vertex(Chunk:extend()):specify{
+        width = 45,
+        height = 45,
+    
+        shape = {
+          {'tunnel2'},
+          {'tunnel2'},
+          {'circle', {size = 8}},
+        },
+    
+        population = {
+          {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
+        }
+      })
+      graph:add_edge(edges.door, stack.get(), current_chunk)
+      stack.push(current_chunk)
+
+      for n = 1, 1 do
+        chunks.add_chunk('filler_1'..n, graph:add_vertex(Chunk:extend()):specify{
+          width = love.math.random(3, 5),
+          height = love.math.random(3, 5),
+      
+          shape = {
+            {'square'}
+          },
+      
+          population = {
+            {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
+          }
+        })
+
+        graph:add_edge(edges.door, stack.get(), current_chunk)
+        stack.push(current_chunk)
+
+        chunks.add_chunk('filler_2'..n, graph:add_vertex(Chunk:extend()):specify{
+          width = love.math.random(3, 8),
+          height = love.math.random(3, 8),
+      
+          shape = {
+            {'square'}
+          },
+      
+          population = {
+            {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
+          }
+        })
+
+        graph:add_edge(edges.door, stack.get(), current_chunk)
+
+        -- chunks.add_chunk('filler_3'..n, graph:add_vertex(Chunk:extend()):specify{
+        --   width = love.math.random(3, 8),
+        --   height = love.math.random(3, 8),
+      
+        --   shape = {
+        --     {'square'}
+        --   },
+      
+        --   population = {
+        --     {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
+        --   }
+        -- })
+
+        -- graph:add_edge(edges.door, stack.get(), current_chunk)
+
+        stack.pop()
+      end
+
+
+
+
+
+    end
+
     clarify_level_specifications(level_specifications)
+
+    for _, v in ipairs(graph.vertices) do
+      parameterize_vertex_from_specification(v)
+    end
   end
   graph_writer(graph)
 
