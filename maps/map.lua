@@ -329,7 +329,7 @@ function Map:planar_embedding(graph)
 
     return math.max(chunk_dimensions_sum.x, chunk_dimensions_sum.y)
   end
-  local function get_domains(variables, assignment)
+  local function get_domains(variables)
     local domains = {}
     local domain_range = {min = 0, max = find_domain_range_max()}
 
@@ -338,18 +338,6 @@ function Map:planar_embedding(graph)
 
       for x = domain_range.min, domain_range.max - v.chunk.width do
         for y = domain_range.min, domain_range.max - v.chunk.height do
-          local pos = vec2(x, y)
-
-          -- Constraint to prevent the polygons from clipping the map borders
-          -- if 
-          --   pos.x > domain_range.max - v.chunk.width or
-          --   pos.y > domain_range.max - v.chunk.height
-          -- then
-          --   print(pos)
-          --   break
-          -- end
-
-
           table.insert(domain, vec2(x, y))
         end
       end
@@ -382,49 +370,199 @@ function Map:planar_embedding(graph)
 
     local constraints = {}
 
-    -- Constraint to prevent the polygons from clipping the map borders
-    -- local domain_range = {min = 0, max = find_domain_range_max()}
-    -- for _, v in ipairs(variables) do
-    --   local constraint = function(variables, assignment)
-    --     if assignment[v] then
-    --       local pos = assignment[v]
-    --       if 
-    --         pos.x > domain_range.max - v.chunk.width or
-    --         pos.y > domain_range.max - v.chunk.height
-    --       then
-    --         return false
-    --       end
-    --     end
-    --     return true
-    --   end
+    local function common_edge(variables, assignment)
+      local shares_common_edge = memoize(function(vertex_1, vertex_2, assignment_1, assignment_2)
 
-    --   table.insert(constraints, constraint)
-    -- end
+        local function get_offset_edges(vertex, assignment)
+          local edges = vertex.outline_edges
+          local offset = assignment
 
-    local Intersect = require 'lib.batteries.intersect'
-    -- Constraint polygons to positions which overlap their bounding boxes with their edge neighbors
-    for _, v in ipairs(graph.edges) do
-      local constraint = function(variables, assignment)
-        if assignment[v.vertex_1] and assignment[v.vertex_2] then
+          local offset_edges = tablex.deep_copy(edges)
 
-          local assignment_1, assignment_2 = assignment[v.vertex_1], assignment[v.vertex_2]
-          local chunk_1, chunk_2 = v.vertex_1.chunk, v.vertex_2.chunk
+          for _, edge in ipairs(offset_edges) do
+            for i, point in ipairs(edge) do
+              edge[i] = vec2(point.x + offset.x, point.y + offset.y)
+            end
+          end
 
-          local pos_1, hs_1 = intersect.rect_to_aabb(assignment_1, vec2(chunk_1.width, chunk_1.height))
-          local pos_2, hs_2 = intersect.rect_to_aabb(assignment_2, vec2(chunk_2.width, chunk_2.height))
-          if not
-            intersect.aabb_aabb_overlap(pos_1, hs_1, pos_2, hs_2) 
-          then
-            return false
-          end 
-          
+          return offset_edges
         end
-        return true
+
+        local function are_intersecting(p1, q1, p2, q2)
+          local function on_segment(p, q, r)
+            if (
+              q.x <= math.max(p.x, r.x) and q.x >= math.min(p.x, r.x) and
+              q.y <= math.max(p.y, r.y) and q.y >= math.min(p.y, r.y)
+            ) 
+            then
+              return true
+            else
+              return false
+            end
+          end
+
+          local function orientation(p, q, r)
+            local val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)
+            if val == 0 then return 0
+            else return val > 0 and 1 or 2
+            end
+          end
+
+          local function do_intersect(p1, q1, p2, q2)
+            local o1 = orientation(p1, q1, p2)
+            local o2 = orientation(p1, q1, q2)
+            local o3 = orientation(p2, q2, p1)
+            local o4 = orientation(p2, q2, q1)
+            
+            if (o1 ~= o2 and o3 ~= o4) then return true
+            elseif (o1 == 0 and on_segment(p1, p2, q1)) then return true
+            elseif (o2 == 0 and on_segment(p1, q2, q1)) then return true
+            elseif (o3 == 0 and on_segment(p2, p1, q2)) then return true
+            elseif (o4 == 0 and on_segment(p2, q1, q2)) then return true
+            else return false
+            end
+          end
+
+          return do_intersect(p1, q1, p2, q2)
+        end
+
+        local edges_1 = get_offset_edges(vertex_1, assignment_1)
+        local edges_2 = get_offset_edges(vertex_2, assignment_2)
+
+        local shares_common_edge = false
+        for _, edge_1 in ipairs(edges_1) do
+          for _, edge_2 in ipairs(edges_2) do
+
+            local p1, q1 = edge_1[1], edge_1[#edge_1]
+            local p2, q2 = edge_2[1], edge_2[#edge_2]
+            
+            local dx1, dy1 = p1.x - q1.x, p1.y - q1.y
+            local dx2, dy2 = p2.x - q2.x, p2.y - q2.y
+
+            local d1 = vec2(p1.x - q1.x, p1.y - q1.y)
+            local d2 = vec2(p2.x - q2.x, p2.y - q2.y)
+
+            if math.sign(dx1) == -math.sign(dx2) and math.sign(dy1) == -math.sign(dy2) then
+              if 
+                (p1 ~= p2 and q1 ~= q2) and
+                (edge_1[1+1] ~= p2) and (edge_1[#edge_1-1] ~= q2)
+              then
+                if are_intersecting(p1, q1, p2, q2) then
+                  edge_matches[get_id(vertex_1)..':'..get_id(vertex_2)] = {edge_1 = edge_1, edge_2 = edge_2}
+                  shares_common_edge = true
+                  break
+                end
+              end
+            end
+          end
+        end
+
+        return shares_common_edge
+      end)
+
+      local is_consistent = true
+      for _, v in ipairs(graph.edges) do
+        local vertex_1, vertex_2 = v.vertex_1, v.vertex_2
+        if assignment[vertex_1] ~= nil and assignment[vertex_2] ~= nil then
+
+          if shares_common_edge(vertex_1, vertex_2, assignment[vertex_1], assignment[vertex_2]) == false then
+            is_consistent = false
+            break
+          end
+
+        end
       end
 
-      table.insert(constraints, constraint)
+      return is_consistent
     end
 
+    local function no_overlap(variables, assignment)
+      local does_intersect = memoize(function(vertex_1, vertex_2, assignment_1, assignment_2)
+
+        local pos_1, hs_1 = intersect.rect_to_aabb(assignment_1, vec2(vertex_1.chunk.width, vertex_1.chunk.height))
+        local pos_2, hs_2 = intersect.rect_to_aabb(assignment_2, vec2(vertex_2.chunk.width, vertex_2.chunk.height))
+        if not
+          intersect.aabb_aabb_overlap(pos_1, hs_1, pos_2, hs_2) 
+        then
+          return false
+        end 
+
+        local function get_offset_path(vertex, assignment)
+          local path = vertex.polygon
+          local offset = assignment
+
+          local offset_path = tablex.copy(path)
+          for i, v in ipairs(path) do
+            offset_path[i] = v + offset
+          end
+          return offset_path
+        end
+
+        local subject = get_offset_path(vertex_1, assignment_1)
+        local clip = get_offset_path(vertex_2, assignment_2)
+
+        local is_intersect = false
+        local none_outside = true
+        for i, v in ipairs(subject) do
+          local relation = point_in_polygon(v, clip)
+          if relation == 0 then
+            none_outside = false
+          end
+          if relation == 1 then
+            is_intersect = true
+            break
+          end
+        end
+
+        return is_intersect or none_outside
+      end)
+
+      local is_consistent = true
+      for _, vertex_1 in ipairs(graph.vertices) do
+        for _, vertex_2 in ipairs(graph.vertices) do
+          if vertex_1 ~= vertex_2 and assignment[vertex_1] and assignment[vertex_2] then
+            if does_intersect(vertex_1, vertex_2, assignment[vertex_1], assignment[vertex_2]) then
+              is_consistent = false
+
+              -- local assignment_1 = assignment[vertex_1]
+              -- local assignment_2 = assignment[vertex_2]
+              -- table.insert(constraints, 1, function(variables, assignment)
+              --   if assignment[vertex_1] and assignment[vertex_2] then
+              --     if assignment[vertex_1] - assignment[vertex_2] == assignment_1 - assignment_2 then
+              --       fast_pass = fast_pass + 1
+              --       return false
+              --     end
+              --   end
+    
+              --   return true
+              -- end)
+
+              break
+            end
+          end
+        end
+      end
+
+      return is_consistent
+    end
+
+    table.insert(constraints, common_edge)
+    table.insert(constraints, no_overlap)
+
+    return constraints
+  end
+
+  fill_vertices_info()
+  local variables = get_variables()
+  local constraints = get_constraints(variables)
+  local assignment = {}
+  local domains = get_domains(variables)
+
+  local domain_constraints = {}
+  for _, v in ipairs(variables) do
+    domain_constraints[v] = {}
+  end
+  local function make_domain_constraints()
 
     local start = love.timer.getTime()
     for _, v in ipairs(graph.edges) do
@@ -541,44 +679,9 @@ function Map:planar_embedding(graph)
 
       end
 
-      -- for x = -vertex_2.chunk.width, vertex_1.chunk.width + vertex_2.chunk.width do
-      --   for y = -vertex_2.chunk.height, vertex_1.chunk.height + vertex_2.chunk.height do
-          
-      --   local edges_2 = get_offset_edges(vertex_2, vec2(x, y))
-      --   local shares_common_edge = false
-      --   for _, edge_1 in ipairs(edges_1) do
-      --     for _, edge_2 in ipairs(edges_2) do
-
-      --       local p1, q1 = edge_1[1], edge_1[#edge_1]
-      --       local p2, q2 = edge_2[1], edge_2[#edge_2]
-            
-      --       local dx1, dy1 = p1.x - q1.x, p1.y - q1.y
-      --       local dx2, dy2 = p2.x - q2.x, p2.y - q2.y
-
-      --       local d1 = vec2(p1.x - q1.x, p1.y - q1.y)
-      --       local d2 = vec2(p2.x - q2.x, p2.y - q2.y)
-
-      --       if math.sign(dx1) == -math.sign(dx2) and math.sign(dy1) == -math.sign(dy2) then
-      --         if 
-      --           (p1 ~= p2 and q1 ~= q2) and
-      --           (edge_1[1+1] ~= p2) and (edge_1[#edge_1-1] ~= q2)
-      --         then
-      --           if are_intersecting(p1, q1, p2, q2) then
-      --             valid_pos_pool:set(x, y, true)
-      --             break
-      --           end
-      --         end
-      --       end
-      --     end
-      --   end
-
-      --   end
-      -- end
-
-
-      local constraint = function(variables, assignment)
-        if assignment[v.vertex_1] and assignment[v.vertex_2] then
-          local assignment_1, assignment_2 = assignment[v.vertex_1], assignment[v.vertex_2]
+      local constraint_1 = function(pos, variables, assignment)
+        if assignment[v.vertex_2] then
+          local assignment_1, assignment_2 = pos, assignment[v.vertex_2]
           local relation = vec2(assignment_2.x - assignment_1.x, assignment_2.y - assignment_1.y)
 
           if valid_pos_pool:get(relation.x, relation.y) ~= true then
@@ -588,198 +691,54 @@ function Map:planar_embedding(graph)
         end
         return true
       end
-      table.insert(constraints, constraint)
+
+      local constraint_2 = function(pos, variables, assignment)
+        if assignment[v.vertex_1] then
+          local assignment_1, assignment_2 = assignment[v.vertex_1], pos
+          local relation = vec2(assignment_2.x - assignment_1.x, assignment_2.y - assignment_1.y)
+
+          if valid_pos_pool:get(relation.x, relation.y) ~= true then
+            return false
+          end
+          
+        end
+        return true
+      end
+
+
+      table.insert(domain_constraints[v.vertex_1], constraint_1)
+      table.insert(domain_constraints[v.vertex_2], constraint_2)
     end
     print( (love.timer.getTime() - start) * 100)
 
-    local function common_edge(variables, assignment)
-      local shares_common_edge = memoize(function(vertex_1, vertex_2, assignment_1, assignment_2)
 
-        local function get_offset_edges(vertex, assignment)
-          local edges = vertex.outline_edges
-          local offset = assignment
+  end
+  make_domain_constraints()
 
-          local offset_edges = tablex.deep_copy(edges)
+  local function constrain_domains(vars, domains, assignment)
 
-          for _, edge in ipairs(offset_edges) do
-            for i, point in ipairs(edge) do
-              edge[i] = vec2(point.x + offset.x, point.y + offset.y)
-            end
-          end
+    for var, domain in pairs(domains) do
 
-          return offset_edges
-        end
+      for i = #domain, 1, -1 do
+        local pos = domain[i]
 
-        local function are_intersecting(p1, q1, p2, q2)
-          local function on_segment(p, q, r)
-            if (
-              q.x <= math.max(p.x, r.x) and q.x >= math.min(p.x, r.x) and
-              q.y <= math.max(p.y, r.y) and q.y >= math.min(p.y, r.y)
-            ) 
-            then
-              return true
-            else
-              return false
-            end
-          end
-
-          local function orientation(p, q, r)
-            local val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)
-            if val == 0 then return 0
-            else return val > 0 and 1 or 2
-            end
-          end
-
-          local function do_intersect(p1, q1, p2, q2)
-            local o1 = orientation(p1, q1, p2)
-            local o2 = orientation(p1, q1, q2)
-            local o3 = orientation(p2, q2, p1)
-            local o4 = orientation(p2, q2, q1)
-            
-            if (o1 ~= o2 and o3 ~= o4) then return true
-            elseif (o1 == 0 and on_segment(p1, p2, q1)) then return true
-            elseif (o2 == 0 and on_segment(p1, q2, q1)) then return true
-            elseif (o3 == 0 and on_segment(p2, p1, q2)) then return true
-            elseif (o4 == 0 and on_segment(p2, q1, q2)) then return true
-            else return false
-            end
-          end
-
-          return do_intersect(p1, q1, p2, q2)
-        end
-
-        local edges_1 = get_offset_edges(vertex_1, assignment_1)
-        local edges_2 = get_offset_edges(vertex_2, assignment_2)
-
-        local shares_common_edge = false
-        for _, edge_1 in ipairs(edges_1) do
-          for _, edge_2 in ipairs(edges_2) do
-
-            local p1, q1 = edge_1[1], edge_1[#edge_1]
-            local p2, q2 = edge_2[1], edge_2[#edge_2]
-            
-            local dx1, dy1 = p1.x - q1.x, p1.y - q1.y
-            local dx2, dy2 = p2.x - q2.x, p2.y - q2.y
-
-            local d1 = vec2(p1.x - q1.x, p1.y - q1.y)
-            local d2 = vec2(p2.x - q2.x, p2.y - q2.y)
-
-            if math.sign(dx1) == -math.sign(dx2) and math.sign(dy1) == -math.sign(dy2) then
-              if 
-                (p1 ~= p2 and q1 ~= q2) and
-                (edge_1[1+1] ~= p2) and (edge_1[#edge_1-1] ~= q2)
-              then
-                if are_intersecting(p1, q1, p2, q2) then
-                  edge_matches[get_id(vertex_1)..':'..get_id(vertex_2)] = {edge_1 = edge_1, edge_2 = edge_2}
-                  shares_common_edge = true
-                  break
-                end
-              end
-            end
-          end
-        end
-
-        return shares_common_edge
-      end)
-
-      local is_consistent = true
-      for _, v in ipairs(graph.edges) do
-        local vertex_1, vertex_2 = v.vertex_1, v.vertex_2
-        if assignment[vertex_1] ~= nil and assignment[vertex_2] ~= nil then
-
-          if shares_common_edge(vertex_1, vertex_2, assignment[vertex_1], assignment[vertex_2]) == false then
-            is_consistent = false
-            break
-          end
-
-        end
-      end
-
-      return is_consistent
-    end
-
-
-    local function no_overlap(variables, assignment)
-      local does_intersect = memoize(function(vertex_1, vertex_2, assignment_1, assignment_2)
-
-        local pos_1, hs_1 = intersect.rect_to_aabb(assignment_1, vec2(vertex_1.chunk.width, vertex_1.chunk.height))
-        local pos_2, hs_2 = intersect.rect_to_aabb(assignment_2, vec2(vertex_2.chunk.width, vertex_2.chunk.height))
-        if not
-          intersect.aabb_aabb_overlap(pos_1, hs_1, pos_2, hs_2) 
-        then
-          return false
-        end 
-
-        local function get_offset_path(vertex, assignment)
-          local path = vertex.polygon
-          local offset = assignment
-
-          local offset_path = tablex.copy(path)
-          for i, v in ipairs(path) do
-            offset_path[i] = v + offset
-          end
-          return offset_path
-        end
-
-        local subject = get_offset_path(vertex_1, assignment_1)
-        local clip = get_offset_path(vertex_2, assignment_2)
-
-        local is_intersect = false
-        local none_outside = true
-        for i, v in ipairs(subject) do
-          local relation = point_in_polygon(v, clip)
-          if relation == 0 then
-            none_outside = false
-          end
-          if relation == 1 then
-            is_intersect = true
+        for _, v in ipairs(domain_constraints[var]) do
+          if not v(pos, vars, assignment) then
+            local back = #domain
+            domain[i], domain[back] = domain[back], domain[i]
+            table.remove(domain)
             break
           end
         end
 
-        return is_intersect or none_outside
-      end)
-
-      local is_consistent = true
-      for _, vertex_1 in ipairs(graph.vertices) do
-        for _, vertex_2 in ipairs(graph.vertices) do
-          if vertex_1 ~= vertex_2 and assignment[vertex_1] and assignment[vertex_2] then
-            if does_intersect(vertex_1, vertex_2, assignment[vertex_1], assignment[vertex_2]) then
-              is_consistent = false
-
-              -- local assignment_1 = assignment[vertex_1]
-              -- local assignment_2 = assignment[vertex_2]
-              -- table.insert(constraints, 1, function(variables, assignment)
-              --   if assignment[vertex_1] and assignment[vertex_2] then
-              --     if assignment[vertex_1] - assignment[vertex_2] == assignment_1 - assignment_2 then
-              --       fast_pass = fast_pass + 1
-              --       return false
-              --     end
-              --   end
-    
-              --   return true
-              -- end)
-
-              break
-            end
-          end
-        end
       end
 
-      return is_consistent
+
     end
 
-    table.insert(constraints, common_edge)
-    table.insert(constraints, no_overlap)
-
-    return constraints
+    return domains
   end
 
-  fill_vertices_info()
-  local variables = get_variables()
-  local constraints = get_constraints(variables)
-  local assignment = {}
-  local domains = get_domains(variables, assignment)
 
   local function select_unassigned_variable(vars, domains, assignment)
     local min_var, min_size = nil, math.huge
@@ -801,12 +760,12 @@ function Map:planar_embedding(graph)
     end
     return satisfied
   end
-  local function backtrack_search(vars, constraints, assignment)
-    local domains = get_domains(variables, assignment)
-
+  local function backtrack_search(vars, domains, constraints, assignment)
     if #tablex.keys(assignment) == #vars then
       return assignment
     end
+
+    local domains = constrain_domains(vars, domains, assignment)
     
     local var = select_unassigned_variable(vars, domains, assignment)
     
@@ -830,7 +789,7 @@ function Map:planar_embedding(graph)
       assignment[var] = value
         
       if is_consistent(assignment, constraints, vars) then
-        local result = backtrack_search(vars, constraints, assignment)
+        local result = backtrack_search(vars, domains, constraints, assignment)
         if result ~= nil then
           return result
         end
@@ -842,7 +801,7 @@ function Map:planar_embedding(graph)
     return nil
   end
 
-  local assignment = backtrack_search(variables, constraints, assignment)
+  local assignment = backtrack_search(variables, domains, constraints, assignment)
   --print(#constraints, fast_pass)
   assert(assignment, 'unsatisfiable')
 
