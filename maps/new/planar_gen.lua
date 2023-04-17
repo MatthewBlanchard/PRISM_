@@ -1,4 +1,4 @@
-love.math.setRandomSeed(2)
+--love.math.setRandomSeed(2)
 --love.audio.setVolume(0) --gitignore
 
 local Map = require "maps.map"
@@ -481,7 +481,6 @@ function Level:create(callback)
             max = math.max(max, cell)
           end
         end
-        print(max)
 
 
         local treasure_spots = {}
@@ -562,7 +561,6 @@ function Level:create(callback)
       entities.shopkeep = {
         uuid = id_generator(), 
         callback = function() 
-          print('wow')
         end
       }
       entities.product = {
@@ -863,95 +861,91 @@ function Level:create(callback)
       end
     end
 
-    local function clarify_level_specifications(level_specifications)
-      chunks.add_chunk('start', graph:add_vertex(Chunk:extend()):specify{
-        width = 3,
-        height = 3,
+    -- local function clarify_level_specifications(level_specifications)
+    --   chunks.add_chunk('start', graph:add_vertex(Chunk:extend()):specify{
+    --     width = 3,
+    --     height = 3,
     
-        shape = {
-          {'square'}
-        },
+    --     shape = {
+    --       {'square'}
+    --     },
     
-        population = {
-          {id = 'Player', type = 'center'},
-          {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
-        }
-      })
+    --     population = {
+    --       {id = 'Player', type = 'center'},
+    --       {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
+    --     }
+    --   })
 
-      stack.push(current_chunk)
+    --   stack.push(current_chunk)
 
-      chunks.add_chunk('hub', graph:add_vertex(Chunk:extend()):specify{
-        width = 45,
-        height = 45,
+    --   chunks.add_chunk('hub', graph:add_vertex(Chunk:extend()):specify{
+    --     width = 45,
+    --     height = 45,
     
-        shape = {
-          {'tunnel2'},
-          {'tunnel2'},
-          {'circle', {size = 8}},
-        },
+    --     shape = {
+    --       {'tunnel2'},
+    --       {'tunnel2'},
+    --       {'circle', {size = 8}},
+    --     },
     
-        population = {
-          {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
-        }
-      })
-      graph:add_edge(edges.door, stack.get(), current_chunk)
-      stack.push(current_chunk)
+    --     population = {
+    --       {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
+    --     }
+    --   })
+    --   graph:add_edge(edges.door, stack.get(), current_chunk)
+    --   stack.push(current_chunk)
 
-      for n = 1, 1 do
-        chunks.add_chunk('filler_1'..n, graph:add_vertex(Chunk:extend()):specify{
-          width = love.math.random(3, 5),
-          height = love.math.random(3, 5),
+    --   for n = 1, 15 do
+    --     chunks.add_chunk('filler_1'..n, graph:add_vertex(Chunk:extend()):specify{
+    --       width = love.math.random(3, 5),
+    --       height = love.math.random(3, 5),
       
-          shape = {
-            {'square'}
-          },
+    --       shape = {
+    --         {'square'}
+    --       },
       
-          population = {
-            {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
-          }
-        })
+    --       population = {
+    --         {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
+    --       }
+    --     })
 
-        graph:add_edge(edges.door, stack.get(), current_chunk)
-        stack.push(current_chunk)
+    --     graph:add_edge(edges.door, stack.get(), current_chunk)
+    --     -- stack.push(current_chunk)
 
-        chunks.add_chunk('filler_2'..n, graph:add_vertex(Chunk:extend()):specify{
-          width = love.math.random(3, 8),
-          height = love.math.random(3, 8),
+    --     -- chunks.add_chunk('filler_2'..n, graph:add_vertex(Chunk:extend()):specify{
+    --     --   width = love.math.random(3, 8),
+    --     --   height = love.math.random(3, 8),
       
-          shape = {
-            {'square'}
-          },
+    --     --   shape = {
+    --     --     {'square'}
+    --     --   },
       
-          population = {
-            {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
-          }
-        })
+    --     --   population = {
+    --     --     {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
+    --     --   }
+    --     -- })
 
-        graph:add_edge(edges.door, stack.get(), current_chunk)
+    --     -- graph:add_edge(edges.door, stack.get(), current_chunk)
 
-        -- chunks.add_chunk('filler_3'..n, graph:add_vertex(Chunk:extend()):specify{
-        --   width = love.math.random(3, 8),
-        --   height = love.math.random(3, 8),
+    --     -- chunks.add_chunk('filler_3'..n, graph:add_vertex(Chunk:extend()):specify{
+    --     --   width = love.math.random(3, 8),
+    --     --   height = love.math.random(3, 8),
       
-        --   shape = {
-        --     {'square'}
-        --   },
+    --     --   shape = {
+    --     --     {'square'}
+    --     --   },
       
-        --   population = {
-        --     {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
-        --   }
-        -- })
+    --     --   population = {
+    --     --     {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_5'}, type = 'all_wall'},
+    --     --   }
+    --     -- })
 
-        -- graph:add_edge(edges.door, stack.get(), current_chunk)
+    --     -- graph:add_edge(edges.door, stack.get(), current_chunk)
 
-        stack.pop()
-      end
+    --     -- stack.pop()
+    --   end
 
-
-
-
-
-    end
+    -- end
 
     clarify_level_specifications(level_specifications)
 
