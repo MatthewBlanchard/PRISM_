@@ -348,8 +348,8 @@ function Map:planar_embedding(graph)
     return domains
   end
 
+  local domain_constraints = {}
   local edge_matches = {}
-  local fast_pass = 0
   local function point_in_polygon(point, polygon)
     local oddNodes = false
     local j = #polygon
@@ -460,20 +460,18 @@ function Map:planar_embedding(graph)
         return shares_common_edge
       end)
 
-      local is_consistent = true
       for _, v in ipairs(graph.edges) do
         local vertex_1, vertex_2 = v.vertex_1, v.vertex_2
         if assignment[vertex_1] ~= nil and assignment[vertex_2] ~= nil then
 
           if shares_common_edge(vertex_1, vertex_2, assignment[vertex_1], assignment[vertex_2]) == false then
-            is_consistent = false
-            break
+            return false, {vertex_1, vertex_2}
           end
 
         end
       end
 
-      return is_consistent
+      return true
     end
 
     local function no_overlap(variables, assignment)
@@ -517,33 +515,48 @@ function Map:planar_embedding(graph)
         return is_intersect or none_outside
       end)
 
-      local is_consistent = true
       for _, vertex_1 in ipairs(graph.vertices) do
         for _, vertex_2 in ipairs(graph.vertices) do
           if vertex_1 ~= vertex_2 and assignment[vertex_1] and assignment[vertex_2] then
             if does_intersect(vertex_1, vertex_2, assignment[vertex_1], assignment[vertex_2]) then
-              is_consistent = false
+              local bad_relation = assignment[vertex_1] - assignment[vertex_2]
 
-              -- local assignment_1 = assignment[vertex_1]
-              -- local assignment_2 = assignment[vertex_2]
-              -- table.insert(constraints, 1, function(variables, assignment)
-              --   if assignment[vertex_1] and assignment[vertex_2] then
-              --     if assignment[vertex_1] - assignment[vertex_2] == assignment_1 - assignment_2 then
-              --       fast_pass = fast_pass + 1
-              --       return false
-              --     end
-              --   end
-    
-              --   return true
-              -- end)
+              local constraint_1 = function(pos, variables, assignment)
+                if assignment[vertex_2] then
+                  local assignment_1, assignment_2 = pos, assignment[vertex_2]
+                  local relation = assignment_2 - assignment_1
+        
+                  if relation == bad_relation then
+                    return false
+                  end
+                  
+                end
+                return true
+              end
+        
+              local constraint_2 = function(pos, variables, assignment)
+                if assignment[vertex_1] then
+                  local assignment_1, assignment_2 = assignment[vertex_1], pos
+                  local relation = assignment_2 - assignment_1
+        
+                  if relation == bad_relation then
+                    return false
+                  end
+                  
+                end
+                return true
+              end
+        
+              table.insert(domain_constraints[vertex_1], constraint_1)
+              table.insert(domain_constraints[vertex_2], constraint_2)
 
-              break
+              return false, {vertex_1, vertex_2}
             end
           end
         end
       end
 
-      return is_consistent
+      return true
     end
 
     table.insert(constraints, common_edge)
@@ -558,11 +571,50 @@ function Map:planar_embedding(graph)
   local assignment = {}
   local domains = get_domains(variables)
 
-  local domain_constraints = {}
   for _, v in ipairs(variables) do
     domain_constraints[v] = {}
   end
   local function make_domain_constraints()
+
+    local does_intersect = function(vertex_1, vertex_2, assignment_1, assignment_2)
+
+      local pos_1, hs_1 = intersect.rect_to_aabb(assignment_1, vec2(vertex_1.chunk.width, vertex_1.chunk.height))
+      local pos_2, hs_2 = intersect.rect_to_aabb(assignment_2, vec2(vertex_2.chunk.width, vertex_2.chunk.height))
+      if not
+        intersect.aabb_aabb_overlap(pos_1, hs_1, pos_2, hs_2) 
+      then
+        return false
+      end 
+
+      local function get_offset_path(vertex, assignment)
+        local path = vertex.polygon
+        local offset = assignment
+
+        local offset_path = tablex.copy(path)
+        for i, v in ipairs(path) do
+          offset_path[i] = v + offset
+        end
+        return offset_path
+      end
+
+      local subject = get_offset_path(vertex_1, assignment_1)
+      local clip = get_offset_path(vertex_2, assignment_2)
+
+      local is_intersect = false
+      local none_outside = true
+      for i, v in ipairs(subject) do
+        local relation = point_in_polygon(v, clip)
+        if relation == 0 then
+          none_outside = false
+        end
+        if relation == 1 then
+          is_intersect = true
+          break
+        end
+      end
+
+      return is_intersect or none_outside
+    end
 
     local start = love.timer.getTime()
     for _, v in ipairs(graph.edges) do
@@ -669,7 +721,9 @@ function Map:planar_embedding(graph)
                 (edge_1[1+1] ~= p2) and (edge_1[#edge_1-1] ~= q2)
               then
                 if are_intersecting(p1, q1, p2, q2) then
-                  valid_pos_pool:set(x, y, true)
+                  if not (does_intersect(vertex_1, vertex_2, vec2(0, 0), vec2(x, y))) then
+                    valid_pos_pool:set(x, y, true)
+                  end
                   break
                 end
               end
@@ -682,7 +736,7 @@ function Map:planar_embedding(graph)
       local constraint_1 = function(pos, variables, assignment)
         if assignment[v.vertex_2] then
           local assignment_1, assignment_2 = pos, assignment[v.vertex_2]
-          local relation = vec2(assignment_2.x - assignment_1.x, assignment_2.y - assignment_1.y)
+          local relation = assignment_2 - assignment_1
 
           if valid_pos_pool:get(relation.x, relation.y) ~= true then
             return false
@@ -695,7 +749,7 @@ function Map:planar_embedding(graph)
       local constraint_2 = function(pos, variables, assignment)
         if assignment[v.vertex_1] then
           local assignment_1, assignment_2 = assignment[v.vertex_1], pos
-          local relation = vec2(assignment_2.x - assignment_1.x, assignment_2.y - assignment_1.y)
+          local relation = assignment_2 - assignment_1
 
           if valid_pos_pool:get(relation.x, relation.y) ~= true then
             return false
@@ -718,16 +772,20 @@ function Map:planar_embedding(graph)
   local function constrain_domains(vars, domains, assignment)
 
     for var, domain in pairs(domains) do
-
       for i = #domain, 1, -1 do
         local pos = domain[i]
 
-        for _, v in ipairs(domain_constraints[var]) do
-          if not v(pos, vars, assignment) then
-            local back = #domain
-            domain[i], domain[back] = domain[back], domain[i]
-            table.remove(domain)
-            break
+        if not pos then -- domain sometimes has a hole in it?
+          table.remove(domain, i)
+        else
+          for _, v in ipairs(domain_constraints[var]) do
+            if not v(pos, vars, assignment) then
+              -- local back = #domain
+              -- domain[i], domain[back] = domain[back], domain[i]
+              -- table.remove(domain)
+              table.remove(domain, i)
+              break
+            end
           end
         end
 
@@ -751,58 +809,85 @@ function Map:planar_embedding(graph)
     return min_var
   end
   local function is_consistent(assignment, constraints, variables)
-    local satisfied = true
     for _, clause in ipairs(constraints) do
-      if clause(variables, assignment) == false then
-        satisfied = false
-        break
+      local satisfied, conflicts = clause(variables, assignment)
+      if satisfied == false then
+        return false, conflicts
       end
     end
-    return satisfied
+    return true
   end
+  local function rpairs(t)
+    local total = #t
+    
+    return function()
+      if total > 0 then
+        local r = love.math.random(total)
+        local v = t[r]
+        
+        t[r], t[total] = t[total], t[r]
+        total = total - 1
+        
+        return v
+      end
+    end
+  end
+
+  local domain_history = {}
   local function backtrack_search(vars, domains, constraints, assignment)
-    if #tablex.keys(assignment) == #vars then
+    if #assignment == #vars then
       return assignment
     end
 
     local domains = constrain_domains(vars, domains, assignment)
-    
+    table.insert(domain_history, domains)
     local var = select_unassigned_variable(vars, domains, assignment)
-    
-    local function rpairs(t)
-      local total = #t
-      
-      return function()
-        if total > 0 then
-          local r = love.math.random(total)
-          local v = t[r]
-          
-          t[r], t[total] = t[total], t[r]
-          total = total - 1
-          
-          return v
-        end
-      end
-    end
 
     for value in rpairs(domains[var]) do
       assignment[var] = value
+      table.insert(assignment, var)
+
+      local consistent, conflicts = is_consistent(assignment, constraints, vars)
         
-      if is_consistent(assignment, constraints, vars) then
+      if consistent then
         local result = backtrack_search(vars, domains, constraints, assignment)
         if result ~= nil then
           return result
         end
+      else
+        -- local is_continue = true
+        -- for i, v in ipairs(assignment) do
+        --   for _, v2 in ipairs(conflicts) do
+        --     if v == v2 then
+        --       for n = #assignment, i+1, -1 do
+        --         local var = table.remove(assignment)
+        --         assignment[var] = nil
+        --         table.remove(domain_history)
+        --       end
+        --       is_continue = false
+        --       break
+        --     end
+        --   end
+        --   if is_continue == false then
+        --     break
+        --   end
+        -- end
+
+        -- local domains = domain_history[#domain_history]
+        -- local result = backtrack_search(vars, domains, constraints, assignment)
+        -- if result ~= nil then
+        --   return result
+        -- end
       end
         
       assignment[var] = nil
+      table.remove(assignment)
     end
     
     return nil
   end
 
   local assignment = backtrack_search(variables, domains, constraints, assignment)
-  --print(#constraints, fast_pass)
   assert(assignment, 'unsatisfiable')
 
   local length = find_domain_range_max()
