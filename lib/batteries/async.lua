@@ -19,9 +19,9 @@ local path = (...):gsub("async", "")
 local assert = require(path .. "assert")
 local class = require(path .. "class")
 
-local async = class({
+local async = class {
 	name = "async",
-})
+}
 
 function async:new()
 	self.tasks = {}
@@ -29,22 +29,18 @@ function async:new()
 end
 
 local capture_callstacks
-if love.system.getOS() == 'Web' then
+if love.system.getOS() == "Web" then
 	-- Do no extra wrapping under lovejs because using xpcall causes "attempt
 	-- to yield across metamethod/C-call boundary"
-	capture_callstacks = function(f)
-		return f
-	end
+	capture_callstacks = function(f) return f end
 else
 	capture_callstacks = function(f)
 		-- Report errors with the coroutine's callstack instead of one coming
 		-- from async:update.
 		return function(...)
-			local results = {xpcall(f, debug.traceback, ...)}
+			local results = { xpcall(f, debug.traceback, ...) }
 			local success = table.remove(results, 1)
-			if not success then
-				error(table.remove(results, 1))
-			end
+			if not success then error(table.remove(results, 1)) end
 			return unpack(results)
 		end
 	end
@@ -74,17 +70,14 @@ local function process_resume(self, td, success, msg, ...)
 		if error_cb then
 			error_cb(msg)
 		else
-			local err = ("failure in async task:\n\n\t%s\n")
-				:format(tostring(msg))
+			local err = ("failure in async task:\n\n\t%s\n"):format(tostring(msg))
 			error(err)
 		end
 	end
 	--check done
 	if coroutine.status(co) == "dead" then
 		--done? run callback with result
-		if cb then
-			cb(msg, ...)
-		end
+		if cb then cb(msg, ...) end
 	else
 		--if not completed, re-add to the appropriate queue
 		if msg == "stall" then
@@ -122,13 +115,9 @@ end
 function async:update_for_time(t, early_out_stalls)
 	local now = love.timer.getTime()
 	while love.timer.getTime() - now < t do
-		if not self:update() then
-			break
-		end
+		if not self:update() then break end
 		--all stalled?
-		if early_out_stalls and #self.tasks == 0 then
-			break
-		end
+		if early_out_stalls and #self.tasks == 0 then break end
 	end
 end
 
@@ -157,14 +146,12 @@ end
 --	intended to be called with dot syntax on the class itself
 
 --stall the current coroutine
-function async.stall()
-	return coroutine.yield("stall")
-end
+function async.stall() return coroutine.yield "stall" end
 
 --make the current coroutine wait
 function async.wait(time)
 	if not coroutine.running() then
-		error("attempt to wait in main thread, this will block forever")
+		error "attempt to wait in main thread, this will block forever"
 	end
 	local now = love.timer.getTime()
 	while love.timer.getTime() - now < time do

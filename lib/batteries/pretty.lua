@@ -21,7 +21,7 @@
 ]]
 
 local path = (...):gsub("pretty", "")
-local table = require(path.."tablex") --shadow global table module
+local table = require(path .. "tablex") --shadow global table module
 
 local pretty = {}
 
@@ -35,14 +35,10 @@ pretty.default_config = {
 pretty.default_indent = "\t"
 
 --pretty-print something directly
-function pretty.print(input, config)
-	print(pretty.string(input, config))
-end
+function pretty.print(input, config) print(pretty.string(input, config)) end
 
 --pretty-format something into a string
-function pretty.string(input, config)
-	return pretty._process(input, config)
-end
+function pretty.string(input, config) return pretty._process(input, config) end
 
 --internal
 --actual processing part
@@ -53,9 +49,7 @@ function pretty._process(input, config, processing_state)
 	if type(input) ~= "table" or mt and mt.__tostring then
 		local s = tostring(input)
 		--quote strings
-		if type(input) == "string" then
-			s = '"' .. s .. '"'
-		end
+		if type(input) == "string" then s = '"' .. s .. '"' end
 		return s
 	end
 
@@ -76,7 +70,7 @@ function pretty._process(input, config, processing_state)
 
 	--init or collect processing state
 	processing_state = processing_state or {
-		circular_references = {i = 1},
+		circular_references = { i = 1 },
 		depth = 0,
 	}
 
@@ -100,9 +94,7 @@ function pretty._process(input, config, processing_state)
 
 	local function internal_value(v)
 		v = pretty._process(v, config, processing_state)
-		if indent ~= "" then
-			v = v:gsub(newline, newline..indent)
-		end
+		if indent ~= "" then v = v:gsub(newline, newline .. indent) end
 		return v
 	end
 
@@ -122,9 +114,7 @@ function pretty._process(input, config, processing_state)
 		if not seen[k] then
 			--encapsulate anything that's not a string
 			--todo: also keywords and strings with spaces
-			if type(k) ~= "string" then
-				k = "[" .. tostring(k) .. "]"
-			end
+			if type(k) ~= "string" then k = "[" .. tostring(k) .. "]" end
 			table.insert(chunks, k .. " = " .. internal_value(v))
 		end
 	end
@@ -136,12 +126,10 @@ function pretty._process(input, config, processing_state)
 			local break_next = false
 			local line = {}
 			for i = 1, per_line do
-				if #chunks == 0 then
-					break
-				end
+				if #chunks == 0 then break end
 				local v = chunks[1]
 				--tables split to own line
-				if v:find("{") then
+				if v:find "{" then
 					--break line here
 					break_next = true
 					break
@@ -149,12 +137,8 @@ function pretty._process(input, config, processing_state)
 					table.insert(line, table.remove(chunks, 1))
 				end
 			end
-			if #line > 0 then
-				table.insert(line_chunks, table.concat(line, ", "))
-			end
-			if break_next then
-				table.insert(line_chunks, table.remove(chunks, 1))
-			end
+			if #line > 0 then table.insert(line_chunks, table.concat(line, ", ")) end
+			if break_next then table.insert(line_chunks, table.remove(chunks, 1)) end
 		end
 		chunks = line_chunks
 	end
@@ -166,13 +150,17 @@ function pretty._process(input, config, processing_state)
 	circular_references[input] = nil
 
 	local multiline = #chunks > 1
-	local separator = (indent == "" or not multiline) and ", " or ",\n"..indent
+	local separator = (indent == "" or not multiline) and ", " or ",\n" .. indent
 
-	local prelude = ref.string and (string.format(" <referenced as %s> ",ref.string)) or ""
+	local prelude = ref.string and (string.format(" <referenced as %s> ", ref.string)) or ""
 	if multiline then
-		return "{" .. prelude .. newline ..
-			indent .. table.concat(chunks, separator) .. newline ..
-		"}"
+		return "{"
+			.. prelude
+			.. newline
+			.. indent
+			.. table.concat(chunks, separator)
+			.. newline
+			.. "}"
 	end
 	return "{" .. prelude .. table.concat(chunks, separator) .. "}"
 end

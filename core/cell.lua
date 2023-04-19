@@ -13,8 +13,7 @@ Cell.sightLimit = nil -- if set to an integer an actor standing on this tile's s
 Cell.movePenalty = 0 -- applies a penalty to speed when moving through this cell
 Cell.lightReduction = 1 -- reduces the amount of light that passes through this cell
 
-function Cell:__new()
-end
+function Cell:__new() end
 
 function Cell:onEnter(level, actor) -- called when an actor enters the cell
 end
@@ -26,10 +25,8 @@ function Cell:onAction(level, actor, action) -- called when an action is taken o
 end
 
 --- Cells can have custom functions to determine whether an actor standing on them can be seen.
---- For instance, grass cells allow actors to be seen only if the other actor is in the same 
+--- For instance, grass cells allow actors to be seen only if the other actor is in the same
 --- clump of grass.
-function Cell:visibleFromCell(level, cell) 
-  return true
-end
+function Cell:visibleFromCell(level, cell) return true end
 
 return Cell

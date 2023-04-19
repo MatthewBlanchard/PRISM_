@@ -26,21 +26,50 @@ local uuid4_template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 function identifier.uuid4(rng)
 	--x should be 0x0-0xf, the single y should be 0x8-0xb
 	--4 should always just be 4 (denoting uuid version)
-    local out = uuid4_template:gsub("[xy]", function (c)
-        return string.format(
-			"%x",
-			c == "x" and _random(rng, 0x0, 0xf) or _random(rng, 0x8, 0xb)
-		)
-    end)
+	local out = uuid4_template:gsub(
+		"[xy]",
+		function(c)
+			return string.format("%x", c == "x" and _random(rng, 0x0, 0xf) or _random(rng, 0x8, 0xb))
+		end
+	)
 
 	return out
 end
 
 --crockford's base32 https://en.wikipedia.org/wiki/Base32
 local _encoding = {
-	"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-	"A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "M",
-	"N", "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z"
+	"0",
+	"1",
+	"2",
+	"3",
+	"4",
+	"5",
+	"6",
+	"7",
+	"8",
+	"9",
+	"A",
+	"B",
+	"C",
+	"D",
+	"E",
+	"F",
+	"G",
+	"H",
+	"J",
+	"K",
+	"M",
+	"N",
+	"P",
+	"Q",
+	"R",
+	"S",
+	"T",
+	"V",
+	"W",
+	"X",
+	"Y",
+	"Z",
 }
 
 --since ulid needs time since unix epoch with miliseconds, we can just
@@ -49,7 +78,7 @@ local function _now(time_func, ...)
 	if package.loaded.socket then return package.loaded.socket.gettime(...) end
 	if pcall(require, "socket") then return require("socket").gettime(...) end
 	if time_func then return time_func(...) end
-	error("assertion failed: socket can't be found and no time function provided")
+	error "assertion failed: socket can't be found and no time function provided"
 end
 
 --generate an ULID using this rng at this time (now by default)

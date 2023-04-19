@@ -5,51 +5,49 @@
 ]]
 
 local path = ...
-local function require_relative(p)
-	return require(table.concat({path, p}, "."))
-end
+local function require_relative(p) return require(table.concat({ path, p }, ".")) end
 
 --build the module
 local _batteries = {
 	--
-	class = require_relative("class"),
+	class = require_relative "class",
 	--
-	assert = require_relative("assert"),
+	assert = require_relative "assert",
 	--extension libraries
-	mathx = require_relative("mathx"),
-	tablex = require_relative("tablex"),
-	stringx = require_relative("stringx"),
+	mathx = require_relative "mathx",
+	tablex = require_relative "tablex",
+	stringx = require_relative "stringx",
 	--sorting routines
-	sort = require_relative("sort"),
+	sort = require_relative "sort",
 	--
-	functional = require_relative("functional"),
+	functional = require_relative "functional",
 	--collections
-	sequence = require_relative("sequence"),
-	set = require_relative("set"),
+	sequence = require_relative "sequence",
+	set = require_relative "set",
 	--geom
-	vec2 = require_relative("vec2"),
-	vec3 = require_relative("vec3"),
-	intersect = require_relative("intersect"),
+	vec2 = require_relative "vec2",
+	vec3 = require_relative "vec3",
+	intersect = require_relative "intersect",
 	--
-	timer = require_relative("timer"),
-	pubsub = require_relative("pubsub"),
-	state_machine = require_relative("state_machine"),
-	async = require_relative("async"),
-	manual_gc = require_relative("manual_gc"),
-	colour = require_relative("colour"),
-	pretty = require_relative("pretty"),
-	measure = require_relative("measure"),
-	make_pooled = require_relative("make_pooled"),
+	timer = require_relative "timer",
+	pubsub = require_relative "pubsub",
+	state_machine = require_relative "state_machine",
+	async = require_relative "async",
+	manual_gc = require_relative "manual_gc",
+	colour = require_relative "colour",
+	pretty = require_relative "pretty",
+	measure = require_relative "measure",
+	make_pooled = require_relative "make_pooled",
 }
 
 --assign aliases
-for _, alias in ipairs({
-	{"mathx", "math"},
-	{"tablex", "table"},
-	{"stringx", "string"},
-	{"sort", "stable_sort"},
-	{"colour", "color"},
-}) do
+for _, alias in ipairs {
+	{ "mathx", "math" },
+	{ "tablex", "table" },
+	{ "stringx", "string" },
+	{ "sort", "stable_sort" },
+	{ "colour", "color" },
+} do
 	_batteries[alias[2]] = _batteries[alias[1]]
 end
 
@@ -57,9 +55,7 @@ end
 function _batteries:export()
 	--export all key strings globally, if doesn't already exist
 	for k, v in pairs(self) do
-		if _G[k] == nil then
-			_G[k] = v
-		end
+		if _G[k] == nil then _G[k] = v end
 	end
 
 	--overlay tablex and functional and sort routines onto table
@@ -86,23 +82,20 @@ function _batteries:export()
 	return self
 end
 
-
 --convert naming, for picky eaters
 --experimental, let me know how it goes
 function _batteries:camelCase()
 	--not part of stringx for now, because it's not necessarily utf8 safe
 	local function capitalise(s)
-		local head = s:sub(1,1)
+		local head = s:sub(1, 1)
 		local tail = s:sub(2)
 		return head:upper() .. tail
 	end
 
 	--any acronyms to fully capitalise to avoid "Rgb" and the like
-	local acronyms = _batteries.set{"rgb", "rgba", "argb", "hsl", "xy", "gc", "aabb",}
+	local acronyms = _batteries.set { "rgb", "rgba", "argb", "hsl", "xy", "gc", "aabb" }
 	local function caps_acronym(s)
-		if acronyms:has(s) then
-			s = s:upper()
-		end
+		if acronyms:has(s) then s = s:upper() end
 		return s
 	end
 
@@ -113,7 +106,7 @@ function _batteries:camelCase()
 		local first = chunks:shift()
 		chunks:remap(capitalise)
 		chunks:unshift(first)
-		return chunks:concat("")
+		return chunks:concat ""
 	end
 	--convert all named properties
 	--(keep the old ones around as well)
@@ -141,9 +134,7 @@ function _batteries:camelCase()
 				_batteries.camelCase(v)
 			end
 			--assign if the key changed and there isn't a matching key
-			if k ~= camel and self[camel] == nil then
-				self[camel] = v
-			end
+			if k ~= camel and self[camel] == nil then self[camel] = v end
 		end
 	end
 

@@ -6,17 +6,17 @@ RobeOfTatters.char = Tiles["armor"]
 RobeOfTatters.name = "Robe of Rags"
 
 RobeOfTatters.components = {
-  components.Item(),
-  components.Equipment{
-    slot = "body",
-    effects = {
-      conditions.Modifystats{
-        AC = 1,
-        MGK = 1
-      }
-    }
-  },
-  components.Cost{rarity = "common"}
+	components.Item(),
+	components.Equipment {
+		slot = "body",
+		effects = {
+			conditions.Modifystats {
+				AC = 1,
+				MGK = 1,
+			},
+		},
+	},
+	components.Cost { rarity = "common" },
 }
 
 return RobeOfTatters

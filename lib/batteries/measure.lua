@@ -30,9 +30,7 @@ function measure.time_taken(test_function, runs, warmup_runs)
 		local start_time = measure.get_time()
 		test_function()
 		local end_time = measure.get_time()
-		if i > warmup_runs then
-			table.insert(times, end_time - start_time)
-		end
+		if i > warmup_runs then table.insert(times, end_time - start_time) end
 	end
 
 	local mean = functional.mean(times)
@@ -49,12 +47,10 @@ function measure.memory_taken(test_function, runs, warmup_runs)
 	--collect data
 	local mems = {}
 	for i = 1, warmup_runs + runs do
-		local start_mem = collectgarbage("count")
+		local start_mem = collectgarbage "count"
 		test_function()
-		local end_mem = collectgarbage("count")
-		if i > warmup_runs then
-			table.insert(mems, math.max(0, end_mem - start_mem))
-		end
+		local end_mem = collectgarbage "count"
+		if i > warmup_runs then table.insert(mems, math.max(0, end_mem - start_mem)) end
 	end
 
 	local mean = functional.mean(mems)
@@ -71,16 +67,14 @@ function measure.memory_taken_strict(test_function, runs, warmup_runs)
 	--collect data
 	local mems = {}
 	for i = 1, warmup_runs + runs do
-		collectgarbage("collect")
-		collectgarbage("stop")
-		local start_mem = collectgarbage("count")
+		collectgarbage "collect"
+		collectgarbage "stop"
+		local start_mem = collectgarbage "count"
 		test_function()
-		local end_mem = collectgarbage("count")
-		if i > warmup_runs then
-			table.insert(mems, math.max(0, end_mem - start_mem))
-		end
+		local end_mem = collectgarbage "count"
+		if i > warmup_runs then table.insert(mems, math.max(0, end_mem - start_mem)) end
 	end
-	collectgarbage("restart")
+	collectgarbage "restart"
 
 	local mean = functional.mean(mems)
 	local min, max = functional.minmax(mems)

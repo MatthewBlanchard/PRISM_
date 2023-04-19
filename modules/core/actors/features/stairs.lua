@@ -4,17 +4,13 @@ local Tiles = require "display.tiles"
 
 local targetStair = targets.Actor:extend()
 
-function targetStair:validate(owner, actor)
-  return actor:is(actors.Stairs)
-end
+function targetStair:validate(owner, actor) return actor:is(actors.Stairs) end
 
 local Exit = Action:extend()
 Exit.name = "descend"
-Exit.targets = {targetStair}
+Exit.targets = { targetStair }
 
-function Exit:perform(level)
-  level.exit = true
-end
+function Exit:perform(level) level.exit = true end
 
 local Stairs = Actor:extend()
 
@@ -23,8 +19,8 @@ Stairs.name = "stairs"
 Stairs.remembered = true
 
 Stairs.components = {
-  components.Collideable_box(),
-  components.Usable({Exit}, Exit),
+	components.Collideable_box(),
+	components.Usable({ Exit }, Exit),
 }
 
 return Stairs

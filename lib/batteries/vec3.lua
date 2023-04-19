@@ -9,14 +9,12 @@ local vec2 = require(path .. "vec2")
 local math = require(path .. "mathx") --shadow global math module
 local make_pooled = require(path .. "make_pooled")
 
-local vec3 = class({
+local vec3 = class {
 	name = "vec3",
-})
+}
 
 --stringification
-function vec3:__tostring()
-	return ("(%.2f, %.2f, %.2f)"):format(self.x, self.y, self.z)
-end
+function vec3:__tostring() return ("(%.2f, %.2f, %.2f)"):format(self.x, self.y, self.z) end
 
 --probably-too-flexible ctor
 function vec3:new(x, y, z)
@@ -34,39 +32,25 @@ function vec3:new(x, y, z)
 end
 
 --explicit ctors
-function vec3:copy()
-	return vec3(self.x, self.y, self.z)
-end
+function vec3:copy() return vec3(self.x, self.y, self.z) end
 
-function vec3:xyz(x, y, z)
-	return vec3(x, y, z)
-end
+function vec3:xyz(x, y, z) return vec3(x, y, z) end
 
-function vec3:filled(x, y, z)
-	return vec3(x, y, z)
-end
+function vec3:filled(x, y, z) return vec3(x, y, z) end
 
-function vec3:zero()
-	return vec3(0, 0, 0)
-end
+function vec3:zero() return vec3(0, 0, 0) end
 
 --unpack for multi-args
-function vec3:unpack()
-	return self.x, self.y, self.z
-end
+function vec3:unpack() return self.x, self.y, self.z end
 
 --pack when a sequence is needed
-function vec3:pack()
-	return {self:unpack()}
-end
+function vec3:pack() return { self:unpack() } end
 
 --handle pooling
 make_pooled(vec3, 128)
 
 --get a pooled copy of an existing vector
-function vec3:pooled_copy()
-	return vec3:pooled():vset(self)
-end
+function vec3:pooled_copy() return vec3:pooled():vset(self) end
 
 --modify
 
@@ -101,9 +85,9 @@ local EQUALS_EPSILON = 1e-9
 --true if a and b are functionally equivalent
 function vec3.equals(a, b)
 	return (
-		math.abs(a.x - b.x) <= EQUALS_EPSILON and
-		math.abs(a.y - b.y) <= EQUALS_EPSILON and
-		math.abs(a.z - b.z) <= EQUALS_EPSILON
+		math.abs(a.x - b.x) <= EQUALS_EPSILON
+		and math.abs(a.y - b.y) <= EQUALS_EPSILON
+		and math.abs(a.z - b.z) <= EQUALS_EPSILON
 	)
 end
 
@@ -111,9 +95,9 @@ end
 --(very slightly faster than `not vec3.equals(a, b)`)
 function vec3.nequals(a, b)
 	return (
-		math.abs(a.x - b.x) > EQUALS_EPSILON or
-		math.abs(a.y - b.y) > EQUALS_EPSILON or
-		math.abs(a.z - b.z) > EQUALS_EPSILON
+		math.abs(a.x - b.x) > EQUALS_EPSILON
+		or math.abs(a.y - b.y) > EQUALS_EPSILON
+		or math.abs(a.z - b.z) > EQUALS_EPSILON
 	)
 end
 
@@ -191,37 +175,21 @@ end
 
 --garbage mode
 
-function vec3:vadd(v)
-	return self:copy():vaddi(v)
-end
+function vec3:vadd(v) return self:copy():vaddi(v) end
 
-function vec3:vsub(v)
-	return self:copy():vsubi(v)
-end
+function vec3:vsub(v) return self:copy():vsubi(v) end
 
-function vec3:vmul(v)
-	return self:copy():vmuli(v)
-end
+function vec3:vmul(v) return self:copy():vmuli(v) end
 
-function vec3:vdiv(v)
-	return self:copy():vdivi(v)
-end
+function vec3:vdiv(v) return self:copy():vdivi(v) end
 
-function vec3:sadd(x, y, z)
-	return self:copy():saddi(x, y, z)
-end
+function vec3:sadd(x, y, z) return self:copy():saddi(x, y, z) end
 
-function vec3:ssub(x, y, z)
-	return self:copy():ssubi(x, y, z)
-end
+function vec3:ssub(x, y, z) return self:copy():ssubi(x, y, z) end
 
-function vec3:smul(x, y, z)
-	return self:copy():smuli(x, y, z)
-end
+function vec3:smul(x, y, z) return self:copy():smuli(x, y, z) end
 
-function vec3:sdiv(x, y, z)
-	return self:copy():sdivi(x, y, z)
-end
+function vec3:sdiv(x, y, z) return self:copy():sdivi(x, y, z) end
 
 --fused multiply-add (a + (b * t))
 
@@ -232,21 +200,15 @@ function vec3:fmai(v, t)
 	return self
 end
 
-function vec3:fma(v, t)
-	return self:copy():fmai(v, t)
-end
+function vec3:fma(v, t) return self:copy():fmai(v, t) end
 
 -----------------------------------------------------------
 -- geometric methods
 -----------------------------------------------------------
 
-function vec3:length_squared()
-	return self.x * self.x + self.y * self.y + self.z * self.z
-end
+function vec3:length_squared() return self.x * self.x + self.y * self.y + self.z * self.z end
 
-function vec3:length()
-	return math.sqrt(self:length_squared())
-end
+function vec3:length() return math.sqrt(self:length_squared()) end
 
 function vec3:distance_squared(other)
 	local dx = self.x - other.x
@@ -255,17 +217,13 @@ function vec3:distance_squared(other)
 	return dx * dx + dy * dy + dz * dz
 end
 
-function vec3:distance(other)
-	return math.sqrt(self:distance_squared(other))
-end
+function vec3:distance(other) return math.sqrt(self:distance_squared(other)) end
 
 --immediate mode
 
 function vec3:normalisei_both()
 	local len = self:length()
-	if len == 0 then
-		return self, 0
-	end
+	if len == 0 then return self, 0 end
 	return self:sdivi(len), len
 end
 
@@ -279,9 +237,7 @@ function vec3:normalisei_len()
 	return len
 end
 
-function vec3:inversei()
-	return self:smuli(-1)
-end
+function vec3:inversei() return self:smuli(-1) end
 
 --swizzle extraction
 --not as nice as property accessors so might be worth doing that later :)
@@ -297,15 +253,11 @@ local _allowed_swizzle = {
 }
 
 function vec3:encode_swizzle_field(swizzle)
-	if type(swizzle) == "string" then
-		swizzle = swizzle:byte()
-	end
+	if type(swizzle) == "string" then swizzle = swizzle:byte() end
 	return _allowed_swizzle[swizzle] or "x"
 end
 
-function vec3:extract_single(swizzle)
-	return self[self:encode_swizzle_field(swizzle)]
-end
+function vec3:extract_single(swizzle) return self[self:encode_swizzle_field(swizzle)] end
 
 function vec3:infuse_single(swizzle, v)
 	self[self:encode_swizzle_field(swizzle)] = v
@@ -343,10 +295,7 @@ local _euler_macro = {
 }
 function vec3:rotate_euleri(angle_x_axis, angle_y_axis, angle_z_axis)
 	for i, swizzle in ipairs(_euler_macro) do
-		local angle =
-			i == 1 and angle_x_axis
-			or i == 2 and angle_y_axis
-			or i == 3 and angle_z_axis
+		local angle = i == 1 and angle_x_axis or i == 2 and angle_y_axis or i == 3 and angle_z_axis
 		self:rotatei(swizzle, angle)
 	end
 	return self
@@ -365,9 +314,7 @@ end
 
 --garbage mode
 
-function vec3:normalised()
-	return self:copy():normalisei()
-end
+function vec3:normalised() return self:copy():normalisei() end
 
 function vec3:normalised_len()
 	local v = self:copy()
@@ -375,13 +322,9 @@ function vec3:normalised_len()
 	return v, len
 end
 
-function vec3:inverse()
-	return self:copy():inversei()
-end
+function vec3:inverse() return self:copy():inversei() end
 
-function vec3:rotate(swizzle, angle)
-	return self:copy():rotatei(swizzle, angle)
-end
+function vec3:rotate(swizzle, angle) return self:copy():rotatei(swizzle, angle) end
 
 function vec3:rotate_euler(angle_x_axis, angle_y_axis, angle_z_axis)
 	return self:copy():rotate_euleri(angle_x_axis, angle_y_axis, angle_z_axis)
@@ -392,7 +335,6 @@ vec3.rot180 = vec3.inverse --alias
 function vec3:rotate_around(swizzle, angle, pivot)
 	return self:copy():rotate_aroundi(swizzle, angle, pivot)
 end
-
 
 -----------------------------------------------------------
 -- per-component clamping ops
@@ -419,17 +361,11 @@ function vec3:clampi(min, max)
 	return self
 end
 
-function vec3:min(v)
-	return self:copy():mini(v)
-end
+function vec3:min(v) return self:copy():mini(v) end
 
-function vec3:max(v)
-	return self:copy():maxi(v)
-end
+function vec3:max(v) return self:copy():maxi(v) end
 
-function vec3:clamp(min, max)
-	return self:copy():clampi(min, max)
-end
+function vec3:clamp(min, max) return self:copy():clampi(min, max) end
 
 -----------------------------------------------------------
 -- absolute value
@@ -442,9 +378,7 @@ function vec3:absi()
 	return self
 end
 
-function vec3:abs()
-	return self:copy():absi()
-end
+function vec3:abs() return self:copy():absi() end
 
 -----------------------------------------------------------
 -- truncation/rounding
@@ -471,17 +405,11 @@ function vec3:roundi()
 	return self
 end
 
-function vec3:floor()
-	return self:copy():floori()
-end
+function vec3:floor() return self:copy():floori() end
 
-function vec3:ceil()
-	return self:copy():ceili()
-end
+function vec3:ceil() return self:copy():ceili() end
 
-function vec3:round()
-	return self:copy():roundi()
-end
+function vec3:round() return self:copy():roundi() end
 
 -----------------------------------------------------------
 -- interpolation
@@ -494,9 +422,7 @@ function vec3:lerpi(other, amount)
 	return self
 end
 
-function vec3:lerp(other, amount)
-	return self:copy():lerpi(other, amount)
-end
+function vec3:lerp(other, amount) return self:copy():lerpi(other, amount) end
 
 function vec3:lerp_epsi(other, amount, eps)
 	self.x = math.lerp_eps(self.x, other.x, amount, eps)
@@ -505,49 +431,35 @@ function vec3:lerp_epsi(other, amount, eps)
 	return self
 end
 
-function vec3:lerp_eps(other, amount, eps)
-	return self:copy():lerp_epsi(other, amount, eps)
-end
+function vec3:lerp_eps(other, amount, eps) return self:copy():lerp_epsi(other, amount, eps) end
 
 -----------------------------------------------------------
 -- vector products and projections
 -----------------------------------------------------------
 
-function vec3.dot(a, b)
-	return a.x * b.x + a.y * b.y + a.z * b.z
-end
+function vec3.dot(a, b) return a.x * b.x + a.y * b.y + a.z * b.z end
 
 function vec3.cross(a, b, into)
 	if not into then into = vec3:zero() end
-	return into:sset(
-		a.y * b.z - a.z * b.y,
-		a.z * b.x - a.x * b.z,
-		a.x * b.y - a.y * b.x
-	)
+	return into:sset(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x)
 end
 
 --scalar projection a onto b
 function vec3.sproj(a, b)
 	local len = b:length()
-	if len == 0 then
-		return 0
-	end
+	if len == 0 then return 0 end
 	return a:dot(b) / len
 end
 
 --vector projection a onto b (writes into a)
 function vec3.vproji(a, b)
 	local div = b:dot(b)
-	if div == 0 then
-		return a:sset(0, 0, 0)
-	end
+	if div == 0 then return a:sset(0, 0, 0) end
 	local fac = a:dot(b) / div
 	return a:vset(b):smuli(fac)
 end
 
-function vec3.vproj(a, b)
-	return a:copy():vproji(b)
-end
+function vec3.vproj(a, b) return a:copy():vproji(b) end
 
 --vector rejection a onto b (writes into a)
 function vec3.vreji(a, b)
@@ -557,9 +469,7 @@ function vec3.vreji(a, b)
 	return a
 end
 
-function vec3.vrej(a, b)
-	return a:copy():vreji(b)
-end
+function vec3.vrej(a, b) return a:copy():vreji(b) end
 
 -----------------------------------------------------------
 -- vector extension methods for special purposes

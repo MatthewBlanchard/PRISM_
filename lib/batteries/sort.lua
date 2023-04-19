@@ -65,10 +65,8 @@ function sort._merge(array, workspace, low, middle, high, less)
 	j = middle + 1
 	k = low
 	while true do
-		if (k >= j) or (j > high) then
-			break
-		end
-		if less(array[j], workspace[i])  then
+		if (k >= j) or (j > high) then break end
+		if less(array[j], workspace[i]) then
 			array[k] = array[j]
 			j = j + 1
 		else
@@ -106,13 +104,9 @@ local _sorted_types = {
 local function default_less(a, b)
 	local sort_a = _sorted_types[type(a)]
 	local sort_b = _sorted_types[type(b)]
-	if not sort_a or not sort_b then
-		return false
-	end
+	if not sort_a or not sort_b then return false end
 	--different types, sorted by type
-	if sort_a ~= sort_b then
-		return sort_a < sort_b
-	end
+	if sort_a ~= sort_b then return sort_a < sort_b end
 	--otherwise same type, use less
 	return a < b
 end
@@ -131,7 +125,7 @@ function sort._sort_setup(array, less)
 	if not trivial then
 		--check less
 		if less(array[1], array[1]) then
-			error("invalid order function for sorting; less(v, v) should not be true for any v.")
+			error "invalid order function for sorting; less(v, v) should not be true for any v."
 		end
 	end
 	--setup complete
@@ -148,7 +142,7 @@ function sort.stable_sort(array, less)
 		local middle = math.ceil(n / 2)
 		workspace[middle] = array[1]
 		--dive in
-		sort._merge_sort_impl( array, workspace, 1, n, less )
+		sort._merge_sort_impl(array, workspace, 1, n, less)
 	end
 	return array
 end
@@ -157,9 +151,7 @@ function sort.insertion_sort(array, less)
 	--setup
 	local trivial, n
 	trivial, n, less = sort._sort_setup(array, less)
-	if not trivial then
-		sort._insertion_sort_impl(array, 1, n, less)
-	end
+	if not trivial then sort._insertion_sort_impl(array, 1, n, less) end
 	return array
 end
 

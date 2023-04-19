@@ -7,7 +7,7 @@ local assert = require(path .. "assert")
 local pretty = require(path .. "pretty")
 
 local stringx = setmetatable({}, {
-	__index = string
+	__index = string,
 })
 
 --split a string on a delimiter into an ordered table
@@ -19,9 +19,7 @@ function stringx.split(self, delim, limit)
 	assert:type(delim, "string", "stringx.split - delim", 1)
 	assert:type(limit, "number", "stringx.split - limit", 1)
 
-	if limit then
-		assert(limit >= 0, "max_split must be positive!")
-	end
+	if limit then assert(limit >= 0, "max_split must be positive!") end
 
 	--we try to create as little garbage as possible!
 	--only one table to contain the result, plus the split strings.
@@ -70,7 +68,7 @@ function stringx.split(self, delim, limit)
 	--collect substrings
 	i = 1
 	for si, j in ipairs(res) do
-		res[si] = self:sub(i, j-1)
+		res[si] = self:sub(i, j - 1)
 		i = j + delim_length
 	end
 	--add the final section
@@ -119,13 +117,9 @@ function stringx.trim(s)
 	end
 
 	--overlapping ranges means no content
-	if head > tail then
-		return ""
-	end
+	if head > tail then return "" end
 	--limit ranges means no trim
-	if head == 1 and tail == len then
-		return s
-	end
+	if head == 1 and tail == len then return s end
 
 	--pull out the content
 	return s:sub(head, tail)
@@ -140,9 +134,7 @@ function stringx.ltrim(s)
 			break
 		end
 	end
-	if head == 1 then
-		return s
-	end
+	if head == 1 then return s end
 	return s:sub(head)
 end
 
@@ -157,9 +149,7 @@ function stringx.rtrim(s)
 		end
 	end
 
-	if tail == #s then
-		return s
-	end
+	if tail == #s then return s end
 
 	return s:sub(1, tail)
 end
@@ -176,18 +166,14 @@ function stringx.deindent(s, keep_trailing_empty)
 	end
 
 	--nothing to do
-	if #lines == 0 then
-		return ""
-	end
+	if #lines == 0 then return "" end
 
 	--detect indent
-	local _, _, indent = lines[1]:find("^([ \t]*)")
+	local _, _, indent = lines[1]:find "^([ \t]*)"
 	local indent_len = indent and indent:len() or 0
 
 	--not indented
-	if indent_len == 0 then
-		return table.concat(lines, newline)
-	end
+	if indent_len == 0 then return table.concat(lines, newline) end
 
 	--de-indent the lines
 	local res = {}
@@ -197,10 +183,7 @@ function stringx.deindent(s, keep_trailing_empty)
 			local start_len = line_start:len()
 			if
 				line_start == indent
-				or (
-					start_len < indent_len
-					and line_start == indent:sub(1, start_len)
-				)
+				or (start_len < indent_len and line_start == indent:sub(1, start_len))
 			then
 				line = line:sub(start_len + 1)
 			end
@@ -240,9 +223,7 @@ function stringx.contains(haystack, needle)
 				break
 			end
 		end
-		if found then
-			return true
-		end
+		if found then return true end
 	end
 	return false
 end
@@ -252,9 +233,7 @@ end
 --Using loops is actually faster than string.find!
 function stringx.starts_with(s, prefix)
 	for i = 1, #prefix do
-		if s:byte(i) ~= prefix:byte(i) then
-			return false
-		end
+		if s:byte(i) ~= prefix:byte(i) then return false end
 	end
 	return true
 end
@@ -265,9 +244,7 @@ function stringx.ends_with(s, suffix)
 	local len = #s
 	local suffix_len = #suffix
 	for i = 0, suffix_len - 1 do
-		if s:byte(len - i) ~= suffix:byte(suffix_len - i) then
-			return false
-		end
+		if s:byte(len - i) ~= suffix:byte(suffix_len - i) then return false end
 	end
 	return true
 end
@@ -291,10 +268,10 @@ end
 --titlizes a string
 --"quick brown fox" becomes "Quick Brown Fox"
 function stringx.title_case(s)
-    s = s:gsub("%s%l", string.upper)
-    s = s:gsub("^%l", string.upper)
+	s = s:gsub("%s%l", string.upper)
+	s = s:gsub("^%l", string.upper)
 
-    return s
+	return s
 end
 
 return stringx

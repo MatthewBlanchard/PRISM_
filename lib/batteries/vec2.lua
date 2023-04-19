@@ -7,14 +7,12 @@ local class = require(path .. "class")
 local math = require(path .. "mathx") --shadow global math module
 local make_pooled = require(path .. "make_pooled")
 
-local vec2 = class({
+local vec2 = class {
 	name = "vec2",
-})
+}
 
 --stringification
-function vec2:__tostring()
-	return ("(%.2f, %.2f)"):format(self.x, self.y)
-end
+function vec2:__tostring() return ("(%.2f, %.2f)"):format(self.x, self.y) end
 
 --ctor
 function vec2:new(x, y)
@@ -34,43 +32,27 @@ function vec2:new(x, y)
 end
 
 --explicit ctors; mostly vestigial at this point
-function vec2:copy()
-	return vec2(self.x, self.y)
-end
+function vec2:copy() return vec2(self.x, self.y) end
 
-function vec2:xy(x, y)
-	return vec2(x, y)
-end
+function vec2:xy(x, y) return vec2(x, y) end
 
-function vec2:polar(length, angle)
-	return vec2(length, 0):rotate_inplace(angle)
-end
+function vec2:polar(length, angle) return vec2(length, 0):rotate_inplace(angle) end
 
-function vec2:filled(v)
-	return vec2(v, v)
-end
+function vec2:filled(v) return vec2(v, v) end
 
-function vec2:zero()
-	return vec2(0)
-end
+function vec2:zero() return vec2(0) end
 
 --unpack for multi-args
-function vec2:unpack()
-	return self.x, self.y
-end
+function vec2:unpack() return self.x, self.y end
 
 --pack when a sequence is needed
-function vec2:pack()
-	return {self:unpack()}
-end
+function vec2:pack() return { self:unpack() } end
 
 --shared pooled storage
 make_pooled(vec2, 128)
 
 --get a pooled copy of an existing vector
-function vec2:pooled_copy()
-	return vec2:pooled(self)
-end
+function vec2:pooled_copy() return vec2:pooled(self) end
 
 --modify
 
@@ -103,19 +85,13 @@ local EQUALS_EPSILON = 1e-9
 
 --true if a and b are functionally equivalent
 function vec2.equals(a, b)
-	return (
-		math.abs(a.x - b.x) <= EQUALS_EPSILON and
-		math.abs(a.y - b.y) <= EQUALS_EPSILON
-	)
+	return (math.abs(a.x - b.x) <= EQUALS_EPSILON and math.abs(a.y - b.y) <= EQUALS_EPSILON)
 end
 
 --true if a and b are not functionally equivalent
 --(very slightly faster than `not vec2.equals(a, b)`)
 function vec2.nequals(a, b)
-	return (
-		math.abs(a.x - b.x) > EQUALS_EPSILON or
-		math.abs(a.y - b.y) > EQUALS_EPSILON
-	)
+	return (math.abs(a.x - b.x) > EQUALS_EPSILON or math.abs(a.y - b.y) > EQUALS_EPSILON)
 end
 
 -----------------------------------------------------------
@@ -188,13 +164,9 @@ end
 -- geometric methods
 -----------------------------------------------------------
 
-function vec2:length_squared()
-	return self.x * self.x + self.y * self.y
-end
+function vec2:length_squared() return self.x * self.x + self.y * self.y end
 
-function vec2:length()
-	return math.sqrt(self:length_squared())
-end
+function vec2:length() return math.sqrt(self:length_squared()) end
 
 function vec2:distance_squared(other)
 	local dx = self.x - other.x
@@ -202,15 +174,11 @@ function vec2:distance_squared(other)
 	return dx * dx + dy * dy
 end
 
-function vec2:distance(other)
-	return math.sqrt(self:distance_squared(other))
-end
+function vec2:distance(other) return math.sqrt(self:distance_squared(other)) end
 
 function vec2:normalise_both_inplace()
 	local len = self:length()
-	if len == 0 then
-		return self, 0
-	end
+	if len == 0 then return self, 0 end
 	return self:scalar_div_inplace(len), len
 end
 
@@ -224,9 +192,7 @@ function vec2:normalise_len_inplace()
 	return len
 end
 
-function vec2:inverse_inplace()
-	return self:scalar_mul_inplace(-1)
-end
+function vec2:inverse_inplace() return self:scalar_mul_inplace(-1) end
 
 -- angle/direction specific
 
@@ -267,20 +233,14 @@ end
 vec2.rot180_inplace = vec2.inverse_inplace --alias
 
 --get the angle of this vector relative to (1, 0)
-function vec2:angle()
-	return math.atan2(self.y, self.x)
-end
+function vec2:angle() return math.atan2(self.y, self.x) end
 
 --get the normalised difference in angle between two vectors
-function vec2:angle_difference(v)
-	return math.angle_difference(self:angle(), v:angle())
-end
+function vec2:angle_difference(v) return math.angle_difference(self:angle(), v:angle()) end
 
 --lerp towards the direction of a provided vector
 --(length unchanged)
-function vec2:lerp_direction_inplace(v, t)
-	return self:rotate_inplace(self:angle_difference(v) * t)
-end
+function vec2:lerp_direction_inplace(v, t) return self:rotate_inplace(self:angle_difference(v) * t) end
 
 -----------------------------------------------------------
 -- per-component clamping ops
@@ -366,28 +326,20 @@ end
 -- vector products and projections
 -----------------------------------------------------------
 
-function vec2:dot(other)
-	return self.x * other.x + self.y * other.y
-end
+function vec2:dot(other) return self.x * other.x + self.y * other.y end
 
 --"fake", but useful - also called the wedge product apparently
-function vec2:cross(other)
-	return self.x * other.y - self.y * other.x
-end
+function vec2:cross(other) return self.x * other.y - self.y * other.x end
 
 function vec2:scalar_projection(other)
 	local len = other:length()
-	if len == 0 then
-		return 0
-	end
+	if len == 0 then return 0 end
 	return self:dot(other) / len
 end
 
 function vec2:vector_projection_inplace(other)
 	local div = other:dot(other)
-	if div == 0 then
-		return self:scalar_set(0)
-	end
+	if div == 0 then return self:scalar_set(0) end
 	local fac = self:dot(other) / div
 	return self:vector_set(other):scalar_mul_inplace(fac)
 end
@@ -405,10 +357,7 @@ end
 --	>0 when p left of line
 --	=0 when p on line
 --	<0 when p right of line
-function vec2.winding_side(a, b, p)
-	return (b.x - a.x) * (p.y - a.y)
-		 - (p.x - a.x) * (b.y - a.y)
-end
+function vec2.winding_side(a, b, p) return (b.x - a.x) * (p.y - a.y) - (p.x - a.x) * (b.y - a.y) end
 
 -----------------------------------------------------------
 -- vector extension methods for special purposes
@@ -445,13 +394,9 @@ function vec2:apply_friction_xy_inplace(mu_x, mu_y, dt)
 end
 
 --minimum/maximum components
-function vec2:mincomp()
-	return math.min(self.x, self.y)
-end
+function vec2:mincomp() return math.min(self.x, self.y) end
 
-function vec2:maxcomp()
-	return math.max(self.x, self.y)
-end
+function vec2:maxcomp() return math.max(self.x, self.y) end
 
 -- mask out min component, with preference to keep x
 function vec2:major_inplace()
@@ -485,7 +430,7 @@ vec2.normalize_inplace = vec2.normalise_inplace
 vec2.normalize_len_inplace = vec2.normalise_len_inplace
 
 --garbage generating functions that return a new vector rather than modifying self
-for _, inplace_name in ipairs({
+for _, inplace_name in ipairs {
 	"vector_add_inplace",
 	"vector_sub_inplace",
 	"vector_mul_inplace",
@@ -527,7 +472,7 @@ for _, inplace_name in ipairs({
 	"apply_friction_xy_inplace",
 	"major_inplace",
 	"minor_inplace",
-}) do
+} do
 	local garbage_name = inplace_name:gsub("_inplace", "")
 	vec2[garbage_name] = function(self, ...)
 		self = self:copy()
@@ -539,45 +484,41 @@ end
 --
 --i do encourage using the longer versions above as it makes code easier
 --to understand when you come back, but i also appreciate wanting short code
-for _, v in ipairs({
-	{"sset", "scalar_set"},
-	{"sadd", "scalar_add"},
-	{"ssub", "scalar_sub"},
-	{"smul", "scalar_mul"},
-	{"sdiv", "scalar_div"},
-	{"vset", "vector_set"},
-	{"vadd", "vector_add"},
-	{"vsub", "vector_sub"},
-	{"vmul", "vector_mul"},
-	{"vdiv", "vector_div"},
+for _, v in ipairs {
+	{ "sset", "scalar_set" },
+	{ "sadd", "scalar_add" },
+	{ "ssub", "scalar_sub" },
+	{ "smul", "scalar_mul" },
+	{ "sdiv", "scalar_div" },
+	{ "vset", "vector_set" },
+	{ "vadd", "vector_add" },
+	{ "vsub", "vector_sub" },
+	{ "vmul", "vector_mul" },
+	{ "vdiv", "vector_div" },
 	--(no plain addi etc, imo it's worth differentiating vaddi vs saddi)
-	{"fma", "fused_multiply_add"},
-	{"vproj", "vector_projection"},
-	{"vrej", "vector_rejection"},
+	{ "fma", "fused_multiply_add" },
+	{ "vproj", "vector_projection" },
+	{ "vrej", "vector_rejection" },
 	--just for the _inplace -> i shorthand, mostly for backwards compatibility
-	{"min", "min"},
-	{"max", "max"},
-	{"clamp", "clamp"},
-	{"abs", "abs"},
-	{"sign", "sign"},
-	{"floor", "floor"},
-	{"ceil", "ceil"},
-	{"round", "round"},
-	{"lerp", "lerp"},
-	{"rotate", "rotate"},
-	{"normalise", "normalise"},
-	{"normalize", "normalize"},
-}) do
+	{ "min", "min" },
+	{ "max", "max" },
+	{ "clamp", "clamp" },
+	{ "abs", "abs" },
+	{ "sign", "sign" },
+	{ "floor", "floor" },
+	{ "ceil", "ceil" },
+	{ "round", "round" },
+	{ "lerp", "lerp" },
+	{ "rotate", "rotate" },
+	{ "normalise", "normalise" },
+	{ "normalize", "normalize" },
+} do
 	local shorthand, original = v[1], v[2]
-	if vec2[shorthand] == nil then
-		vec2[shorthand] = vec2[original]
-	end
+	if vec2[shorthand] == nil then vec2[shorthand] = vec2[original] end
 	--and inplace version
 	shorthand = shorthand .. "i"
 	original = original .. "_inplace"
-	if vec2[shorthand] == nil then
-		vec2[shorthand] = vec2[original]
-	end
+	if vec2[shorthand] == nil then vec2[shorthand] = vec2[original] end
 end
 
 return vec2
