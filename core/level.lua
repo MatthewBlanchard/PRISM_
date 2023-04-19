@@ -1,6 +1,5 @@
 local Object = require "object"
 local Actor = require "core.actor"
-local System = require "core.system"
 local Scheduler = require "core.scheduler"
 local SparseMap = require "structures.sparsemap"
 local Vector2 = require "math.vector"
@@ -455,10 +454,7 @@ function Level:moveActorChecked(actor, direction)
 
 		local squeeze_success = true
 		for cell in trySqueeze do
-			if not self:getCellPassable(cell.x, cell.y, actor) then
-				squeeze_success = false
-			else
-			end
+			if not self:getCellPassable(cell.x, cell.y, actor) then squeeze_success = false end
 		end
 
 		if squeeze_success then
