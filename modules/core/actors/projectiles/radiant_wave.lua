@@ -9,15 +9,15 @@ Bone_Shard.name = "Radiant Wave"
 Bone_Shard.color = { 0.89, 0.855, 0.788, 1 }
 
 Bone_Shard.components = {
-	components.Light {
-		color = LightColor(4, 10, 22),
-	},
-	components.Projectile {
-		range = 5,
-		bounce = 1,
-		damage = "1d4",
-		effects = {},
-	},
+   components.Light {
+      color = LightColor(4, 10, 22),
+   },
+   components.Projectile {
+      range = 5,
+      bounce = 1,
+      damage = "1d4",
+      effects = {},
+   },
 }
 
 return Bone_Shard

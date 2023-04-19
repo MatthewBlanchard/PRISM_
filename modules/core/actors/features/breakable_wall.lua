@@ -10,12 +10,12 @@ BreakableWall.remembered = true
 BreakableWall.tileLighting = true
 
 BreakableWall.components = {
-	components.Opaque(),
-	components.Collideable_box(),
-	components.Stats {
-		maxHP = 1,
-		AC = 0,
-	},
+   components.Opaque(),
+   components.Collideable_box(),
+   components.Stats {
+      maxHP = 1,
+      AC = 0,
+   },
 }
 
 return BreakableWall

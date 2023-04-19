@@ -16,18 +16,18 @@ local Grid = ROT.Type.Grid
 -- @tparam[opt=100] int options.emissionThreshold Cells with emissivity > threshold will be treated as light source in the next pass.
 -- @tparam[opt=10] int options.range Max light range
 function Lighting:init(reflectivityCallback, options)
-	self._reflectivityCallback = reflectivityCallback
-	self._options = { passes = 1, emissionThreshold = 100 / 255, range = 10 }
-	self._fov = nil
-	self._lights = Grid()
-	self._reflectivityCache = Grid()
-	self._fovCache = Grid()
+   self._reflectivityCallback = reflectivityCallback
+   self._options = { passes = 1, emissionThreshold = 100 / 255, range = 10 }
+   self._fov = nil
+   self._lights = Grid()
+   self._reflectivityCache = Grid()
+   self._fovCache = Grid()
 
-	if options then
-		for k, _ in pairs(options) do
-			self._options[k] = options[k]
-		end
-	end
+   if options then
+      for k, _ in pairs(options) do
+         self._options[k] = options[k]
+      end
+   end
 end
 
 --- Set FOV
@@ -37,9 +37,9 @@ end
 -- @see ROT.FOV.Precise
 -- @see ROT.FOV.Bresenham
 function Lighting:setFOV(fov)
-	self._fov = fov
-	self._fovCache = Grid()
-	return self
+   self._fov = fov
+   self._fovCache = Grid()
+   return self
 end
 
 --- Add or remove a light source
@@ -49,12 +49,12 @@ end
 -- @treturn ROT.Lighting self
 -- @see ROT.Color
 function Lighting:setLight(x, y, color)
-	self._lights:setCell(
-		x,
-		y,
-		type(color) == "string" and ROT.Color.fromString(color) or color or nil
-	)
-	return self
+   self._lights:setCell(
+      x,
+      y,
+      type(color) == "string" and ROT.Color.fromString(color) or color or nil
+   )
+   return self
 end
 
 function Lighting:getLight(x, y) return self._lights:getCell(x, y) end
@@ -63,103 +63,103 @@ function Lighting:getLight(x, y) return self._lights:getCell(x, y) end
 -- @tparam function lightingCallback Will be called with (x, y, color) for every lit cell
 -- @treturn ROT.Lighting self
 function Lighting:compute(lightingCallback)
-	local doneCells = PointSet()
-	local emittingCells = Grid()
-	local litCells = Grid()
+   local doneCells = PointSet()
+   local emittingCells = Grid()
+   local litCells = Grid()
 
-	for _, x, y, light in self._lights:each() do
-		local emitted = emittingCells:getCell(x, y)
-		if not emitted then
-			emitted = { 0, 0, 0 }
-			emittingCells:setCell(x, y, emitted)
-		end
-		ROT.Color.add_(emitted, light)
-	end
+   for _, x, y, light in self._lights:each() do
+      local emitted = emittingCells:getCell(x, y)
+      if not emitted then
+         emitted = { 0, 0, 0 }
+         emittingCells:setCell(x, y, emitted)
+      end
+      ROT.Color.add_(emitted, light)
+   end
 
-	for i = 1, self._options.passes do
-		self:_emitLight(emittingCells, litCells, doneCells)
-		if i < self._options.passes then
-			emittingCells = self:_computeEmitters(litCells, doneCells)
-		end
-	end
+   for i = 1, self._options.passes do
+      self:_emitLight(emittingCells, litCells, doneCells)
+      if i < self._options.passes then
+         emittingCells = self:_computeEmitters(litCells, doneCells)
+      end
+   end
 
-	for _, x, y, value in litCells:each() do
-		lightingCallback(x, y, value)
-	end
+   for _, x, y, value in litCells:each() do
+      lightingCallback(x, y, value)
+   end
 
-	return self
+   return self
 end
 
 function Lighting:_emitLight(emittingCells, litCells, doneCells)
-	for _, x, y, v in emittingCells:each() do
-		self:_emitLightFromCell(x, y, v, litCells)
-		doneCells:push(x, y)
-	end
-	return self
+   for _, x, y, v in emittingCells:each() do
+      self:_emitLightFromCell(x, y, v, litCells)
+      doneCells:push(x, y)
+   end
+   return self
 end
 
 function Lighting:_computeEmitters(litCells, doneCells)
-	local result = Grid()
-	if not litCells then return nil end
-	for _, x, y, color in litCells:each() do
-		if not doneCells:find(x, y) then
-			local reflectivity = self._reflectivityCache:getCell(x, y)
-			if not reflectivity then
-				reflectivity = self:_reflectivityCallback(x, y)
-				self._reflectivityCache:setCell(x, y, reflectivity)
-			end
+   local result = Grid()
+   if not litCells then return nil end
+   for _, x, y, color in litCells:each() do
+      if not doneCells:find(x, y) then
+         local reflectivity = self._reflectivityCache:getCell(x, y)
+         if not reflectivity then
+            reflectivity = self:_reflectivityCallback(x, y)
+            self._reflectivityCache:setCell(x, y, reflectivity)
+         end
 
-			if reflectivity > 0 then
-				local emission = {}
-				local intensity = 0
-				for l, c in ipairs(color) do
-					if l < 4 then
-						local part = c * reflectivity
-						emission[l] = part
-						intensity = intensity + part
-					end
-				end
-				if intensity > self._options.emissionThreshold then result:setCell(x, y, emission) end
-			end
-		end
-	end
+         if reflectivity > 0 then
+            local emission = {}
+            local intensity = 0
+            for l, c in ipairs(color) do
+               if l < 4 then
+                  local part = c * reflectivity
+                  emission[l] = part
+                  intensity = intensity + part
+               end
+            end
+            if intensity > self._options.emissionThreshold then result:setCell(x, y, emission) end
+         end
+      end
+   end
 
-	return result
+   return result
 end
 
 local function dist(x, y, x2, y2) return math.sqrt(math.pow(x - x2, 2) + math.pow(y - y2, 2)) end
 
 function Lighting:_emitLightFromCell(x, y, color, litCells)
-	local lx, ly = x, y
-	local fov = self._fovCache:getCell(x, y) or self:_updateFOV(x, y)
-	for _, x, y, formFactor in fov:each() do
-		local distance = math.max(dist(lx, ly, x, y), 3)
-		local falloff = (1 / distance) + (3 - math.min(3, dist(lx, ly, x, y))) / 50
-		local cellColor = litCells:getCell(x, y)
-		if not cellColor then
-			cellColor = { 0, 0, 0 }
-			litCells:setCell(x, y, cellColor)
-		end
-		for l = 1, 3 do
-			cellColor[l] = cellColor[l] + color[l] * formFactor * falloff
-		end
-	end
-	return self
+   local lx, ly = x, y
+   local fov = self._fovCache:getCell(x, y) or self:_updateFOV(x, y)
+   for _, x, y, formFactor in fov:each() do
+      local distance = math.max(dist(lx, ly, x, y), 3)
+      local falloff = (1 / distance) + (3 - math.min(3, dist(lx, ly, x, y))) / 50
+      local cellColor = litCells:getCell(x, y)
+      if not cellColor then
+         cellColor = { 0, 0, 0 }
+         litCells:setCell(x, y, cellColor)
+      end
+      for l = 1, 3 do
+         cellColor[l] = cellColor[l] + color[l] * formFactor * falloff
+      end
+   end
+   return self
 end
 
 function Lighting:_updateFOV(x, y)
-	local cache = Grid()
-	self._fovCache:setCell(x, y, cache)
-	local range = self._options.range
-	local function cb(x, y, r, vis)
-		if vis == true or vis == false then vis = vis == true and 1 or 0 end
-		local formFactor = vis * (1 - r / range)
-		if formFactor == 0 then return end
-		cache:setCell(x, y, formFactor)
-	end
-	self._fov:compute(x, y, range, cb)
+   local cache = Grid()
+   self._fovCache:setCell(x, y, cache)
+   local range = self._options.range
+   local function cb(x, y, r, vis)
+      if vis == true or vis == false then vis = vis == true and 1 or 0 end
+      local formFactor = vis * (1 - r / range)
+      if formFactor == 0 then return end
+      cache:setCell(x, y, formFactor)
+   end
+   self._fov:compute(x, y, range, cb)
 
-	return cache
+   return cache
 end
 
 return Lighting

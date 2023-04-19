@@ -10,8 +10,8 @@ FullBelly.name = "Mid-fight Snack"
 FullBelly.description = "When eat food gain +2 ATK for 5 turns."
 
 FullBelly:onAction(actions.Eat, function(self, level, actor, action)
-	action.time = action.time - 25
-	action.owner:applyCondition(FullBellyStats())
+   action.time = action.time - 25
+   action.owner:applyCondition(FullBellyStats())
 end)
 
 return FullBelly
