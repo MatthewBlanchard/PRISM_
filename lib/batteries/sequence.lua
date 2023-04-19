@@ -50,10 +50,17 @@ for _, v in ipairs {
 end
 
 --aliases
+<<<<<<< HEAD
 for _, v in ipairs {
    { "flatten", "collapse" },
 } do
    sequence[v[1]] = sequence[v[2]]
+=======
+for _, v in ipairs({
+	{ "flatten", "collapse" },
+}) do
+	sequence[v[1]] = sequence[v[2]]
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --import functional interface in method form
@@ -102,6 +109,7 @@ for _, v in ipairs {
 end
 
 --aliases
+<<<<<<< HEAD
 for _, v in ipairs {
    { "remap", "map_inplace" },
    { "map_stitch", "stitch" },
@@ -109,6 +117,15 @@ for _, v in ipairs {
    { "find_best", "find_max" },
 } do
    sequence[v[1]] = sequence[v[2]]
+=======
+for _, v in ipairs({
+	{ "remap", "map_inplace" },
+	{ "map_stitch", "stitch" },
+	{ "map_cycle", "cycle" },
+	{ "find_best", "find_max" },
+}) do
+	sequence[v[1]] = sequence[v[2]]
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --(anything that needs bespoke wrapping)

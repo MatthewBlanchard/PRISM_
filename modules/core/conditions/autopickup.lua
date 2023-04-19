@@ -1,7 +1,8 @@
-local Condition = require "core.condition"
+local Condition = require("core.condition")
 
 local Pickup = Condition:extend()
 Pickup:afterAction(actions.Move, function(self, level, actor, action)
+<<<<<<< HEAD
    local sight_component = actor:getComponent(components.Sight)
    if not sight_component then return end
 
@@ -10,6 +11,18 @@ Pickup:afterAction(actions.Move, function(self, level, actor, action)
          level:performAction(actor:getAction(actions.Pickup)(actor, { item }), true)
       end
    end
+=======
+	local sight_component = actor:getComponent(components.Sight)
+	if not sight_component then
+		return
+	end
+
+	for _, item in pairs(sight_component.seenActors) do
+		if item:is(actors.Shard) and actions.Pickup:validateTarget(1, actor, item) then
+			level:performAction(actor:getAction(actions.Pickup)(actor, { item }), true)
+		end
+	end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end)
 
 return Pickup

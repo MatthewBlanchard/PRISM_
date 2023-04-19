@@ -1,4 +1,4 @@
-local Component = require "core.component"
+local Component = require("core.component")
 
 local RealityDistortion = Component:extend()
 RealityDistortion.name = "RealityDistortion"

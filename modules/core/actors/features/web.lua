@@ -1,5 +1,5 @@
-local Actor = require "core.actor"
-local Tiles = require "display.tiles"
+local Actor = require("core.actor")
+local Tiles = require("display.tiles")
 
 local actor = Actor:extend()
 actor.char = Tiles["web"]

@@ -14,6 +14,7 @@ local colour = {}
 
 local ok, bit = pcall(require, "bit")
 if ok then
+<<<<<<< HEAD
    --we have bit operations module, use the fast path
    local band, bor = bit.band, bit.bor
    local lshift, rshift = bit.lshift, bit.rshift
@@ -67,6 +68,61 @@ if ok then
       local a = rshift(band(rgba, 0x000000ff), 0) / 255
       return r, g, b, a
    end
+=======
+	--we have bit operations module, use the fast path
+	local band, bor = bit.band, bit.bor
+	local lshift, rshift = bit.lshift, bit.rshift
+
+	--rgb only (no alpha)
+	function colour.pack_rgb(r, g, b)
+		local br = lshift(band(0xff, r * 255), 16)
+		local bg = lshift(band(0xff, g * 255), 8)
+		local bb = lshift(band(0xff, b * 255), 0)
+		return bor(br, bg, bb)
+	end
+
+	function colour.unpack_rgb(rgb)
+		local r = rshift(band(rgb, 0x00ff0000), 16) / 255
+		local g = rshift(band(rgb, 0x0000ff00), 8) / 255
+		local b = rshift(band(rgb, 0x000000ff), 0) / 255
+		return r, g, b
+	end
+
+	--argb format (common for shared hex)
+
+	function colour.pack_argb(r, g, b, a)
+		local ba = lshift(band(0xff, a * 255), 24)
+		local br = lshift(band(0xff, r * 255), 16)
+		local bg = lshift(band(0xff, g * 255), 8)
+		local bb = lshift(band(0xff, b * 255), 0)
+		return bor(br, bg, bb, ba)
+	end
+
+	function colour.unpack_argb(argb)
+		local r = rshift(band(argb, 0x00ff0000), 16) / 255
+		local g = rshift(band(argb, 0x0000ff00), 8) / 255
+		local b = rshift(band(argb, 0x000000ff), 0) / 255
+		local a = rshift(band(argb, 0xff000000), 24) / 255
+		return r, g, b, a
+	end
+
+	--rgba format
+	function colour.pack_rgba(r, g, b, a)
+		local br = lshift(band(0xff, r * 255), 24)
+		local bg = lshift(band(0xff, g * 255), 16)
+		local bb = lshift(band(0xff, b * 255), 8)
+		local ba = lshift(band(0xff, a * 255), 0)
+		return bor(br, bg, bb, ba)
+	end
+
+	function colour.unpack_rgba(rgba)
+		local r = rshift(band(rgba, 0xff000000), 24) / 255
+		local g = rshift(band(rgba, 0x00ff0000), 16) / 255
+		local b = rshift(band(rgba, 0x0000ff00), 8) / 255
+		local a = rshift(band(rgba, 0x000000ff), 0) / 255
+		return r, g, b, a
+	end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 else
    --we don't have bitops, use a slower pure-float path
    local floor = math.floor
@@ -153,6 +209,7 @@ end
 
 --convert rgb to hsl
 function colour.rgb_to_hsl(r, g, b)
+<<<<<<< HEAD
    local max, min = math.max(r, g, b), math.min(r, g, b)
    if max == min then return 0, 0, min end
 
@@ -169,12 +226,35 @@ function colour.rgb_to_hsl(r, g, b)
       h = (r - g) / d + 4
    end
    return h / 6, s, l
+=======
+	local max, min = math.max(r, g, b), math.min(r, g, b)
+	if max == min then
+		return 0, 0, min
+	end
+
+	local l, d = max + min, max - min
+	local s = d / (l > 1 and (2 - l) or l)
+	l = l / 2
+	local h --depends on below
+	if max == r then
+		h = (g - b) / d
+		if g < b then
+			h = h + 6
+		end
+	elseif max == g then
+		h = (b - r) / d + 2
+	else
+		h = (r - g) / d + 4
+	end
+	return h / 6, s, l
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --todo: hsv
 
 --oklab https://bottosson.github.io/posts/oklab/
 function colour.oklab_to_rgb(l, a, b)
+<<<<<<< HEAD
    local _l = l + 0.3963377774 * a + 0.2158037573 * b
    local _m = l - 0.1055613458 * a - 0.0638541728 * b
    local _s = l - 0.0894841775 * a - 1.2914855480 * b
@@ -189,6 +269,22 @@ function colour.oklab_to_rgb(l, a, b)
       (-0.0041119885 * _l - 0.7034763098 * _m + 1.7068625689 * _s)
    )
    return red, green, blue
+=======
+	local _l = l + 0.3963377774 * a + 0.2158037573 * b
+	local _m = l - 0.1055613458 * a - 0.0638541728 * b
+	local _s = l - 0.0894841775 * a - 1.2914855480 * b
+
+	_l = math.pow(_l, 3.0)
+	_m = math.pow(_m, 3.0)
+	_s = math.pow(_s, 3.0)
+
+	local red, green, blue = love.math.linearToGamma(
+		(4.0767245293 * _l - 3.3072168827 * _m + 0.2307590544 * _s),
+		(-1.2681437731 * _l + 2.6093323231 * _m - 0.3411344290 * _s),
+		(-0.0041119885 * _l - 0.7034763098 * _m + 1.7068625689 * _s)
+	)
+	return red, green, blue
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 function colour.rgb_to_oklab(red, green, blue)
@@ -214,6 +310,7 @@ end
 --can be used for finding nearest colours for palette mapping, for example
 
 function colour.distance_rgb(ar, ag, ab, br, bg, bb)
+<<<<<<< HEAD
    local dr, dg, db = ar - br, ag - bg, ab - bb
    return math.sqrt(dr * dr + dg * dg + db * db)
 end
@@ -222,6 +319,16 @@ function colour.distance_packed_rgb(a, b)
    local ar, ag, ab = colour.unpack_rgb(a)
    local br, bg, bb = colour.unpack_rgb(b)
    return colour.distance_rgb(ar, ag, ab, br, bg, bb)
+=======
+	local dr, dg, db = ar - br, ag - bg, ab - bb
+	return math.sqrt(dr * dr + dg * dg + db * db)
+end
+
+function colour.distance_packed_rgb(a, b)
+	local ar, ag, ab = colour.unpack_rgb(a)
+	local br, bg, bb = colour.unpack_rgb(b)
+	return colour.distance_rgb(ar, ag, ab, br, bg, bb)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --todo: rgba and various other unpacks

@@ -2,6 +2,7 @@ local ROTLOVE_PATH = (...) .. "."
 local Class = require(ROTLOVE_PATH .. "class")
 
 local ROT = Class:extend("ROT", {
+<<<<<<< HEAD
    DEFAULT_WIDTH = 80,
    DEFAULT_HEIGHT = 24,
 
@@ -23,12 +24,36 @@ local ROT = Class:extend("ROT", {
          { -1, -1 },
       },
    },
+=======
+	DEFAULT_WIDTH = 80,
+	DEFAULT_HEIGHT = 24,
+
+	DIRS = {
+		FOUR = {
+			{ 0, -1 },
+			{ 1, 0 },
+			{ 0, 1 },
+			{ -1, 0 },
+		},
+		EIGHT = {
+			{ 0, -1 },
+			{ 1, -1 },
+			{ 1, 0 },
+			{ 1, 1 },
+			{ 0, 1 },
+			{ -1, 1 },
+			{ -1, 0 },
+			{ -1, -1 },
+		},
+	},
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 })
 package.loaded[...] = ROT
 
 -- Concatenating assert function
 -- see http://lua.space/general/assert-usage-caveat
 function ROT.assert(pass, ...)
+<<<<<<< HEAD
    if pass then
       return pass, ...
    elseif select("#", ...) > 0 then
@@ -36,6 +61,15 @@ function ROT.assert(pass, ...)
    else
       error("assertion failed!", 2)
    end
+=======
+	if pass then
+		return pass, ...
+	elseif select("#", ...) > 0 then
+		error(table.concat({ ... }), 2)
+	else
+		error("assertion failed!", 2)
+	end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 ROT.Class = Class
@@ -44,16 +78,31 @@ ROT.RNG = require(ROTLOVE_PATH .. "rng")
 
 -- bind a function to a class instance
 function Class:bind(func)
+<<<<<<< HEAD
    return function(...) return func(self, ...) end
+=======
+	return function(...)
+		return func(self, ...)
+	end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 -- get/set RNG instance for a class
 -- used by maps, noise, dice, etc.
 Class._rng = ROT.RNG
+<<<<<<< HEAD
 function Class:getRNG() return self._rng end
 function Class:setRNG(rng)
    self._rng = rng or ROT.RNG
    return self
+=======
+function Class:getRNG()
+	return self._rng
+end
+function Class:setRNG(rng)
+	self._rng = rng or ROT.RNG
+	return self
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 require(ROTLOVE_PATH .. "newFuncs")

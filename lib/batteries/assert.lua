@@ -26,14 +26,22 @@ end
 --assert a value is not nil
 --return the value, so this can be chained
 function assert:some(v, msg, stack_level)
+<<<<<<< HEAD
    if v == nil then
       error(("assertion failed: value is nil %s"):format(_extra(msg)), 2 + (stack_level or 0))
    end
    return v
+=======
+	if v == nil then
+		error(("assertion failed: value is nil %s"):format(_extra(msg)), 2 + (stack_level or 0))
+	end
+	return v
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --assert two values are equal
 function assert:equal(a, b, msg, stack_level)
+<<<<<<< HEAD
    if a ~= b then
       error(
          ("assertion failed: %s is not equal to %s %s"):format(
@@ -45,18 +53,35 @@ function assert:equal(a, b, msg, stack_level)
       )
    end
    return a
+=======
+	if a ~= b then
+		error(
+			("assertion failed: %s is not equal to %s %s"):format(tostring(a), tostring(b), _extra(msg)),
+			2 + (stack_level or 0)
+		)
+	end
+	return a
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --assert two values are not equal
 function assert:not_equal(a, b, msg, stack_level)
+<<<<<<< HEAD
    if a == b then
       error(("assertion failed: values are equal %s"):format(_extra(msg)), 2 + (stack_level or 0))
    end
    return a
+=======
+	if a == b then
+		error(("assertion failed: values are equal %s"):format(_extra(msg)), 2 + (stack_level or 0))
+	end
+	return a
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --assert a value is of a certain type
 function assert:type(a, t, msg, stack_level)
+<<<<<<< HEAD
    if type(a) ~= t then
       error(
          ("assertion failed: %s (%s) not of type %s %s"):format(
@@ -69,6 +94,15 @@ function assert:type(a, t, msg, stack_level)
       )
    end
    return a
+=======
+	if type(a) ~= t then
+		error(
+			("assertion failed: %s (%s) not of type %s %s"):format(tostring(a), type(a), tostring(t), _extra(msg)),
+			2 + (stack_level or 0)
+		)
+	end
+	return a
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --assert a value is nil or a certain type.

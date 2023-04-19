@@ -1,5 +1,5 @@
 -- @module Core
-local Object = require "object"
+local Object = require("object")
 
 --- A System is a class representing a level-wide event handler that can be attached to a Level object.
 --- It listens to events such as an actor taking an action, moving, or a tick of time.

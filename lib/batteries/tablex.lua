@@ -113,21 +113,45 @@ end
 --find the index in a sequential table that a resides at
 --or nil if nothing was found
 function tablex.index_of(t, a)
+<<<<<<< HEAD
    if a == nil then return nil end
    for i, b in ipairs(t) do
       if a == b then return i end
    end
    return nil
+=======
+	if a == nil then
+		return nil
+	end
+	for i, b in ipairs(t) do
+		if a == b then
+			return i
+		end
+	end
+	return nil
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --find the key in a keyed table that a resides at
 --or nil if nothing was found
 function tablex.key_of(t, a)
+<<<<<<< HEAD
    if a == nil then return nil end
    for k, v in pairs(t) do
       if a == v then return k end
    end
    return nil
+=======
+	if a == nil then
+		return nil
+	end
+	for k, v in pairs(t) do
+		if a == v then
+			return k
+		end
+	end
+	return nil
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --remove the first instance of value from a table (linear search)
@@ -171,8 +195,17 @@ end
 
 --helper for optionally passed random; defaults to love.math.random if present, otherwise math.random
 local _global_random = math.random
+<<<<<<< HEAD
 if love and love.math and love.math.random then _global_random = love.math.random end
 local function _random(min, max, r) return r and r:random(min, max) or _global_random(min, max) end
+=======
+if love and love.math and love.math.random then
+	_global_random = love.math.random
+end
+local function _random(min, max, r)
+	return r and r:random(min, max) or _global_random(min, max)
+end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 
 --pick a random value from a table (or nil if it's empty)
 function tablex.random_index(t, r)
@@ -267,6 +300,7 @@ end
 --	range can be a number, where it is used as a numeric limit (ie [1-range])
 --	range can be a table, where the sequential values are used as keys
 function tablex.compact(t, range)
+<<<<<<< HEAD
    local r = {}
    if type(range) == "table" then
       for _, k in ipairs(range) do
@@ -282,6 +316,27 @@ function tablex.compact(t, range)
       error("tablex.compact - range must be a number or table", 2)
    end
    return r
+=======
+	local r = {}
+	if type(range) == "table" then
+		for _, k in ipairs(range) do
+			local v = t[k]
+			if v then
+				table.insert(r, v)
+			end
+		end
+	elseif type(range) == "number" then
+		for i = 1, range do
+			local v = t[i]
+			if v then
+				table.insert(r, v)
+			end
+		end
+	else
+		error("tablex.compact - range must be a number or table", 2)
+	end
+	return r
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --append sequence t2 into t1, modifying t1
@@ -446,6 +501,7 @@ end
 --check if two tables have equal contents at the first level
 --slow, as it needs two loops
 function tablex.shallow_equal(a, b)
+<<<<<<< HEAD
    if a == b then return true end
    for k, v in pairs(a) do
       if b[k] ~= v then return false end
@@ -456,11 +512,30 @@ function tablex.shallow_equal(a, b)
       if a[k] == nil then return false end
    end
    return true
+=======
+	if a == b then
+		return true
+	end
+	for k, v in pairs(a) do
+		if b[k] ~= v then
+			return false
+		end
+	end
+	-- second loop to ensure a isn't missing any keys from b.
+	-- we don't compare the values - if any are missing we're not equal
+	for k, v in pairs(b) do
+		if a[k] == nil then
+			return false
+		end
+	end
+	return true
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --check if two tables have equal contents all the way down
 --slow, as it needs two potentially recursive loops
 function tablex.deep_equal(a, b)
+<<<<<<< HEAD
    if a == b then return true end
    --not equal on type
    if type(a) ~= type(b) then return false end
@@ -475,6 +550,32 @@ function tablex.deep_equal(a, b)
       if a[k] == nil then return false end
    end
    return true
+=======
+	if a == b then
+		return true
+	end
+	--not equal on type
+	if type(a) ~= type(b) then
+		return false
+	end
+	--bottomed out
+	if type(a) ~= "table" then
+		return a == b
+	end
+	for k, v in pairs(a) do
+		if not tablex.deep_equal(v, b[k]) then
+			return false
+		end
+	end
+	-- second loop to ensure a isn't missing any keys from b
+	-- we don't compare the values - if any are missing we're not equal
+	for k, v in pairs(b) do
+		if a[k] == nil then
+			return false
+		end
+	end
+	return true
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --alias

@@ -15,15 +15,26 @@ local identifier = {}
 
 --(internal; use a provided random generator object, or not)
 local function _random(rng, ...)
+<<<<<<< HEAD
    if rng then return rng:random(...) end
    if love then return love.math.random(...) end
    return math.random(...)
+=======
+	if rng then
+		return rng:random(...)
+	end
+	if love then
+		return love.math.random(...)
+	end
+	return math.random(...)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 local uuid4_template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
 
 --generate a UUID version 4
 function identifier.uuid4(rng)
+<<<<<<< HEAD
    --x should be 0x0-0xf, the single y should be 0x8-0xb
    --4 should always just be 4 (denoting uuid version)
    local out = uuid4_template:gsub(
@@ -34,10 +45,20 @@ function identifier.uuid4(rng)
    )
 
    return out
+=======
+	--x should be 0x0-0xf, the single y should be 0x8-0xb
+	--4 should always just be 4 (denoting uuid version)
+	local out = uuid4_template:gsub("[xy]", function(c)
+		return string.format("%x", c == "x" and _random(rng, 0x0, 0xf) or _random(rng, 0x8, 0xb))
+	end)
+
+	return out
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --crockford's base32 https://en.wikipedia.org/wiki/Base32
 local _encoding = {
+<<<<<<< HEAD
    "0",
    "1",
    "2",
@@ -70,15 +91,62 @@ local _encoding = {
    "X",
    "Y",
    "Z",
+=======
+	"0",
+	"1",
+	"2",
+	"3",
+	"4",
+	"5",
+	"6",
+	"7",
+	"8",
+	"9",
+	"A",
+	"B",
+	"C",
+	"D",
+	"E",
+	"F",
+	"G",
+	"H",
+	"J",
+	"K",
+	"M",
+	"N",
+	"P",
+	"Q",
+	"R",
+	"S",
+	"T",
+	"V",
+	"W",
+	"X",
+	"Y",
+	"Z",
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 }
 
 --since ulid needs time since unix epoch with miliseconds, we can just
 --use socket. if that's not loaded, they'll have to provide their own
 local function _now(time_func, ...)
+<<<<<<< HEAD
    if package.loaded.socket then return package.loaded.socket.gettime(...) end
    if pcall(require, "socket") then return require("socket").gettime(...) end
    if time_func then return time_func(...) end
    error "assertion failed: socket can't be found and no time function provided"
+=======
+	if package.loaded.socket then
+		return package.loaded.socket.gettime(...)
+	end
+	if pcall(require, "socket") then
+		return require("socket").gettime(...)
+	end
+	if time_func then
+		return time_func(...)
+	end
+	error("assertion failed: socket can't be found and no time function provided")
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --generate an ULID using this rng at this time (now by default)

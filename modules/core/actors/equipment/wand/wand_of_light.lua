@@ -1,8 +1,8 @@
-local Actor = require "core.actor"
-local Action = require "core.action"
-local Condition = require "core.condition"
-local Tiles = require "display.tiles"
-local LightColor = require "structures.lighting.lightcolor"
+local Actor = require("core.actor")
+local Action = require("core.action")
+local Condition = require("core.condition")
+local Tiles = require("display.tiles")
+local LightColor = require("structures.lighting.lightcolor")
 -- The light actor
 -- Not super reusable so we define the light actor here.
 local Orb = Actor:extend()
@@ -10,10 +10,17 @@ Orb.char = Tiles["pointy_poof"]
 Orb.name = "Orb of light"
 
 Orb.components = {
+<<<<<<< HEAD
    components.Light {
       color = LightColor(26, 26, 30),
    },
    components.Lifetime { duration = 3000 },
+=======
+	components.Light({
+		color = LightColor(26, 26, 30),
+	}),
+	components.Lifetime({ duration = 3000 }),
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 }
 
 -- Let's get our zap target going.
@@ -28,6 +35,7 @@ Zap.targets = { targets.Item, ZapTarget }
 Zap.aoeRange = 3
 
 function Zap:perform(level)
+<<<<<<< HEAD
    actions.Zap.perform(self, level)
 
    local effects_system = level:getSystem "Effects"
@@ -50,6 +58,30 @@ function Zap:perform(level)
          end
       end
    end
+=======
+	actions.Zap.perform(self, level)
+
+	local effects_system = level:getSystem("Effects")
+
+	local target = self.targetActors[2]
+	local orb = Orb()
+	orb.position = target
+	level:addActor(orb)
+
+	local fov, actors = level:getAOE("fov", target, self.aoeRange)
+
+	for _, actor in ipairs(actors) do
+		if actor:getComponent(components.Stats) then
+			if actor:hasComponent(components.Stats) then
+				effects_system:addEffect(
+					level,
+					effects.CharacterDynamic(actor, 0, -1, Tiles["bubble_stun"], { 1, 1, 1 }, 0.5)
+				)
+				level.scheduler:addTime(actor, 600)
+			end
+		end
+	end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 -- Actual item definition all the way down here
@@ -59,6 +91,7 @@ WandOfLight.color = { 0.7, 0.7, 0.7, 1 }
 WandOfLight.char = Tiles["wand_pointy"]
 
 WandOfLight.components = {
+<<<<<<< HEAD
    components.Item { stackable = false },
    components.Usable(),
    components.Wand {
@@ -66,6 +99,15 @@ WandOfLight.components = {
       zap = Zap,
    },
    components.Cost { rarity = "common" },
+=======
+	components.Item({ stackable = false }),
+	components.Usable(),
+	components.Wand({
+		maxCharges = 5,
+		zap = Zap,
+	}),
+	components.Cost({ rarity = "common" }),
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 }
 
 return WandOfLight

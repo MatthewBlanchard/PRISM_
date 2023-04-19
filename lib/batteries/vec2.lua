@@ -46,7 +46,13 @@ function vec2:zero() return vec2(0) end
 function vec2:unpack() return self.x, self.y end
 
 --pack when a sequence is needed
+<<<<<<< HEAD
 function vec2:pack() return { self:unpack() } end
+=======
+function vec2:pack()
+	return { self:unpack() }
+end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 
 --shared pooled storage
 make_pooled(vec2, 128)
@@ -63,10 +69,19 @@ function vec2:vector_set(v)
 end
 
 function vec2:scalar_set(x, y)
+<<<<<<< HEAD
    if not y then y = x end
    self.x = x
    self.y = y
    return self
+=======
+	if not y then
+		y = x
+	end
+	self.x = x
+	self.y = y
+	return self
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 function vec2:swap(v)
@@ -85,13 +100,21 @@ local EQUALS_EPSILON = 1e-9
 
 --true if a and b are functionally equivalent
 function vec2.equals(a, b)
+<<<<<<< HEAD
    return (math.abs(a.x - b.x) <= EQUALS_EPSILON and math.abs(a.y - b.y) <= EQUALS_EPSILON)
+=======
+	return (math.abs(a.x - b.x) <= EQUALS_EPSILON and math.abs(a.y - b.y) <= EQUALS_EPSILON)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --true if a and b are not functionally equivalent
 --(very slightly faster than `not vec2.equals(a, b)`)
 function vec2.nequals(a, b)
+<<<<<<< HEAD
    return (math.abs(a.x - b.x) > EQUALS_EPSILON or math.abs(a.y - b.y) > EQUALS_EPSILON)
+=======
+	return (math.abs(a.x - b.x) > EQUALS_EPSILON or math.abs(a.y - b.y) > EQUALS_EPSILON)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 -----------------------------------------------------------
@@ -133,6 +156,7 @@ end
 
 --scalar
 function vec2:scalar_add_inplace(x, y)
+<<<<<<< HEAD
    if not y then y = x end
    self.x = self.x + x
    self.y = self.y + y
@@ -158,6 +182,41 @@ function vec2:scalar_div_inplace(x, y)
    self.x = self.x / x
    self.y = self.y / y
    return self
+=======
+	if not y then
+		y = x
+	end
+	self.x = self.x + x
+	self.y = self.y + y
+	return self
+end
+
+function vec2:scalar_sub_inplace(x, y)
+	if not y then
+		y = x
+	end
+	self.x = self.x - x
+	self.y = self.y - y
+	return self
+end
+
+function vec2:scalar_mul_inplace(x, y)
+	if not y then
+		y = x
+	end
+	self.x = self.x * x
+	self.y = self.y * y
+	return self
+end
+
+function vec2:scalar_div_inplace(x, y)
+	if not y then
+		y = x
+	end
+	self.x = self.x / x
+	self.y = self.y / y
+	return self
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 -----------------------------------------------------------
@@ -357,7 +416,13 @@ end
 --	>0 when p left of line
 --	=0 when p on line
 --	<0 when p right of line
+<<<<<<< HEAD
 function vec2.winding_side(a, b, p) return (b.x - a.x) * (p.y - a.y) - (p.x - a.x) * (b.y - a.y) end
+=======
+function vec2.winding_side(a, b, p)
+	return (b.x - a.x) * (p.y - a.y) - (p.x - a.x) * (b.y - a.y)
+end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 
 -----------------------------------------------------------
 -- vector extension methods for special purposes
@@ -484,6 +549,7 @@ end
 --
 --i do encourage using the longer versions above as it makes code easier
 --to understand when you come back, but i also appreciate wanting short code
+<<<<<<< HEAD
 for _, v in ipairs {
    { "sset", "scalar_set" },
    { "sadd", "scalar_add" },
@@ -519,6 +585,47 @@ for _, v in ipairs {
    shorthand = shorthand .. "i"
    original = original .. "_inplace"
    if vec2[shorthand] == nil then vec2[shorthand] = vec2[original] end
+=======
+for _, v in ipairs({
+	{ "sset", "scalar_set" },
+	{ "sadd", "scalar_add" },
+	{ "ssub", "scalar_sub" },
+	{ "smul", "scalar_mul" },
+	{ "sdiv", "scalar_div" },
+	{ "vset", "vector_set" },
+	{ "vadd", "vector_add" },
+	{ "vsub", "vector_sub" },
+	{ "vmul", "vector_mul" },
+	{ "vdiv", "vector_div" },
+	--(no plain addi etc, imo it's worth differentiating vaddi vs saddi)
+	{ "fma", "fused_multiply_add" },
+	{ "vproj", "vector_projection" },
+	{ "vrej", "vector_rejection" },
+	--just for the _inplace -> i shorthand, mostly for backwards compatibility
+	{ "min", "min" },
+	{ "max", "max" },
+	{ "clamp", "clamp" },
+	{ "abs", "abs" },
+	{ "sign", "sign" },
+	{ "floor", "floor" },
+	{ "ceil", "ceil" },
+	{ "round", "round" },
+	{ "lerp", "lerp" },
+	{ "rotate", "rotate" },
+	{ "normalise", "normalise" },
+	{ "normalize", "normalize" },
+}) do
+	local shorthand, original = v[1], v[2]
+	if vec2[shorthand] == nil then
+		vec2[shorthand] = vec2[original]
+	end
+	--and inplace version
+	shorthand = shorthand .. "i"
+	original = original .. "_inplace"
+	if vec2[shorthand] == nil then
+		vec2[shorthand] = vec2[original]
+	end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 return vec2

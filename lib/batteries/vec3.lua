@@ -44,7 +44,13 @@ function vec3:zero() return vec3(0, 0, 0) end
 function vec3:unpack() return self.x, self.y, self.z end
 
 --pack when a sequence is needed
+<<<<<<< HEAD
 function vec3:pack() return { self:unpack() } end
+=======
+function vec3:pack()
+	return { self:unpack() }
+end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 
 --handle pooling
 make_pooled(vec3, 128)
@@ -84,21 +90,37 @@ local EQUALS_EPSILON = 1e-9
 
 --true if a and b are functionally equivalent
 function vec3.equals(a, b)
+<<<<<<< HEAD
    return (
       math.abs(a.x - b.x) <= EQUALS_EPSILON
       and math.abs(a.y - b.y) <= EQUALS_EPSILON
       and math.abs(a.z - b.z) <= EQUALS_EPSILON
    )
+=======
+	return (
+		math.abs(a.x - b.x) <= EQUALS_EPSILON
+		and math.abs(a.y - b.y) <= EQUALS_EPSILON
+		and math.abs(a.z - b.z) <= EQUALS_EPSILON
+	)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --true if a and b are not functionally equivalent
 --(very slightly faster than `not vec3.equals(a, b)`)
 function vec3.nequals(a, b)
+<<<<<<< HEAD
    return (
       math.abs(a.x - b.x) > EQUALS_EPSILON
       or math.abs(a.y - b.y) > EQUALS_EPSILON
       or math.abs(a.z - b.z) > EQUALS_EPSILON
    )
+=======
+	return (
+		math.abs(a.x - b.x) > EQUALS_EPSILON
+		or math.abs(a.y - b.y) > EQUALS_EPSILON
+		or math.abs(a.z - b.z) > EQUALS_EPSILON
+	)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 -----------------------------------------------------------
@@ -138,6 +160,7 @@ end
 
 --scalar
 function vec3:saddi(x, y, z)
+<<<<<<< HEAD
    if not y then y = x end
    if not z then z = y end
    self.x = self.x + x
@@ -171,6 +194,57 @@ function vec3:sdivi(x, y, z)
    self.y = self.y / y
    self.z = self.z / z
    return self
+=======
+	if not y then
+		y = x
+	end
+	if not z then
+		z = y
+	end
+	self.x = self.x + x
+	self.y = self.y + y
+	self.z = self.z + z
+	return self
+end
+
+function vec3:ssubi(x, y, z)
+	if not y then
+		y = x
+	end
+	if not z then
+		z = y
+	end
+	self.x = self.x - x
+	self.y = self.y - y
+	self.z = self.z - z
+	return self
+end
+
+function vec3:smuli(x, y, z)
+	if not y then
+		y = x
+	end
+	if not z then
+		z = y
+	end
+	self.x = self.x * x
+	self.y = self.y * y
+	self.z = self.z * z
+	return self
+end
+
+function vec3:sdivi(x, y, z)
+	if not y then
+		y = x
+	end
+	if not z then
+		z = y
+	end
+	self.x = self.x / x
+	self.y = self.y / y
+	self.z = self.z / z
+	return self
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --garbage mode
@@ -265,10 +339,19 @@ function vec3:infuse_single(swizzle, v)
 end
 
 function vec3:extract_vec2(swizzle, into)
+<<<<<<< HEAD
    if not into then into = vec2:zero() end
    local x = self:extract_single(swizzle:byte(1))
    local y = self:extract_single(swizzle:byte(2))
    return into:sset(x, y)
+=======
+	if not into then
+		into = vec2:zero()
+	end
+	local x = self:extract_single(swizzle:byte(1))
+	local y = self:extract_single(swizzle:byte(2))
+	return into:sset(x, y)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 function vec3:infuse_vec2(swizzle, v)
@@ -294,11 +377,19 @@ local _euler_macro = {
    "xy",
 }
 function vec3:rotate_euleri(angle_x_axis, angle_y_axis, angle_z_axis)
+<<<<<<< HEAD
    for i, swizzle in ipairs(_euler_macro) do
       local angle = i == 1 and angle_x_axis or i == 2 and angle_y_axis or i == 3 and angle_z_axis
       self:rotatei(swizzle, angle)
    end
    return self
+=======
+	for i, swizzle in ipairs(_euler_macro) do
+		local angle = i == 1 and angle_x_axis or i == 2 and angle_y_axis or i == 3 and angle_z_axis
+		self:rotatei(swizzle, angle)
+	end
+	return self
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --todo: 90deg rotations
@@ -440,8 +531,15 @@ function vec3:lerp_eps(other, amount, eps) return self:copy():lerp_epsi(other, a
 function vec3.dot(a, b) return a.x * b.x + a.y * b.y + a.z * b.z end
 
 function vec3.cross(a, b, into)
+<<<<<<< HEAD
    if not into then into = vec3:zero() end
    return into:sset(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x)
+=======
+	if not into then
+		into = vec3:zero()
+	end
+	return into:sset(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --scalar projection a onto b

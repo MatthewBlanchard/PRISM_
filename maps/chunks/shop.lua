@@ -1,11 +1,23 @@
+<<<<<<< HEAD
 local Chunk = require "maps.chunk"
 
 local shop = Chunk:extend()
 function shop:parameters()
    self.width, self.height = 8, 8
+=======
+local Chunk = require("maps.chunk")
+
+local shop = Chunk:extend()
+function shop:parameters()
+	self.width, self.height = 8, 8
+end
+function shop:shaper(chunk)
+	chunk:clear_rect(1, 1, chunk.width - 1, chunk.height - 1)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 function shop:shaper(chunk) chunk:clear_rect(1, 1, chunk.width - 1, chunk.height - 1) end
 function shop:populater(chunk, clipping)
+<<<<<<< HEAD
    local cx, cy = chunk:get_center()
 
    local _, shopkeep_id = chunk:insert_actor("Shopkeep", cx, cy - 1)
@@ -28,6 +40,30 @@ function shop:populater(chunk, clipping)
    }
 
    --[[for i = 1, 3 do
+=======
+	local cx, cy = chunk:get_center()
+
+	local _, shopkeep_id = chunk:insert_actor("Shopkeep", cx, cy - 1)
+	chunk:insert_actor("Stationarytorch", cx - 2, cy - 1)
+	chunk:insert_actor("Stationarytorch", cx + 2, cy - 1)
+
+	local shopItems = {
+		{
+			components.Weapon,
+			components.Wand,
+		},
+		{
+			components.Equipment,
+		},
+		{
+			components.Edible,
+			components.Drinkable,
+			components.Readable,
+		},
+	}
+
+	--[[for i = 1, 3 do
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
     local itemTable = shopItems[i]
     local item = Loot.generateLoot(itemTable[love.math.random(1, #itemTable)])
 
@@ -48,7 +84,11 @@ function shop:populater(chunk, clipping)
     end
     chunk:insert_actor('Product', cx-2+i, cy, callback)
   end]]
+<<<<<<< HEAD
    --
+=======
+	--
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 return shop

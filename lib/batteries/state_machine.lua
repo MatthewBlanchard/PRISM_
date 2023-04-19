@@ -80,6 +80,7 @@ function state_machine:has_state(name) return self.states[name] ~= nil end
 
 --add a state
 function state_machine:add_state(name, state)
+<<<<<<< HEAD
    if self:has_state(name) then
       error("error: added duplicate state " .. name)
    else
@@ -88,10 +89,23 @@ function state_machine:add_state(name, state)
    end
 
    return self
+=======
+	if self:has_state(name) then
+		error("error: added duplicate state " .. name)
+	else
+		self.states[name] = state
+		if self:in_state(name) then
+			self:_call_and_transition("enter")
+		end
+	end
+
+	return self
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --remove a state
 function state_machine:remove_state(name)
+<<<<<<< HEAD
    if not self:has_state(name) then
       error("error: removed missing state " .. name)
    else
@@ -100,6 +114,18 @@ function state_machine:remove_state(name)
    end
 
    return self
+=======
+	if not self:has_state(name) then
+		error("error: removed missing state " .. name)
+	else
+		if self:in_state(name) then
+			self:_call("exit")
+		end
+		self.states[name] = nil
+	end
+
+	return self
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --hard-replace a state table

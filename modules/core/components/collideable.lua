@@ -1,4 +1,4 @@
-local Component = require "core.component"
+local Component = require("core.component")
 
 local Collideable = Component:extend()
 Collideable.name = "Collideable"
@@ -9,7 +9,11 @@ Collideable.name = "Collideable"
 Collideable.blockSelf = false
 
 function Collideable:__new()
+<<<<<<< HEAD
    error "Collideable is an abstract class. Use a subclass like CollideableBox instead."
+=======
+	error("Collideable is an abstract class. Use a subclass like CollideableBox instead.")
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 -- Gets the tiles that can be used to take actions from this actor
@@ -17,6 +21,7 @@ end
 -- might only be able to see from the head.
 function Collideable:getActionTiles(actor) end
 
+<<<<<<< HEAD
 function Collideable:eachCellGlobal(actor) error "eachCellGlobal must be implemented by a subclass" end
 
 function Collideable:eachCell() error "eachCell must be implemented by a subclass" end
@@ -38,11 +43,50 @@ function Collideable:hasGlobalCell(actor, cell) return self:hasCell(actor, cell)
 -- given a direction return a list of cells we intend to occupy
 function Collideable:moveCandidate(level, actor, direction)
    error "moveCandidate must be implemented by a subclass"
+=======
+function Collideable:eachCellGlobal(actor)
+	error("eachCellGlobal must be implemented by a subclass")
+end
+
+function Collideable:eachCell()
+	error("eachCell must be implemented by a subclass")
+end
+
+function Collideable:localToGlobal(actor, localPos)
+	return actor.position + localPos
+end
+
+function Collideable:globalToLocal(actor, globalPos)
+	return globalPos - actor.position
+end
+
+function Collideable:hasCell(cell)
+	for vec in self:eachCell() do
+		if vec == cell then
+			return true
+		end
+	end
+
+	return false
+end
+
+function Collideable:hasGlobalCell(actor, cell)
+	return self:hasCell(actor, cell)
+end
+
+-- given a direction return a list of cells we intend to occupy
+function Collideable:moveCandidate(level, actor, direction)
+	error("moveCandidate must be implemented by a subclass")
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 -- called if our moveCandidate is accepted so we can update our state
 function Collideable:acceptedCandidate(level, actor, direction)
+<<<<<<< HEAD
    error "acceptedCandidate must be implemented by a subclass"
+=======
+	error("acceptedCandidate must be implemented by a subclass")
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 -- called if our moveCandidate is blocked by another actor

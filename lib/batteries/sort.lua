@@ -53,6 +53,7 @@ end
 
 --merge sorted adjacent sections of array
 function sort._merge(array, workspace, low, middle, high, less)
+<<<<<<< HEAD
    local i, j, k
    i = 1
    -- copy first half of array to auxiliary array
@@ -80,6 +81,37 @@ function sort._merge(array, workspace, low, middle, high, less)
       array[w] = workspace[i]
       i = i + 1
    end
+=======
+	local i, j, k
+	i = 1
+	-- copy first half of array to auxiliary array
+	for w = low, middle do
+		workspace[i] = array[w]
+		i = i + 1
+	end
+	-- sieve through
+	i = 1
+	j = middle + 1
+	k = low
+	while true do
+		if (k >= j) or (j > high) then
+			break
+		end
+		if less(array[j], workspace[i]) then
+			array[k] = array[j]
+			j = j + 1
+		else
+			array[k] = workspace[i]
+			i = i + 1
+		end
+		k = k + 1
+	end
+	-- copy back any remaining elements of first half
+	for w = k, j - 1 do
+		array[w] = workspace[i]
+		i = i + 1
+	end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --implementation for the merge sort
@@ -133,6 +165,7 @@ function sort._sort_setup(array, less)
 end
 
 function sort.stable_sort(array, less)
+<<<<<<< HEAD
    --setup
    local trivial, n
    trivial, n, less = sort._sort_setup(array, less)
@@ -145,6 +178,20 @@ function sort.stable_sort(array, less)
       sort._merge_sort_impl(array, workspace, 1, n, less)
    end
    return array
+=======
+	--setup
+	local trivial, n
+	trivial, n, less = sort._sort_setup(array, less)
+	if not trivial then
+		--temp storage; allocate ahead of time
+		local workspace = {}
+		local middle = math.ceil(n / 2)
+		workspace[middle] = array[1]
+		--dive in
+		sort._merge_sort_impl(array, workspace, 1, n, less)
+	end
+	return array
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 function sort.insertion_sort(array, less)

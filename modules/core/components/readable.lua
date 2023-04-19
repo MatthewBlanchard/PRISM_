@@ -1,9 +1,10 @@
-local Component = require "core.component"
+local Component = require("core.component")
 
 local Readable = Component:extend()
 Readable.name = "Readable"
 
 Readable.requirements = {
+<<<<<<< HEAD
    components.Item,
    components.Usable,
 }
@@ -11,6 +12,19 @@ Readable.requirements = {
 function Readable:__new(options)
    assert(options.read:is(actions.Read))
    self._read = options.read
+=======
+	components.Item,
+	components.Usable,
+}
+
+function Readable:__new(options)
+	assert(options.read:is(actions.Read))
+	self._read = options.read
+end
+
+function Readable:initialize(actor)
+	actor:addUseAction(self._read)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 function Readable:initialize(actor) actor:addUseAction(self._read) end

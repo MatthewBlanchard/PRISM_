@@ -1,12 +1,13 @@
-local Actor = require "core.actor"
-local Tiles = require "display.tiles"
-local Condition = require "core.condition"
+local Actor = require("core.actor")
+local Tiles = require("display.tiles")
+local Condition = require("core.condition")
 
 local Read = actions.Read:extend()
 Read.name = "read"
 Read.targets = { targets.Item }
 
 function Read:perform(level)
+<<<<<<< HEAD
    actions.Read.perform(self, level)
 
    local familiar = actors.Gloop()
@@ -18,6 +19,19 @@ function Read:perform(level)
    familiar:applyCondition(mind_control)
 
    level:addActor(familiar)
+=======
+	actions.Read.perform(self, level)
+
+	local familiar = actors.Gloop()
+	familiar.position.x = self.owner.position.x
+	familiar.position.y = self.owner.position.y
+	level:addComponent(familiar, components.Lifetime({ duration = 1000 }))
+
+	local mind_control = conditions.Mind_control()
+	familiar:applyCondition(mind_control)
+
+	level:addActor(familiar)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 local ScrollOfFindFamiliar = Actor:extend()
@@ -26,10 +40,17 @@ ScrollOfFindFamiliar.color = { 0.8, 0.8, 0.8, 1 }
 ScrollOfFindFamiliar.char = Tiles["scroll"]
 
 ScrollOfFindFamiliar.components = {
+<<<<<<< HEAD
    components.Item(),
    components.Usable(),
    components.Readable { read = Read },
    components.Cost(),
+=======
+	components.Item(),
+	components.Usable(),
+	components.Readable({ read = Read }),
+	components.Cost(),
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 }
 
 return ScrollOfFindFamiliar

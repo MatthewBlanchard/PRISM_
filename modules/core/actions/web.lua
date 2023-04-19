@@ -1,5 +1,5 @@
-local Action = require "core.action"
-local Tiles = require "display.tiles"
+local Action = require("core.action")
+local Tiles = require("display.tiles")
 
 local WebTarget = targets.Creature:extend()
 WebTarget:setRange(4)
@@ -9,6 +9,7 @@ Web.name = "web"
 Web.targets = { WebTarget }
 
 function Web:perform(level)
+<<<<<<< HEAD
    local creature = self:getTarget(1)
 
    creature:applyCondition(conditions.Slowed)
@@ -20,6 +21,16 @@ function Web:perform(level)
          effects.CharacterDynamic(creature, 0, 0, Tiles["web"], { 1, 1, 1 }, 0.5)
       )
    end
+=======
+	local creature = self:getTarget(1)
+
+	creature:applyCondition(conditions.Slowed)
+
+	local effects_system = level:getSystem("Effects")
+	if effects_system then
+		effects_system:addEffect(level, effects.CharacterDynamic(creature, 0, 0, Tiles["web"], { 1, 1, 1 }, 0.5))
+	end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 return Web

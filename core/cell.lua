@@ -1,5 +1,5 @@
-local Object = require "object"
-local Tiles = require "display.tiles"
+local Object = require("object")
+local Tiles = require("display.tiles")
 
 --- A cell is a single tile on the map. It defines the properties of the tile and has a few callbacks.
 --- Maybe cells should have components so that they can be extended with custom functionality like the grass?
@@ -27,6 +27,12 @@ end
 --- Cells can have custom functions to determine whether an actor standing on them can be seen.
 --- For instance, grass cells allow actors to be seen only if the other actor is in the same
 --- clump of grass.
+<<<<<<< HEAD
 function Cell:visibleFromCell(level, cell) return true end
+=======
+function Cell:visibleFromCell(level, cell)
+	return true
+end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 
 return Cell

@@ -36,6 +36,7 @@ function intersect.circle_circle_overlap(a_pos, a_rad, b_pos, b_rad)
 end
 
 function intersect.circle_circle_collide(a_pos, a_rad, b_pos, b_rad, into)
+<<<<<<< HEAD
    --get delta
    local delta = a_pos:pooled_copy():vector_sub_inplace(b_pos)
    --squared threshold
@@ -58,6 +59,32 @@ function intersect.circle_circle_collide(a_pos, a_rad, b_pos, b_rad, into)
    end
    delta:release()
    return res
+=======
+	--get delta
+	local delta = a_pos:pooled_copy():vector_sub_inplace(b_pos)
+	--squared threshold
+	local rad = a_rad + b_rad
+	local dist = delta:length_squared()
+	local res = false
+	if dist <= rad * rad then
+		if dist == 0 then
+			--singular case; just resolve vertically
+			dist = 1
+			delta:scalar_set(0, 1)
+		else
+			--get actual distance
+			dist = math.sqrt(dist)
+		end
+		--allocate if needed
+		if into == nil then
+			into = vec2(0)
+		end
+		--normalise, scale to separating distance
+		res = into:set(delta):scalar_div_inplace(dist):scalar_mul_inplace(rad - dist)
+	end
+	delta:release()
+	return res
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 function intersect.circle_point_collide(a_pos, a_rad, b, into)
@@ -70,6 +97,7 @@ end
 
 --get the nearest point on the line segment a from point b
 function intersect.nearest_point_on_line(a_start, a_end, b_pos, into)
+<<<<<<< HEAD
    if into == nil then into = vec2(0) end
    --direction of segment
    local segment = a_end:pooled_copy():vector_sub_inplace(a_start)
@@ -86,17 +114,42 @@ function intersect.nearest_point_on_line(a_start, a_end, b_pos, into)
    end
    segment:release()
    return into
+=======
+	if into == nil then
+		into = vec2(0)
+	end
+	--direction of segment
+	local segment = a_end:pooled_copy():vector_sub_inplace(a_start)
+	--detect degenerate case
+	local lensq = segment:length_squared()
+	if lensq <= COLLIDE_EPS then
+		into:set(a_start)
+	else
+		--solve for factor along segment
+		local point_to_start = b_pos:pooled_copy():vector_sub_inplace(a_start)
+		local factor = mathx.clamp01(point_to_start:dot(segment) / lensq)
+		point_to_start:release()
+		into:set(segment):scalar_mul_inplace(factor):vector_add_inplace(a_start)
+	end
+	segment:release()
+	return into
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --internal
 --vector from line seg origin to point
 function intersect._line_to_point(a_start, a_end, b_pos, into)
+<<<<<<< HEAD
    return intersect.nearest_point_on_line(a_start, a_end, b_pos, into):vector_sub_inplace(b_pos)
+=======
+	return intersect.nearest_point_on_line(a_start, a_end, b_pos, into):vector_sub_inplace(b_pos)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --internal
 --line displacement vector from separation vector
 function intersect._line_displacement_to_sep(a_start, a_end, separation, total_rad)
+<<<<<<< HEAD
    local distance = separation:normalise_len_inplace()
    local sep = distance - total_rad
    if sep <= 0 then
@@ -109,6 +162,20 @@ function intersect._line_displacement_to_sep(a_start, a_end, separation, total_r
       return separation
    end
    return false
+=======
+	local distance = separation:normalise_len_inplace()
+	local sep = distance - total_rad
+	if sep <= 0 then
+		if distance <= COLLIDE_EPS then
+			--point intersecting the line; push out along normal
+			separation:set(a_end):vector_sub_inplace(a_start):normalise_inplace():rot90l_inplace()
+		else
+			separation:scalar_mul_inplace(-sep)
+		end
+		return separation
+	end
+	return false
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --overlap a line segment with a circle
@@ -127,6 +194,7 @@ end
 
 --collide 2 line segments
 function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_rad, into)
+<<<<<<< HEAD
    --segment directions from start points
    local a_dir = a_end:pooled_copy():vector_sub_inplace(a_start)
    local b_dir = b_end:pooled_copy():vector_sub_inplace(b_start)
@@ -234,6 +302,115 @@ function intersect.line_line_collide(a_start, a_end, a_rad, b_start, b_end, b_ra
    into:set(best[1]):scalar_mul_inplace(best[2])
 
    return intersect._line_displacement_to_sep(a_start, a_end, into, a_rad + b_rad)
+=======
+	--segment directions from start points
+	local a_dir = a_end:pooled_copy():vector_sub_inplace(a_start)
+	local b_dir = b_end:pooled_copy():vector_sub_inplace(b_start)
+
+	--detect degenerate cases
+	local a_degen = a_dir:length_squared() <= COLLIDE_EPS
+	local b_degen = b_dir:length_squared() <= COLLIDE_EPS
+	if a_degen or b_degen then
+		vec2.release(a_dir, b_dir)
+		if a_degen and b_degen then
+			--actually just circles
+			return intersect.circle_circle_collide(a_start, a_rad, b_start, b_rad, into)
+		elseif a_degen then
+			--a is just circle
+			return intersect.circle_line_collide(a_start, a_rad, b_start, b_end, b_rad, into)
+		elseif b_degen then
+			--b is just circle
+			return intersect.line_circle_collide(a_start, a_end, a_rad, b_start, b_rad, into)
+		end
+	end
+	--otherwise we're _actually_ 2 line segs :)
+	if into == nil then
+		into = vec2(0)
+	end
+
+	--first, check intersection
+
+	--(c to lua translation of paul bourke's
+	-- line intersection algorithm)
+	local dx1 = (a_end.x - a_start.x)
+	local dx2 = (b_end.x - b_start.x)
+	local dy1 = (a_end.y - a_start.y)
+	local dy2 = (b_end.y - b_start.y)
+	local dxab = (a_start.x - b_start.x)
+	local dyab = (a_start.y - b_start.y)
+
+	local denom = dy2 * dx1 - dx2 * dy1
+	local numera = dx2 * dyab - dy2 * dxab
+	local numerb = dx1 * dyab - dy1 * dxab
+
+	--check coincident lines
+	local intersected
+	if math.abs(numera) < COLLIDE_EPS and math.abs(numerb) < COLLIDE_EPS and math.abs(denom) < COLLIDE_EPS then
+		intersected = "both"
+	else
+		--check parallel, non-coincident lines
+		if math.abs(denom) < COLLIDE_EPS then
+			intersected = "none"
+		else
+			--get interpolants along segments
+			local mua = numera / denom
+			local mub = numerb / denom
+			--intersection outside segment bounds?
+			local outside_a = mua < 0 or mua > 1
+			local outside_b = mub < 0 or mub > 1
+			if outside_a and outside_b then
+				intersected = "none"
+			elseif outside_a then
+				intersected = "b"
+			elseif outside_b then
+				intersected = "a"
+			else
+				intersected = "both"
+			end
+		end
+	end
+	assert(intersected)
+
+	if intersected == "both" then
+		--simply displace along A normal
+		into:set(a_dir)
+		vec2.release(a_dir, b_dir)
+		return into:normalise_inplace():scalar_mul_inplace(a_rad + b_rad):rot90l_inplace()
+	end
+
+	vec2.release(a_dir, b_dir)
+
+	--dumb as a rock check-corners approach
+	--todo: pool storage
+	--todo proper calculus from http://geomalgorithms.com/a07-_distance.html
+	local search_tab = {}
+	--only insert corners from the non-intersected line
+	--since intersected line is potentially the apex
+	if intersected ~= "a" then
+		--a endpoints
+		table.insert(search_tab, { intersect._line_to_point(b_start, b_end, a_start), 1 })
+		table.insert(search_tab, { intersect._line_to_point(b_start, b_end, a_end), 1 })
+	end
+	if intersected ~= "b" then
+		--b endpoints
+		table.insert(search_tab, { intersect._line_to_point(a_start, a_end, b_start), -1 })
+		table.insert(search_tab, { intersect._line_to_point(a_start, a_end, b_end), -1 })
+	end
+
+	local best = nil
+	local best_len = nil
+	for _, v in ipairs(search_tab) do
+		local len = v[1]:length_squared()
+		if not best_len or len < best_len then
+			best = v
+		end
+	end
+
+	--fix direction
+	into:set(best[1]):scalar_mul_inplace(best[2])
+
+	return intersect._line_displacement_to_sep(a_start, a_end, into, a_rad + b_rad)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 ------------------------------------------------------------------------------
@@ -248,15 +425,23 @@ end
 
 --return true on overlap, false otherwise
 function intersect.aabb_point_overlap(pos, hs, v)
+<<<<<<< HEAD
    local delta = pos:pooled_copy():vector_sub_inplace(v):abs_inplace()
    local overlap = delta.x <= hs.x and delta.y <= hs.y
    delta:release()
    return overlap
+=======
+	local delta = pos:pooled_copy():vector_sub_inplace(v):abs_inplace()
+	local overlap = delta.x <= hs.x and delta.y <= hs.y
+	delta:release()
+	return overlap
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 -- discrete displacement
 -- return msv to push point to closest edge of aabb
 function intersect.aabb_point_collide(pos, hs, v, into)
+<<<<<<< HEAD
    --separation between centres
    local delta_c = v:pooled_copy():vector_sub_inplace(pos)
    --absolute separation
@@ -276,20 +461,50 @@ function intersect.aabb_point_collide(pos, hs, v, into)
    end
    vec2.release(delta_c, delta_c_abs)
    return res
+=======
+	--separation between centres
+	local delta_c = v:pooled_copy():vector_sub_inplace(pos)
+	--absolute separation
+	local delta_c_abs = delta_c:pooled_copy():abs_inplace()
+	local res = false
+	if delta_c_abs.x < hs.x and delta_c_abs.y < hs.y then
+		res = (into or vec2(0))
+			--separating offset in both directions
+			:set(hs)
+			:vector_sub_inplace(delta_c_abs)
+			--minimum separating distance
+			:minor_inplace()
+			--in the right direction
+			:vector_mul_inplace(delta_c:sign_inplace())
+			--from the aabb's point of view
+			:inverse_inplace()
+	end
+	vec2.release(delta_c, delta_c_abs)
+	return res
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --return true on overlap, false otherwise
 function intersect.aabb_aabb_overlap(a_pos, a_hs, b_pos, b_hs)
+<<<<<<< HEAD
    local delta = a_pos:pooled_copy():vector_sub_inplace(b_pos):abs_inplace()
    local total_size = a_hs:pooled_copy():vector_add_inplace(b_hs)
    local overlap = delta.x <= total_size.x and delta.y <= total_size.y
    vec2.release(delta, total_size)
    return overlap
+=======
+	local delta = a_pos:pooled_copy():vector_sub_inplace(b_pos):abs_inplace()
+	local total_size = a_hs:pooled_copy():vector_add_inplace(b_hs)
+	local overlap = delta.x <= total_size.x and delta.y <= total_size.y
+	vec2.release(delta, total_size)
+	return overlap
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --discrete displacement
 --return msv on collision, false otherwise
 function intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, b_hs, into)
+<<<<<<< HEAD
    local delta = a_pos:pooled_copy():vector_sub_inplace(b_pos)
    local abs_delta = delta:pooled_copy():abs_inplace()
    local size = a_hs:pooled_copy():vector_add_inplace(b_hs)
@@ -307,16 +522,46 @@ function intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, b_hs, into)
       end
    end
    return res
+=======
+	local delta = a_pos:pooled_copy():vector_sub_inplace(b_pos)
+	local abs_delta = delta:pooled_copy():abs_inplace()
+	local size = a_hs:pooled_copy():vector_add_inplace(b_hs)
+	local abs_amount = size:pooled_copy():vector_sub_inplace(abs_delta)
+	local res = false
+	if abs_amount.x > COLLIDE_EPS and abs_amount.y > COLLIDE_EPS then
+		if not into then
+			into = vec2(0)
+		end
+		--actually collided
+		if abs_amount.x <= abs_amount.y then
+			--x min
+			res = into:scalar_set(abs_amount.x * mathx.sign(delta.x), 0)
+		else
+			--y min
+			res = into:scalar_set(0, abs_amount.y * mathx.sign(delta.y))
+		end
+	end
+	return res
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 -- helper function to clamp point to aabb
 function intersect.aabb_point_clamp(pos, hs, v, into)
+<<<<<<< HEAD
    local v_min = pos:pooled_copy():vector_sub_inplace(hs)
    local v_max = pos:pooled_copy():vector_add_inplace(hs)
    into = into or vec2(0)
    into:set(v):clamp_inplace(v_min, v_max)
    vec2.release(v_min, v_max)
    return into
+=======
+	local v_min = pos:pooled_copy():vector_sub_inplace(hs)
+	local v_max = pos:pooled_copy():vector_add_inplace(hs)
+	into = into or vec2(0)
+	into:set(v):clamp_inplace(v_min, v_max)
+	vec2.release(v_min, v_max)
+	return into
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 -- return true on overlap, false otherwise
@@ -329,6 +574,7 @@ end
 
 -- return msv on collision, false otherwise
 function intersect.aabb_circle_collide(a_pos, a_hs, b_pos, b_rad, into)
+<<<<<<< HEAD
    local abs_delta = a_pos:pooled_copy():vector_sub_inplace(b_pos):abs_inplace()
    --circle centre within aabb-like bounds, collide as an aabb
    local like_aabb = abs_delta.x < a_hs.x or abs_delta.y < a_hs.y
@@ -347,6 +593,26 @@ function intersect.aabb_circle_collide(a_pos, a_hs, b_pos, b_rad, into)
       clamped:release()
    end
    return result
+=======
+	local abs_delta = a_pos:pooled_copy():vector_sub_inplace(b_pos):abs_inplace()
+	--circle centre within aabb-like bounds, collide as an aabb
+	local like_aabb = abs_delta.x < a_hs.x or abs_delta.y < a_hs.y
+	--(clean up)
+	abs_delta:release()
+	--
+	local result
+	if like_aabb then
+		local pretend_hs = vec2:pooled(0, 0)
+		result = intersect.aabb_aabb_collide(a_pos, a_hs, b_pos, pretend_hs, into)
+		pretend_hs:release()
+	else
+		--outside aabb-like bounds so we need to collide with the nearest clamped corner point
+		local clamped = intersect.aabb_point_clamp(a_pos, a_hs, b_pos, vec2:pooled())
+		result = intersect.circle_circle_collide(clamped, 0, b_pos, b_rad, into)
+		clamped:release()
+	end
+	return result
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --convert raw x, y, w, h rectangle components to aabb vectors
@@ -366,6 +632,7 @@ end
 --poly is a list of points in order
 --based on winding number, so re-intersecting areas are counted as solid rather than inverting
 function intersect.point_in_poly(point, poly)
+<<<<<<< HEAD
    local wn = 0
    for i, a in ipairs(poly) do
       local b = poly[i + 1] or poly[1]
@@ -376,6 +643,22 @@ function intersect.point_in_poly(point, poly)
       end
    end
    return wn ~= 0
+=======
+	local wn = 0
+	for i, a in ipairs(poly) do
+		local b = poly[i + 1] or poly[1]
+		if a.y <= point.y then
+			if b.y > point.y and vec2.winding_side(a, b, point) > 0 then
+				wn = wn + 1
+			end
+		else
+			if b.y <= point.y and vec2.winding_side(a, b, point) < 0 then
+				wn = wn - 1
+			end
+		end
+	end
+	return wn ~= 0
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --reversed versions

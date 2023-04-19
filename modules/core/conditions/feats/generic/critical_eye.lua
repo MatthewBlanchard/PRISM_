@@ -1,12 +1,18 @@
-local Condition = require "core.condition"
+local Condition = require("core.condition")
 
 local CriticalEye = Condition:extend()
 CriticalEye.name = "Critical Eye"
 CriticalEye.description = "You see opportunities others do not. You crit 5% more often."
 
+<<<<<<< HEAD
 CriticalEye:onAction(
    actions.Damage,
    function(self, level, actor, action) action.criticalOn = action.criticalOn - 1 end
 )
+=======
+CriticalEye:onAction(actions.Damage, function(self, level, actor, action)
+	action.criticalOn = action.criticalOn - 1
+end)
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 
 return CriticalEye

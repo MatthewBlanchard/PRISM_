@@ -30,6 +30,7 @@ end
 
 local capture_callstacks
 if love.system.getOS() == "Web" then
+<<<<<<< HEAD
    -- Do no extra wrapping under lovejs because using xpcall causes "attempt
    -- to yield across metamethod/C-call boundary"
    capture_callstacks = function(f) return f end
@@ -44,6 +45,26 @@ else
          return unpack(results)
       end
    end
+=======
+	-- Do no extra wrapping under lovejs because using xpcall causes "attempt
+	-- to yield across metamethod/C-call boundary"
+	capture_callstacks = function(f)
+		return f
+	end
+else
+	capture_callstacks = function(f)
+		-- Report errors with the coroutine's callstack instead of one coming
+		-- from async:update.
+		return function(...)
+			local results = { xpcall(f, debug.traceback, ...) }
+			local success = table.remove(results, 1)
+			if not success then
+				error(table.remove(results, 1))
+			end
+			return unpack(results)
+		end
+	end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --add a task to the kernel
@@ -64,6 +85,7 @@ function async:add(co, args, callback, error_callback)
 end
 
 local function process_resume(self, td, success, msg, ...)
+<<<<<<< HEAD
    local co, args, cb, error_cb = unpack(td)
    --error?
    if not success then
@@ -87,6 +109,33 @@ local function process_resume(self, td, success, msg, ...)
          table.insert(self.tasks, td)
       end
    end
+=======
+	local co, args, cb, error_cb = unpack(td)
+	--error?
+	if not success then
+		if error_cb then
+			error_cb(msg)
+		else
+			local err = ("failure in async task:\n\n\t%s\n"):format(tostring(msg))
+			error(err)
+		end
+	end
+	--check done
+	if coroutine.status(co) == "dead" then
+		--done? run callback with result
+		if cb then
+			cb(msg, ...)
+		end
+	else
+		--if not completed, re-add to the appropriate queue
+		if msg == "stall" then
+			--add to stalled queue as signalled stall
+			table.insert(self.tasks_stalled, td)
+		else
+			table.insert(self.tasks, td)
+		end
+	end
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 --update some task in the kernel

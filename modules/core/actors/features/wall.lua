@@ -1,6 +1,6 @@
-local Actor = require "core.actor"
-local Tiles = require "display.tiles"
-local Vector2 = require "math.vector"
+local Actor = require("core.actor")
+local Tiles = require("display.tiles")
+local Vector2 = require("math.vector")
 
 local actor = Actor:extend()
 actor.name = "wall"
@@ -10,8 +10,13 @@ actor.opaque = true
 actor.remembered = true
 
 actor.components = {
+<<<<<<< HEAD
    components.Opaque(),
    components.Collideable_box(),
+=======
+	components.Opaque(),
+	components.Collideable_box(),
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 }
 
 return actor

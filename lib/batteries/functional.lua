@@ -253,6 +253,7 @@ functional.map_cycle = functional.cycle
 -- (automatically drops any nils, same as map)
 
 function functional.chain(t, f)
+<<<<<<< HEAD
    local result = {}
    for i = 2, #t do
       local a = t[i - 1]
@@ -261,6 +262,18 @@ function functional.chain(t, f)
       if v ~= nil then table.insert(result, v) end
    end
    return result
+=======
+	local result = {}
+	for i = 2, #t do
+		local a = t[i - 1]
+		local b = t[i]
+		local v = f(a, b)
+		if v ~= nil then
+			table.insert(result, v)
+		end
+	end
+	return result
+>>>>>>> fbe4a4adf3bf1fc96ecb985cb65c5a009faf5ebc
 end
 
 functional.map_chain = functional.chain
