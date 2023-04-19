@@ -35,6 +35,7 @@ Gate.components = {
    components.Stats {
       maxHP = 12,
       AC = 0,
+      PR = 2,
    },
 }
 
