@@ -4,11 +4,9 @@ local Pushable = Component:extend()
 Pushable.name = "Pushable"
 
 Pushable.requirements = {
-  components.Usable,
+   components.Usable,
 }
 
-function Pushable:initialize(actor)
-  actor:addUseAction(actions.Push)
-end
+function Pushable:initialize(actor) actor:addUseAction(actions.Push) end
 
 return Pushable

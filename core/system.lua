@@ -37,67 +37,53 @@ System.softRequirements = nil
 
 --- This method is called when the Level is initialized. It is called after all of the Systems have been attached.
 -- @tparam Level level The Level object this System is attached to.
-function System:initialize(level)
-end
+function System:initialize(level) end
 
-function System:postInitialize(level)
-end
+function System:postInitialize(level) end
 
 --- This method is called after an actor has selected an action, but before it is executed.
 -- @tparam Level level The Level object this System is attached to.
 -- @tparam Actor actor The Actor object that has selected an action.
 -- @tparam Action action The Action object that the Actor has selected to execute.
-function System:beforeAction(level, actor, action)
-end
-    
+function System:beforeAction(level, actor, action) end
+
 --- This method is called after an actor has taken an action.
 -- @tparam Level level The Level object this System is attached to.
 -- @tparam Actor actor The Actor object that has taken an action.
 -- @tparam Action action The Action object that the Actor has executed.
-function System:afterAction(level, actor, action)
-end
+function System:afterAction(level, actor, action) end
 
-function System:beforeMove(level, actor, from, to)
-    
-end
+function System:beforeMove(level, actor, from, to) end
 --- This method is called after an actor has moved.
 -- @tparam Level level The Level object this System is attached to.
 -- @tparam Actor actor The Actor object that has moved.
-function System:onMove(level, actor, from, to)
-end
+function System:onMove(level, actor, from, to) end
 
 --- This method is called after an actor has been added to the Level.
 -- @tparam Level level The Level object this System is attached to.
 -- @tparam Actor actor The Actor object that has been added.
-function System:onActorAdded(level, actor)
-end
+function System:onActorAdded(level, actor) end
 
 --- This method is called after an actor has been removed from the Level.
 -- @tparam Level level The Level object this System is attached to.
 -- @tparam Actor actor The Actor object that has been removed.
-function System:onActorRemoved(level, actor)
-end
+function System:onActorRemoved(level, actor) end
 
 -- Called when an actor or tile has it's opacity changed.
-function System:afterOpacityChanged(level, x, y)
-end
+function System:afterOpacityChanged(level, x, y) end
 
 --- This method is called every 100 units of time, a second, and can be used for mechanics such as hunger and fire spreading.
 -- @tparam Level level The Level object this System is attached to.
-function System:onTick(level)
-end
+function System:onTick(level) end
 
 -- This method is called when a new turn begins. The actor is the actor that is about to take their turn.
-function System:onTurn(level, actor)
-end
+function System:onTurn(level, actor) end
 
 -- This method is called whenever the level yields back to the interface.
 -- The most common usage for this right now is updating the sight component of any
 -- input controlled actors in the Sight system.
-function System:onYield(level, event)
-end
+function System:onYield(level, event) end
 
-function System:onDescend(level)
-end
+function System:onDescend(level) end
 
 return System
