@@ -1,60 +1,63 @@
 local function New(level, map)
-   local actors_by_unique_id = {}
+   local entities_by_unique_id = {}
    local callback_queue = {}
 
+   local player_info
+
+   local function spawn_cell(cell, x, y, callback, unique_id)
+      entities_by_unique_id[unique_id] = cell
+      cell.position = {}
+      cell.position.x = x + 1
+      cell.position.y = y + 1
+
+      if callback then
+         local status = callback(cell, entities_by_unique_id)
+         if status == "Delay" then
+            table.insert(callback_queue, function() callback(cell, entities_by_unique_id) end)
+         end
+      end
+      level:setCell(x + 1, y + 1, cell)
+   end
+
    local function spawn_actor(actor, x, y, callback, unique_id)
-      actors_by_unique_id[unique_id] = actor
+      entities_by_unique_id[unique_id] = actor
       actor.position.x = x + 1
       actor.position.y = y + 1
 
       if callback then
-         local status = callback(actor, actors_by_unique_id)
+         local status = callback(actor, entities_by_unique_id)
          if status == "Delay" then
-            table.insert(callback_queue, function() callback(actor, actors_by_unique_id) end)
+            table.insert(callback_queue, function() callback(actor, entities_by_unique_id) end)
          end
       end
 
       level:addActor(actor)
    end
 
-   local function spawn_actors()
-      for i, v in ipairs(map.actors.list) do
+   local function spawn_entities()
+      for x, y, v in map.entities.sparsemap:each() do
          local id, unique_id, x, y, callback = v.id, v.unique_id, v.pos.x, v.pos.y, v.callback
-         if game[id] == nil then
+         if cells[id] ~= nil then
+            spawn_cell(cells[id](), x, y, callback, unique_id)
+         elseif game[id] == nil then
             spawn_actor(actors[id](), x, y, callback, unique_id)
          else
+            -- if id == 'Player' then
+            --   player_info = {x = x, y = y, id = id, unique_id = unique_id, callback = callback}
+            -- else
             spawn_actor(game[id], x, y, callback, unique_id)
+            -- end
          end
       end
    end
 
-   local function draw_heat_map()
-      for i, v in ipairs(heat_map.map) do
-         for i2, v2 in ipairs(v) do
-            if v2 ~= 999 then
-               local color_modifier = v2 * 5
-               local custom = {
-                  color = {
-                     math.max(0, (255 - color_modifier) / 255),
-                     0 / 255,
-                     math.max(0, (0 + color_modifier) / 255),
-                     1,
-                  },
-               }
-               local coloredtile = actors.Coloredtile(custom)
-               spawn_actor(coloredtile, i, i2)
-            end
-         end
-      end
-   end
-
-   --draw_heat_map()
-
-   spawn_actors()
+   spawn_entities()
 
    for i, v in ipairs(callback_queue) do
       v()
    end
+
+   --spawn_actor(game[player_info.id], player_info.x, player_info.y, player_info.callback, player_info.unique_id)
 
    return map
 end

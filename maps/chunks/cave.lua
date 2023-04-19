@@ -1,5 +1,4 @@
 local Chunk = require "maps.map"
-local Clipper = require "maps.clipper.clipper"
 
 local Cave = Chunk:extend()
 Cave.name = "Cave"

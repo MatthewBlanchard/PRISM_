@@ -39,7 +39,7 @@ function Game:generateLevel(depth)
    -- to use. And which generators to use on which depth somehow.
 
    --local map, populater = ROT.Map.Brogue(50, 50), require "populater" -- Brogue Gen
-   --local map, populater = require "maps.new.level_gen"(), require "maps.new.populater" -- Dim Gen
+   --local map, populater = require "maps.new.planar_gen"(), require "maps.new.populater" -- Dim Gen
    local map, populater = require "maps.new.tunnel_gen"(), require "maps.new.populater"
    local level = Level(map, populater)
    level:addSystem(systems.Message())
@@ -71,6 +71,7 @@ function Game:__exportModule(name)
    self:__loadItems(module_path .. "/components", components, true)
    self:__loadItems(module_path .. "/conditions", conditions, true)
    self:__loadItems(module_path .. "/actors", actors, true)
+   self:__loadItems(module_path .. "/cells", cells, true)
    self:__loadItems(module_path .. "/systems", systems, true)
 
    Loot = require "loot"
@@ -106,6 +107,7 @@ function Game:__initializeExports()
    actions = {}
    components = {}
    actors = {}
+   cells = {}
 end
 
 return Game

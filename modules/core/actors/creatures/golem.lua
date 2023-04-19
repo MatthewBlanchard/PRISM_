@@ -23,7 +23,9 @@ Golem.components = {
    components.Aicontroller(),
 }
 
-function Golem:initialize() self:applyCondition(conditions.Shield()) end
+function Golem:initialize()
+   --self:applyCondition(conditions.Shield())
+end
 
 local actUtil = components.Aicontroller
 function Golem:act(level) return actUtil.randomMove(level, self) end
