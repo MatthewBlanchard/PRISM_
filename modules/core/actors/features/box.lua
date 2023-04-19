@@ -9,15 +9,15 @@ Box.char = Tiles["box"]
 Box.color = { 0.8, 0.5, 0.1, 1 }
 
 Box.components = {
-	components.Collideable_box(),
-	components.Move { speed = 0 },
-	components.Usable(),
-	components.Pushable(),
-	components.Stats {
-		maxHP = 1,
-		AC = 0,
-	},
-	components.Light_occluder(3),
+   components.Collideable_box(),
+   components.Move { speed = 0 },
+   components.Usable(),
+   components.Pushable(),
+   components.Stats {
+      maxHP = 1,
+      AC = 0,
+   },
+   components.Light_occluder(3),
 }
 
 return Box

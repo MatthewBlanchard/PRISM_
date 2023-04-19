@@ -4,8 +4,8 @@ local ModifyStats = Condition:extend()
 ModifyStats.name = "stats"
 
 function ModifyStats:__new(options)
-	Condition.__new(self)
-	self.stats = self.stats or options
+   Condition.__new(self)
+   self.stats = self.stats or options
 end
 
 function ModifyStats:getATK() return self.stats["ATK"] or 0 end

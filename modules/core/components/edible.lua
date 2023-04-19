@@ -4,8 +4,8 @@ local Edible = Component:extend()
 Edible.name = "edible"
 
 Edible.requirements = {
-	components.Item,
-	components.Usable,
+   components.Item,
+   components.Usable,
 }
 
 function Edible:__new(options) self.nutrition = options.nutrition end

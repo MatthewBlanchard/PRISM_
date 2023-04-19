@@ -8,12 +8,12 @@ Bone_Shard.name = "Bone Shard"
 Bone_Shard.color = { 0.89, 0.855, 0.788, 1 }
 
 Bone_Shard.components = {
-	components.Projectile {
-		range = 5,
-		bounce = 0,
-		damage = "1d2",
-		effects = {},
-	},
+   components.Projectile {
+      range = 5,
+      bounce = 0,
+      damage = "1d2",
+      effects = {},
+   },
 }
 
 return Bone_Shard

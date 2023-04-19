@@ -7,17 +7,17 @@ Read.name = "read"
 Read.targets = { targets.Item }
 
 function Read:perform(level)
-	actions.Read.perform(self, level)
+   actions.Read.perform(self, level)
 
-	local familiar = actors.Gloop()
-	familiar.position.x = self.owner.position.x
-	familiar.position.y = self.owner.position.y
-	level:addComponent(familiar, components.Lifetime { duration = 1000 })
+   local familiar = actors.Gloop()
+   familiar.position.x = self.owner.position.x
+   familiar.position.y = self.owner.position.y
+   level:addComponent(familiar, components.Lifetime { duration = 1000 })
 
-	local mind_control = conditions.Mind_control()
-	familiar:applyCondition(mind_control)
+   local mind_control = conditions.Mind_control()
+   familiar:applyCondition(mind_control)
 
-	level:addActor(familiar)
+   level:addActor(familiar)
 end
 
 local ScrollOfFindFamiliar = Actor:extend()
@@ -26,10 +26,10 @@ ScrollOfFindFamiliar.color = { 0.8, 0.8, 0.8, 1 }
 ScrollOfFindFamiliar.char = Tiles["scroll"]
 
 ScrollOfFindFamiliar.components = {
-	components.Item(),
-	components.Usable(),
-	components.Readable { read = Read },
-	components.Cost(),
+   components.Item(),
+   components.Usable(),
+   components.Readable { read = Read },
+   components.Cost(),
 }
 
 return ScrollOfFindFamiliar

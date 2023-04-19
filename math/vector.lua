@@ -18,8 +18,8 @@ Vector2.y = nil
 --@tparam number x The x component of the vector.
 --@tparam number y The y component of the vector.
 function Vector2:__new(x, y)
-	self.x = x or 0
-	self.y = y or 0
+   self.x = x or 0
+   self.y = y or 0
 end
 
 --- Returns a copy of the vector.
@@ -61,15 +61,15 @@ function Vector2.__unm(a) return Vector2(-a.x, -a.y) end
 function Vector2:__tostring() return "x: " .. self.x .. " y: " .. self.y end
 
 function Vector2:getRange(type, vec)
-	assert(vec.is and vec:is(Vector2), "Expected argument vector to be of type Vector2!")
+   assert(vec.is and vec:is(Vector2), "Expected argument vector to be of type Vector2!")
 
-	if type == "box" then
-		local xDist = math.abs(vec.x - self.x)
-		local yDist = math.abs(vec.y - self.y)
-		return math.max(xDist, yDist)
-	else
-		return math.sqrt(math.pow(self.x - vec.x, 2) + math.pow(self.y - vec.y, 2))
-	end
+   if type == "box" then
+      local xDist = math.abs(vec.x - self.x)
+      local yDist = math.abs(vec.y - self.y)
+      return math.max(xDist, yDist)
+   else
+      return math.sqrt(math.pow(self.x - vec.x, 2) + math.pow(self.y - vec.y, 2))
+   end
 end
 
 Vector2.UP = Vector2(0, -1)

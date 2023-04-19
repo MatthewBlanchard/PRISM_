@@ -9,10 +9,10 @@ Drink.name = "drink"
 Drink.targets = { targets.Item }
 
 function Drink:perform(level)
-	actions.Drink.perform(self, level)
+   actions.Drink.perform(self, level)
 
-	local heal = self.owner:getReaction(reactions.Heal)
-	level:performAction(heal(self.owner, {}, 5))
+   local heal = self.owner:getReaction(reactions.Heal)
+   level:performAction(heal(self.owner, {}, 5))
 end
 
 local Potion = Actor:extend()
@@ -24,14 +24,14 @@ Potion.char = Tiles["potion"]
 --Potion.lightEffect = components.Light.effects.pulse({ 0.3, 0.0, 0.0, 1 }, 3, .5)
 
 Potion.components = {
-	components.Light {
-		color = LightColor(16, 0, 0),
-		effect = Potion.lightEffect,
-	},
-	components.Item { stackable = true },
-	components.Usable(),
-	components.Drinkable { drink = Drink },
-	components.Cost(),
+   components.Light {
+      color = LightColor(16, 0, 0),
+      effect = Potion.lightEffect,
+   },
+   components.Item { stackable = true },
+   components.Usable(),
+   components.Drinkable { drink = Drink },
+   components.Cost(),
 }
 
 return Potion

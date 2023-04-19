@@ -8,9 +8,9 @@ River.color = { 0.0, 0.0, 1.0, 1 }
 River.remembered = true
 
 River.components = {
-	components.Animated {
-		sheet = { Tiles["river_h_1"], Tiles["river_h_2"] },
-	},
+   components.Animated {
+      sheet = { Tiles["river_h_1"], Tiles["river_h_2"] },
+   },
 }
 
 return River

@@ -7,13 +7,13 @@ local LevelUpPanel = Panel:extend()
 function LevelUpPanel:__new(display, parent) Panel.__new(self, display, parent, 23, 15, 27, 17) end
 
 function LevelUpPanel:draw()
-	self:clear()
-	self:drawBorders()
+   self:clear()
+   self:drawBorders()
 end
 
 function LevelUpPanel:handleKeyPress(keypress)
-	local feat = self.options[keypress]
-	--[[
+   local feat = self.options[keypress]
+   --[[
   if stat then
     local statLevel = game.curActor.levels[stat] + 1
     local feats = self.feats[stat][statLevel]
@@ -27,7 +27,7 @@ function LevelUpPanel:handleKeyPress(keypress)
     end
   end
   ]]
-	--
+   --
 end
 
 return LevelUpPanel

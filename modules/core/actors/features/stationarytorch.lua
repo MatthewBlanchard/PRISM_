@@ -8,9 +8,9 @@ StationaryTorch.name = "StationaryTorch"
 StationaryTorch.color = { 0.5, 0.5, 0.8 }
 
 StationaryTorch.components = {
-	components.Light {
-		color = LightColor(14, 14, 24),
-	},
+   components.Light {
+      color = LightColor(14, 14, 24),
+   },
 }
 
 return StationaryTorch

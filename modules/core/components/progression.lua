@@ -7,8 +7,8 @@ Progression.requirements = { components.Stats }
 Progression.actions = { actions.Level }
 
 function Progression:initialize(actor)
-	self.level = 0
-	self.classAbility = nil
+   self.level = 0
+   self.classAbility = nil
 end
 
 return Progression

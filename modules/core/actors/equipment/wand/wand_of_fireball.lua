@@ -12,13 +12,13 @@ fireballLight.name = "Fireball"
 fireballLight.color = { 1, 0.6, 0.2 }
 fireballLight.char = Tiles["projectile1"]
 fireballLight.components = {
-	components.Light {
-		color = LightColor(28, 16, 1),
-		effect = { components.Light.effects.flicker, { 0.15, 0.3 } },
-	},
-	components.Animated {
-		sheet = { Tiles["projectile1"], Tiles["projectile2"] },
-	},
+   components.Light {
+      color = LightColor(28, 16, 1),
+      effect = { components.Light.effects.flicker, { 0.15, 0.3 } },
+   },
+   components.Animated {
+      sheet = { Tiles["projectile1"], Tiles["projectile2"] },
+   },
 }
 
 local ZapTarget = targets.Point:extend()
@@ -31,41 +31,41 @@ Zap.aoeRange = 2
 Zap.targets = { targets.Item, ZapTarget }
 
 function Zap:perform(level)
-	actions.Zap.perform(self, level, true)
+   actions.Zap.perform(self, level, true)
 
-	local pointTarget = self.targetActors[2]
+   local pointTarget = self.targetActors[2]
 
-	local fov, actors = level:getAOE("fov", pointTarget, self.aoeRange)
-	local damage = ROT.Dice.roll "2d6"
+   local fov, actors = level:getAOE("fov", pointTarget, self.aoeRange)
+   local damage = ROT.Dice.roll "2d6"
 
-	local light = fireballLight()
-	level:addActor(light)
-	level:moveActor(light, pointTarget)
+   local light = fireballLight()
+   level:addActor(light)
+   level:moveActor(light, pointTarget)
 
-	local ox, oy = self.owner.position.x, self.owner.position.y
-	local px, py = pointTarget.x, pointTarget.y
-	local line, valid = Bresenham.line(ox, oy, px, py)
+   local ox, oy = self.owner.position.x, self.owner.position.y
+   local px, py = pointTarget.x, pointTarget.y
+   local line, valid = Bresenham.line(ox, oy, px, py)
 
-	for i = 2, #line do
-		level:moveActor(light, Vector2(line[i][1], line[i][2]))
-		level:yield("wait", 0.1)
-	end
+   for i = 2, #line do
+      level:moveActor(light, Vector2(line[i][1], line[i][2]))
+      level:yield("wait", 0.1)
+   end
 
-	local effects_system = level:getSystem "Effects"
-	effects_system:addEffect(level, effects.ExplosionEffect(fov, pointTarget, self.aoeRange))
+   local effects_system = level:getSystem "Effects"
+   effects_system:addEffect(level, effects.ExplosionEffect(fov, pointTarget, self.aoeRange))
 
-	level:removeActor(light)
+   level:removeActor(light)
 
-	effects_system:suppressEffects()
-	for i, actor in ipairs(actors) do
-		if targets.Creature:validate(self.owner, actor) then
-			local damage =
-				actor:getReaction(reactions.Damage)(actor, { self.owner }, damage, self.targetActors[1])
-			level:performAction(damage)
-		end
-	end
-	print("Level from fireball " .. level)
-	effects_system:resumeEffects(level)
+   effects_system:suppressEffects()
+   for i, actor in ipairs(actors) do
+      if targets.Creature:validate(self.owner, actor) then
+         local damage =
+            actor:getReaction(reactions.Damage)(actor, { self.owner }, damage, self.targetActors[1])
+         level:performAction(damage)
+      end
+   end
+   print("Level from fireball " .. level)
+   effects_system:resumeEffects(level)
 end
 
 local WandOfFireball = Actor:extend()
@@ -75,13 +75,13 @@ WandOfFireball.color = { 1, 0.6, 0.2, 1 }
 WandOfFireball.char = Tiles["wand_gnarly"]
 
 WandOfFireball.components = {
-	components.Item { stackable = false },
-	components.Usable(),
-	components.Wand {
-		maxCharges = 5,
-		zap = Zap,
-	},
-	components.Cost { rarity = "rare" },
+   components.Item { stackable = false },
+   components.Usable(),
+   components.Wand {
+      maxCharges = 5,
+      zap = Zap,
+   },
+   components.Cost { rarity = "rare" },
 }
 
 return WandOfFireball

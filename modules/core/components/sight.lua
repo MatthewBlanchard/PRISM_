@@ -5,31 +5,31 @@ local Sight = Component:extend()
 Sight.name = "Sight"
 
 function Sight:__new(options)
-	self.range = options.range
-	self.fov = options.fov
+   self.range = options.range
+   self.fov = options.fov
 
-	-- explored tracks tiles that have been seen by the player
-	self.explored = options.explored
+   -- explored tracks tiles that have been seen by the player
+   self.explored = options.explored
 
-	-- remembered actors that have been seen by the player
-	self.rememberedActors = SparseGrid()
+   -- remembered actors that have been seen by the player
+   self.rememberedActors = SparseGrid()
 
-	if options.darkvision and math.floor(options.darkvision) ~= options.darkvision then
-		error "Darkvision must be an integer"
-	end
+   if options.darkvision and math.floor(options.darkvision) ~= options.darkvision then
+      error "Darkvision must be an integer"
+   end
 
-	self.darkvision = options.darkvision or 8
+   self.darkvision = options.darkvision or 8
 end
 
 function Sight:initialize(actor)
-	self.seenActors = {}
-	self.scryActors = {}
+   self.seenActors = {}
+   self.scryActors = {}
 
-	if self.fov then
-		self.fov = SparseGrid()
-		self.raw_fov = SparseGrid()
-		if self.explored then self.explored = SparseGrid() end
-	end
+   if self.fov then
+      self.fov = SparseGrid()
+      self.raw_fov = SparseGrid()
+      if self.explored then self.explored = SparseGrid() end
+   end
 end
 
 function Sight:getRevealedActors() return self.seenActors end

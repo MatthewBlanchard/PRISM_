@@ -9,7 +9,7 @@ Collideable.name = "Collideable"
 Collideable.blockSelf = false
 
 function Collideable:__new()
-	error "Collideable is an abstract class. Use a subclass like CollideableBox instead."
+   error "Collideable is an abstract class. Use a subclass like CollideableBox instead."
 end
 
 -- Gets the tiles that can be used to take actions from this actor
@@ -26,23 +26,23 @@ function Collideable:localToGlobal(actor, localPos) return actor.position + loca
 function Collideable:globalToLocal(actor, globalPos) return globalPos - actor.position end
 
 function Collideable:hasCell(cell)
-	for vec in self:eachCell() do
-		if vec == cell then return true end
-	end
+   for vec in self:eachCell() do
+      if vec == cell then return true end
+   end
 
-	return false
+   return false
 end
 
 function Collideable:hasGlobalCell(actor, cell) return self:hasCell(actor, cell) end
 
 -- given a direction return a list of cells we intend to occupy
 function Collideable:moveCandidate(level, actor, direction)
-	error "moveCandidate must be implemented by a subclass"
+   error "moveCandidate must be implemented by a subclass"
 end
 
 -- called if our moveCandidate is accepted so we can update our state
 function Collideable:acceptedCandidate(level, actor, direction)
-	error "acceptedCandidate must be implemented by a subclass"
+   error "acceptedCandidate must be implemented by a subclass"
 end
 
 -- called if our moveCandidate is blocked by another actor

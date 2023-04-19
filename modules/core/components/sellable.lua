@@ -7,42 +7,42 @@ Sellable.name = "Sellable"
 function Sellable:initialize(actor) end
 
 function Sellable:setShopkeep(actor)
-	self.shopkeep = actor
+   self.shopkeep = actor
 
-	local function soldEffect()
-		return effects.Character(
-			actor.position.x,
-			actor.position.y - 1,
-			Tiles["bubble_heart"],
-			{ 1, 1, 1 },
-			1
-		)
-	end
+   local function soldEffect()
+      return effects.Character(
+         actor.position.x,
+         actor.position.y - 1,
+         Tiles["bubble_heart"],
+         { 1, 1, 1 },
+         1
+      )
+   end
 
-	local function unsoldEffect()
-		return effects.Character(
-			actor.position.x,
-			actor.position.y - 1,
-			Tiles["bubble_ellipsis"],
-			{ 1, 1, 1 },
-			1
-		)
-	end
+   local function unsoldEffect()
+      return effects.Character(
+         actor.position.x,
+         actor.position.y - 1,
+         Tiles["bubble_ellipsis"],
+         { 1, 1, 1 },
+         1
+      )
+   end
 
-	self.soldEffect = soldEffect
-	self.notSoldEffect = unsoldEffect
+   self.soldEffect = soldEffect
+   self.notSoldEffect = unsoldEffect
 end
 
 function Sellable:setPrice(currency, price)
-	self.currency = currency
-	self.price = price
+   self.currency = currency
+   self.price = price
 end
 
 function Sellable:setItem(item)
-	--self.item = item
-	--self.char = item.char
-	--self.color = item.color
-	--self.name = item.name
+   --self.item = item
+   --self.char = item.char
+   --self.color = item.color
+   --self.name = item.name
 end
 
 return Sellable
