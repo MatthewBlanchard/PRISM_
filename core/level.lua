@@ -80,7 +80,7 @@ function Level:run()
           end
         end
       end
-      
+
       return "descend"
     end
 
@@ -97,14 +97,14 @@ function Level:run()
       for _, system in ipairs(self.systems) do
         system:onTick(self)
       end
-      
+
       self:triggerActionEvents("onTicks")
     else
       for _, system in ipairs(self.systems) do
         system:onTurn(self, actor)
       end
 
-      local action
+      local _, action
       local controller = self:getActorController(actor)
       if controller then
         -- if we find a player controlled actor we set self.waitingFor and yield it to main
@@ -143,12 +143,16 @@ end
 
 function Level:addSystem(system)
   assert(system.name, "System must have a name.")
-  assert(not self.systems[system.name], "System with name " .. system.name .. " already exists. System names must be unique.")
+  assert(not self.systems[system.name],
+    "System with name " .. system.name .. " already exists. System names must be unique."
+  )
 
   -- Check our requirements and make sure we have all the systems we need
   if system.requirements and #system.requirements > 1 then
     for _, requirement in ipairs(system.requires) do
-      assert(self.systems[requirement], "System " .. system.name .. " requires system " .. requirement .. " but it is not present.")
+      assert(self.systems[requirement],
+        "System " .. system.name .. " requires system " .. requirement .. " but it is not present."
+      )
     end
   end
 
@@ -158,7 +162,10 @@ function Level:addSystem(system)
     if existingSystem.softRequirements and #existingSystem.softRequirements > 0 then
       for _, softRequirement in ipairs(existingSystem.softRequirements) do
         if softRequirement == system.name then
-          error("System " .. system.name .. " is out of order. It must be added before " .. existingSystem.name .. " because it is a soft requirement.")
+          error(
+            "System "..system.name .." is out of order. It must be added before "
+            ..existingSystem.name.." because it is a soft requirement."
+          )
         end
       end
     end
@@ -211,7 +218,7 @@ function Level:addActor(actor)
 
   actor:initialize(self)
   table.insert(self.actors, actor)
-  
+
   self:insertSparseMapEntries(actor)
 
   if actor:hasComponent(components.Aicontroller) or
@@ -252,7 +259,7 @@ end
 function Level:removeComponent(actor, component)
   actor:__removeComponent(component)
   self:updateComponentCache(actor)
-  
+
   if component:is(components.Opaque) then
     self:updateOpacityCache(actor.position.x, actor.position.y)
   end
@@ -280,7 +287,7 @@ function Level:hasActor(actor)
 end
 
 function Level:hasActorWithComponent(component)
-  for actor, _ in self:eachActor(component) do
+  for _, _ in self:eachActor(component) do
     return true
   end
 
@@ -304,18 +311,18 @@ end
 function Level:eachActor(...)
   local n = 1
   local comp = { ... }
-  
+
   if #comp == 1 and self.componentCache[comp[1]] then
     local currentComponentCache = self.componentCache[comp[1]]
-    local key = next(currentComponentCache, key)
+    local key = next(currentComponentCache, nil)
 
     local function iterator()
-      while key do
-        local ractor, rcomp = key, key:getComponent(comp[1])
-        key = next(currentComponentCache, key)
-        
-        return ractor, rcomp
-      end
+      if not key then return end
+
+      local ractor, rcomp = key, key:getComponent(comp[1])
+      key = next(currentComponentCache, key)
+
+      return ractor, rcomp
     end
 
     return iterator
@@ -367,7 +374,7 @@ function Level:eachActorTile(actor)
 
   local i = 1
   return function()
-    while i <= count do
+    if i <= count then
       local ret = dummy[i]
       i = i + 1
       return ret
@@ -385,7 +392,7 @@ function Level:getActorsAt(x, y)
 end
 
 function Level:eachActorAt(x, y)
-  local key
+  local key, _
   local actors = self.sparseMap:get(x, y)
   local function iterator()
     key, _ = next(actors, key)
@@ -399,7 +406,7 @@ function Level:moveActor(actor, pos, skipSparseMap)
   assert(math.floor(pos.x) == pos.x and math.floor(pos.y) == pos.y, "Expected integer values for pos in Level:moveActor.")
 
   for _, system in ipairs(self.systems)  do
-    system:beforeMove(self, actor, oldpos, pos)
+    system:beforeMove(self, actor, actor.position, pos)
   end
 
   -- if the actor isn't in the level, we don't do anything
@@ -411,7 +418,7 @@ function Level:moveActor(actor, pos, skipSparseMap)
     self:removeSparseMapEntries(actor)
   end
   
-  local oldpos = actor.position
+  local previous_position = actor.position
   -- we copy the position here so that the caller doesn't have to worry about
   -- allocating a new table
   actor.position = pos:copy()
@@ -420,11 +427,11 @@ function Level:moveActor(actor, pos, skipSparseMap)
     self:insertSparseMapEntries(actor)
   end
 
-  self:getCell(oldpos.x, oldpos.y):onLeave(self, actor)
+  self:getCell(previous_position.x, previous_position.y):onLeave(self, actor)
   self:getCell(pos.x, pos.y):onEnter(self, actor)
   
   for _, system in ipairs(self.systems) do
-    system:onMove(self, actor, oldpos, pos)
+    system:onMove(self, actor, previous_position, pos)
   end
 end
 

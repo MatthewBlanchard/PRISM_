@@ -43,6 +43,12 @@ function TunnelGen:create(callback)
         self._map:insert_actor('Sqeeto', x, y)
     end
 
+    for i = 1, 1 do
+        local x, y = self._map:get_random_open_tile()
+        self._map:insert_actor('Mimeek', x, y)
+    end
+
+
     print "FINISHED TUNNELING"
 
     for i = 1, 10 do
@@ -115,11 +121,6 @@ function TunnelGen:create(callback)
         }
 
         self._map:insert_actor(light_sources[math.random(1, #light_sources)], x, y)
-    end
-
-    for i = 1, 100 do
-        local x, y = self._map:get_random_open_tile()
-        --self._map:insert_actor('Gloop', x, y)
     end
 
     for x, y, cell in self._map:for_cells() do
