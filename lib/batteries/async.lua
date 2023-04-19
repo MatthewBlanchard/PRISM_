@@ -29,7 +29,7 @@ function async:new()
 end
 
 local capture_callstacks
-if love.system.getOS() == 'Web' then
+if love.system.getOS() == "Web" then
 	-- Do no extra wrapping under lovejs because using xpcall causes "attempt
 	-- to yield across metamethod/C-call boundary"
 	capture_callstacks = function(f)
@@ -40,7 +40,7 @@ else
 		-- Report errors with the coroutine's callstack instead of one coming
 		-- from async:update.
 		return function(...)
-			local results = {xpcall(f, debug.traceback, ...)}
+			local results = { xpcall(f, debug.traceback, ...) }
 			local success = table.remove(results, 1)
 			if not success then
 				error(table.remove(results, 1))
@@ -74,8 +74,7 @@ local function process_resume(self, td, success, msg, ...)
 		if error_cb then
 			error_cb(msg)
 		else
-			local err = ("failure in async task:\n\n\t%s\n")
-				:format(tostring(msg))
+			local err = ("failure in async task:\n\n\t%s\n"):format(tostring(msg))
 			error(err)
 		end
 	end

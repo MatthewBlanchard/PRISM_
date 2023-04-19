@@ -1,4 +1,4 @@
-local ROT = require((...):gsub(('.[^./\\]*'):rep(2) .. '$', ''))
+local ROT = require((...):gsub((".[^./\\]*"):rep(2) .. "$", ""))
 local Feature = ROT.Class:extend("Feature")
 
 function Feature:isValid() end

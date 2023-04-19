@@ -1,12 +1,10 @@
-local Component = require "core.component"
+local Component = require("core.component")
 
 local RealityDistortion = Component:extend()
 RealityDistortion.name = "RealityDistortion"
 
-RealityDistortion.requirements = {
-}
+RealityDistortion.requirements = {}
 
-function RealityDistortion:initialize()
-end
+function RealityDistortion:initialize() end
 
 return RealityDistortion

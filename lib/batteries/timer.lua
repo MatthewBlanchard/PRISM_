@@ -32,9 +32,7 @@ function timer:update(dt)
 
 		--set the expired state and get the relevant callback
 		self.has_expired = self.timer >= self.time
-		local cb = self:expired()
-			and self.on_finish
-			or self.on_progress
+		local cb = self:expired() and self.on_finish or self.on_progress
 
 		if cb then
 			cb(self:progress(), self)

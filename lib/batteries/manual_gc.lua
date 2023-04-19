@@ -44,10 +44,7 @@ return function(time_budget, memory_ceiling, disable_otherwise)
 	local max_steps = 1000
 	local steps = 0
 	local start_time = love.timer.getTime()
-	while
-		love.timer.getTime() - start_time < time_budget and
-		steps < max_steps
-	do
+	while love.timer.getTime() - start_time < time_budget and steps < max_steps do
 		collectgarbage("step", 1)
 		steps = steps + 1
 	end

@@ -57,7 +57,7 @@ end
 
 --pack when a sequence is needed
 function vec3:pack()
-	return {self:unpack()}
+	return { self:unpack() }
 end
 
 --handle pooling
@@ -101,9 +101,9 @@ local EQUALS_EPSILON = 1e-9
 --true if a and b are functionally equivalent
 function vec3.equals(a, b)
 	return (
-		math.abs(a.x - b.x) <= EQUALS_EPSILON and
-		math.abs(a.y - b.y) <= EQUALS_EPSILON and
-		math.abs(a.z - b.z) <= EQUALS_EPSILON
+		math.abs(a.x - b.x) <= EQUALS_EPSILON
+		and math.abs(a.y - b.y) <= EQUALS_EPSILON
+		and math.abs(a.z - b.z) <= EQUALS_EPSILON
 	)
 end
 
@@ -111,9 +111,9 @@ end
 --(very slightly faster than `not vec3.equals(a, b)`)
 function vec3.nequals(a, b)
 	return (
-		math.abs(a.x - b.x) > EQUALS_EPSILON or
-		math.abs(a.y - b.y) > EQUALS_EPSILON or
-		math.abs(a.z - b.z) > EQUALS_EPSILON
+		math.abs(a.x - b.x) > EQUALS_EPSILON
+		or math.abs(a.y - b.y) > EQUALS_EPSILON
+		or math.abs(a.z - b.z) > EQUALS_EPSILON
 	)
 end
 
@@ -154,8 +154,12 @@ end
 
 --scalar
 function vec3:saddi(x, y, z)
-	if not y then y = x end
-	if not z then z = y end
+	if not y then
+		y = x
+	end
+	if not z then
+		z = y
+	end
 	self.x = self.x + x
 	self.y = self.y + y
 	self.z = self.z + z
@@ -163,8 +167,12 @@ function vec3:saddi(x, y, z)
 end
 
 function vec3:ssubi(x, y, z)
-	if not y then y = x end
-	if not z then z = y end
+	if not y then
+		y = x
+	end
+	if not z then
+		z = y
+	end
 	self.x = self.x - x
 	self.y = self.y - y
 	self.z = self.z - z
@@ -172,8 +180,12 @@ function vec3:ssubi(x, y, z)
 end
 
 function vec3:smuli(x, y, z)
-	if not y then y = x end
-	if not z then z = y end
+	if not y then
+		y = x
+	end
+	if not z then
+		z = y
+	end
 	self.x = self.x * x
 	self.y = self.y * y
 	self.z = self.z * z
@@ -181,8 +193,12 @@ function vec3:smuli(x, y, z)
 end
 
 function vec3:sdivi(x, y, z)
-	if not y then y = x end
-	if not z then z = y end
+	if not y then
+		y = x
+	end
+	if not z then
+		z = y
+	end
 	self.x = self.x / x
 	self.y = self.y / y
 	self.z = self.z / z
@@ -313,7 +329,9 @@ function vec3:infuse_single(swizzle, v)
 end
 
 function vec3:extract_vec2(swizzle, into)
-	if not into then into = vec2:zero() end
+	if not into then
+		into = vec2:zero()
+	end
 	local x = self:extract_single(swizzle:byte(1))
 	local y = self:extract_single(swizzle:byte(2))
 	return into:sset(x, y)
@@ -343,10 +361,7 @@ local _euler_macro = {
 }
 function vec3:rotate_euleri(angle_x_axis, angle_y_axis, angle_z_axis)
 	for i, swizzle in ipairs(_euler_macro) do
-		local angle =
-			i == 1 and angle_x_axis
-			or i == 2 and angle_y_axis
-			or i == 3 and angle_z_axis
+		local angle = i == 1 and angle_x_axis or i == 2 and angle_y_axis or i == 3 and angle_z_axis
 		self:rotatei(swizzle, angle)
 	end
 	return self
@@ -392,7 +407,6 @@ vec3.rot180 = vec3.inverse --alias
 function vec3:rotate_around(swizzle, angle, pivot)
 	return self:copy():rotate_aroundi(swizzle, angle, pivot)
 end
-
 
 -----------------------------------------------------------
 -- per-component clamping ops
@@ -518,12 +532,10 @@ function vec3.dot(a, b)
 end
 
 function vec3.cross(a, b, into)
-	if not into then into = vec3:zero() end
-	return into:sset(
-		a.y * b.z - a.z * b.y,
-		a.z * b.x - a.x * b.z,
-		a.x * b.y - a.y * b.x
-	)
+	if not into then
+		into = vec3:zero()
+	end
+	return into:sset(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x)
 end
 
 --scalar projection a onto b

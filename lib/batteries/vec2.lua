@@ -61,7 +61,7 @@ end
 
 --pack when a sequence is needed
 function vec2:pack()
-	return {self:unpack()}
+	return { self:unpack() }
 end
 
 --shared pooled storage
@@ -81,7 +81,9 @@ function vec2:vector_set(v)
 end
 
 function vec2:scalar_set(x, y)
-	if not y then y = x end
+	if not y then
+		y = x
+	end
 	self.x = x
 	self.y = y
 	return self
@@ -103,19 +105,13 @@ local EQUALS_EPSILON = 1e-9
 
 --true if a and b are functionally equivalent
 function vec2.equals(a, b)
-	return (
-		math.abs(a.x - b.x) <= EQUALS_EPSILON and
-		math.abs(a.y - b.y) <= EQUALS_EPSILON
-	)
+	return (math.abs(a.x - b.x) <= EQUALS_EPSILON and math.abs(a.y - b.y) <= EQUALS_EPSILON)
 end
 
 --true if a and b are not functionally equivalent
 --(very slightly faster than `not vec2.equals(a, b)`)
 function vec2.nequals(a, b)
-	return (
-		math.abs(a.x - b.x) > EQUALS_EPSILON or
-		math.abs(a.y - b.y) > EQUALS_EPSILON
-	)
+	return (math.abs(a.x - b.x) > EQUALS_EPSILON or math.abs(a.y - b.y) > EQUALS_EPSILON)
 end
 
 -----------------------------------------------------------
@@ -157,28 +153,36 @@ end
 
 --scalar
 function vec2:scalar_add_inplace(x, y)
-	if not y then y = x end
+	if not y then
+		y = x
+	end
 	self.x = self.x + x
 	self.y = self.y + y
 	return self
 end
 
 function vec2:scalar_sub_inplace(x, y)
-	if not y then y = x end
+	if not y then
+		y = x
+	end
 	self.x = self.x - x
 	self.y = self.y - y
 	return self
 end
 
 function vec2:scalar_mul_inplace(x, y)
-	if not y then y = x end
+	if not y then
+		y = x
+	end
 	self.x = self.x * x
 	self.y = self.y * y
 	return self
 end
 
 function vec2:scalar_div_inplace(x, y)
-	if not y then y = x end
+	if not y then
+		y = x
+	end
 	self.x = self.x / x
 	self.y = self.y / y
 	return self
@@ -406,8 +410,7 @@ end
 --	=0 when p on line
 --	<0 when p right of line
 function vec2.winding_side(a, b, p)
-	return (b.x - a.x) * (p.y - a.y)
-		 - (p.x - a.x) * (b.y - a.y)
+	return (b.x - a.x) * (p.y - a.y) - (p.x - a.x) * (b.y - a.y)
 end
 
 -----------------------------------------------------------
@@ -540,33 +543,33 @@ end
 --i do encourage using the longer versions above as it makes code easier
 --to understand when you come back, but i also appreciate wanting short code
 for _, v in ipairs({
-	{"sset", "scalar_set"},
-	{"sadd", "scalar_add"},
-	{"ssub", "scalar_sub"},
-	{"smul", "scalar_mul"},
-	{"sdiv", "scalar_div"},
-	{"vset", "vector_set"},
-	{"vadd", "vector_add"},
-	{"vsub", "vector_sub"},
-	{"vmul", "vector_mul"},
-	{"vdiv", "vector_div"},
+	{ "sset", "scalar_set" },
+	{ "sadd", "scalar_add" },
+	{ "ssub", "scalar_sub" },
+	{ "smul", "scalar_mul" },
+	{ "sdiv", "scalar_div" },
+	{ "vset", "vector_set" },
+	{ "vadd", "vector_add" },
+	{ "vsub", "vector_sub" },
+	{ "vmul", "vector_mul" },
+	{ "vdiv", "vector_div" },
 	--(no plain addi etc, imo it's worth differentiating vaddi vs saddi)
-	{"fma", "fused_multiply_add"},
-	{"vproj", "vector_projection"},
-	{"vrej", "vector_rejection"},
+	{ "fma", "fused_multiply_add" },
+	{ "vproj", "vector_projection" },
+	{ "vrej", "vector_rejection" },
 	--just for the _inplace -> i shorthand, mostly for backwards compatibility
-	{"min", "min"},
-	{"max", "max"},
-	{"clamp", "clamp"},
-	{"abs", "abs"},
-	{"sign", "sign"},
-	{"floor", "floor"},
-	{"ceil", "ceil"},
-	{"round", "round"},
-	{"lerp", "lerp"},
-	{"rotate", "rotate"},
-	{"normalise", "normalise"},
-	{"normalize", "normalize"},
+	{ "min", "min" },
+	{ "max", "max" },
+	{ "clamp", "clamp" },
+	{ "abs", "abs" },
+	{ "sign", "sign" },
+	{ "floor", "floor" },
+	{ "ceil", "ceil" },
+	{ "round", "round" },
+	{ "lerp", "lerp" },
+	{ "rotate", "rotate" },
+	{ "normalise", "normalise" },
+	{ "normalize", "normalize" },
 }) do
 	local shorthand, original = v[1], v[2]
 	if vec2[shorthand] == nil then

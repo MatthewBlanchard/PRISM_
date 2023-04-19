@@ -7,7 +7,7 @@ local assert = require(path .. "assert")
 local pretty = require(path .. "pretty")
 
 local stringx = setmetatable({}, {
-	__index = string
+	__index = string,
 })
 
 --split a string on a delimiter into an ordered table
@@ -70,7 +70,7 @@ function stringx.split(self, delim, limit)
 	--collect substrings
 	i = 1
 	for si, j in ipairs(res) do
-		res[si] = self:sub(i, j-1)
+		res[si] = self:sub(i, j - 1)
 		i = j + delim_length
 	end
 	--add the final section
@@ -195,13 +195,7 @@ function stringx.deindent(s, keep_trailing_empty)
 		if line ~= "" then
 			local line_start = line:sub(1, indent:len())
 			local start_len = line_start:len()
-			if
-				line_start == indent
-				or (
-					start_len < indent_len
-					and line_start == indent:sub(1, start_len)
-				)
-			then
+			if line_start == indent or (start_len < indent_len and line_start == indent:sub(1, start_len)) then
 				line = line:sub(start_len + 1)
 			end
 		end
@@ -291,10 +285,10 @@ end
 --titlizes a string
 --"quick brown fox" becomes "Quick Brown Fox"
 function stringx.title_case(s)
-    s = s:gsub("%s%l", string.upper)
-    s = s:gsub("^%l", string.upper)
+	s = s:gsub("%s%l", string.upper)
+	s = s:gsub("^%l", string.upper)
 
-    return s
+	return s
 end
 
 return stringx

@@ -27,7 +27,7 @@ end
 function pubsub:_push_defer(event)
 	self._defer_stack = self._defer_stack + 1
 	if self._defer_stack > 255 then
-		error("pubsub defer stack overflow; event infinite loop with event: "..tostring(event))
+		error("pubsub defer stack overflow; event infinite loop with event: " .. tostring(event))
 	end
 end
 
@@ -45,15 +45,17 @@ end
 function pubsub:_pop_defer(event)
 	self._defer_stack = self._defer_stack - 1
 	if self._defer_stack < 0 then
-		error("pubsub defer stack underflow; don't call the defer methods directly - event reported: "..tostring(event))
+		error(
+			"pubsub defer stack underflow; don't call the defer methods directly - event reported: " .. tostring(event)
+		)
 	end
 	if self._defer_stack == 0 then
 		local defer_len = #self._defer
 		if defer_len then
 			for i = 1, defer_len, 3 do
 				local defer_f = self._defer[i]
-				local defer_event = self._defer[i+1]
-				local defer_cb = self._defer[i+2]
+				local defer_event = self._defer[i + 1]
+				local defer_cb = self._defer[i + 2]
 				self[defer_f](self, defer_event, defer_cb)
 			end
 			tablex.clear(self._defer)
