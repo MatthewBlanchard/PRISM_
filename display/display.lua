@@ -60,8 +60,7 @@ function Display:new(w, h, scale, dfg, dbg, fullOrFlags, tilesetInfo, window)
    for i = 1, t.widthInChars do
       t.chars[i] = {}
       t.backgroundColors[i] = {}
-      t
-.foregroundColors[i] = {}
+      t.foregroundColors[i] = {}
       t.oldChars[i] = {}
       t.oldBackgroundColors[i] = {}
       t.oldForegroundColors[i] = {}
