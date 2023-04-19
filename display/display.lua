@@ -106,11 +106,9 @@ function Display:draw(noDraw)
          local px = (x - 1) * self.charWidth
          local py = (y - 1) * self.charHeight
 
-         if c ~= 32 and c ~= 255 then
-            local qd = self.glyphs[c]
-            self:_setColor(fg)
-            self.drawQ(self.glyphSprite, qd, px, py, nil, self.scale)
-         end
+         local qd = self.glyphs[c]
+         self:_setColor(fg)
+         self.drawQ(self.glyphSprite, qd, px, py, nil, self.scale)
 
          self.oldChars[x][y] = c
          self.oldBackgroundColors[x][y] = bg
