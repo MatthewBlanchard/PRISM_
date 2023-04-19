@@ -1,6 +1,4 @@
 local Actor = require "core.actor"
-local Action = require "core.action"
-local Condition = require "core.condition"
 local Tiles = require "display.tiles"
 
 local ZapTarget = targets.Actor:extend()
