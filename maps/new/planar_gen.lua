@@ -1,5 +1,5 @@
 love.math.setRandomSeed(0)
---love.audio.setVolume(0) --gitignore
+love.audio.setVolume(0) --gitignore
 
 local Map = require "maps.map"
 local Object = require "object"
@@ -347,8 +347,11 @@ function Level:create(callback)
       end,
 
       tunnel2 = function(self, chunk, info)
-        local p = vec2(love.math.random(1, chunk.width-1), love.math.random(1, chunk.height-1))
-        local q = vec2(chunk.width-p.x, chunk.height-p.y)
+        local pad = 3
+        local x = math.clamp( (chunk.width*info.px), pad, chunk.width-pad )
+        local y = math.clamp( (chunk.height*info.py), pad, chunk.height-pad )
+        local p = vec2( math.ceil(x), math.ceil(y) )
+        local q = vec2( chunk.width-math.floor(x), chunk.height-math.floor(y) )
 
         local line = Bresenham.line(p.x, p.y, q.x, q.y)
         local path = chunk:new_path()
@@ -357,7 +360,8 @@ function Level:create(callback)
         end
 
         chunk:target_path(path, function(x, y) 
-          chunk:clear_rect(x-1, y-1, x+1, y+1)
+          chunk:clear_ellipse(x, y, 2, 2)
+          --chunk:clear_rect(x-1, y-1, x+1, y+1)
         end)
       end
     }
@@ -883,8 +887,8 @@ function Level:create(callback)
         height = 45,
     
         shape = {
-          {'tunnel2'},
-          {'tunnel2'},
+          {'tunnel2', {px = 1/2, py = 0}},
+          {'tunnel2', {px = 0, py = 1/2}},
           {'circle', {size = 8}},
         },
     
@@ -895,7 +899,7 @@ function Level:create(callback)
       graph:add_edge(edges.door, stack.get(), current_chunk)
       stack.push(current_chunk)
 
-      for n = 1, 5 do
+      for n = 1, 6 do
         chunks.add_chunk('filler_1'..n, graph:add_vertex(Chunk:extend()):specify{
           width = love.math.random(3, 5),
           height = love.math.random(3, 5),

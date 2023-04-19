@@ -856,7 +856,7 @@ end
 -- Ellipse
 function Map:target_ellipse(cx, cy, radx, rady, func)
   for x = cx-radx, cx+radx do
-    for y = cy-rady, cx+rady do
+    for y = cy-rady, cy+rady do
       local dx = (x - cx)^2
       local dy = (y - cy)^2
       if dx/(radx^2) + dy/(rady)^2 <= 1 then
