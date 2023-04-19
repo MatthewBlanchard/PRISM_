@@ -9,8 +9,6 @@ Grass.tile = Tiles["grass_3"]
 Grass.sightLimit = 3 -- when standing on this tile does it interfere with sight?
 Grass.lightReduction = 4 -- reduces the amount of light that passes through this cell
 
-function Grass:visibleFromCell(level, cell) 
-  return cell.grassID == self.grassID
-end
+function Grass:visibleFromCell(level, cell) return cell.grassID == self.grassID end
 
 return Grass

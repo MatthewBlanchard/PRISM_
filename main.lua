@@ -2,7 +2,9 @@ require "prelude"
 
 love.graphics.setDefaultFilter("nearest", "nearest")
 math.randomseed(os.time())
-math.random(); math.random(); math.random()
+math.random()
+math.random()
+math.random()
 
 love.audio.setVolume(0.2)
 
@@ -15,7 +17,7 @@ local Game = require "game"
 
 -- Modules can include the following subfolders:
 -- actions, actors, cells, components, conditions, systems
-game = Game("core")
+game = Game "core"
 
 local StateManager = require "gamestates.statemanager"
 local LevelState = require "gamestates.levelstate"
@@ -23,22 +25,15 @@ local MapDebuggerState = require "gamestates.mapdebuggerstate"
 
 local manager = StateManager()
 
-function love.load()
-    manager:push(LevelState(game:generateLevel(1), 1))
-end
+function love.load() manager:push(LevelState(game:generateLevel(1), 1)) end
 
 function love.draw()
-    manager:draw()
-    local stats = love.graphics.getStats( )
+   manager:draw()
+   local stats = love.graphics.getStats()
 
-    love.graphics.print("Draw Calls:" .. stats.drawcalls, 10, 30)
+   love.graphics.print("Draw Calls:" .. stats.drawcalls, 10, 30)
 end
 
+function love.update(dt) manager:update(dt) end
 
-function love.update(dt)
-    manager:update(dt)
-end
-
-function love.keypressed(key, scancode)
-    manager:keypressed(key, scancode)
-end
+function love.keypressed(key, scancode) manager:keypressed(key, scancode) end

@@ -43,113 +43,101 @@
 --generate unique increasing class ids
 local class_id_gen = 0
 local function next_class_id()
-	class_id_gen = class_id_gen + 1
-	return class_id_gen
+   class_id_gen = class_id_gen + 1
+   return class_id_gen
 end
 
 --implement an interface into c
 local function implement(c, interface)
-	c.__is[interface] = true
-	for k, v in pairs(interface) do
-		if c[k] == nil and type(v) == "function" then
-			c[k] = v
-		end
-	end
+   c.__is[interface] = true
+   for k, v in pairs(interface) do
+      if c[k] == nil and type(v) == "function" then c[k] = v end
+   end
 end
 
 --build a new class
 local function class(config)
-	local class_id = next_class_id()
+   local class_id = next_class_id()
 
-	config = config or {}
-	local extends = config.extends
-	local implements = config.implements
-	local name = config.name or ("unnamed class %d)"):format(class_id)
+   config = config or {}
+   local extends = config.extends
+   local implements = config.implements
+   local name = config.name or ("unnamed class %d)"):format(class_id)
 
-	local c = {}
+   local c = {}
 
-	--prototype
-	c.__index = c
+   --prototype
+   c.__index = c
 
-	--unique generated id per-class
-	c.__id = class_id
+   --unique generated id per-class
+   c.__id = class_id
 
-	--the class name for type calls
-	c.__type = name
+   --the class name for type calls
+   c.__type = name
 
-	--return the name of the class
-	function c:type()
-		return self.__type
-	end
+   --return the name of the class
+   function c:type() return self.__type end
 
-	if config.default_tostring then
-		function c:__tostring()
-			return name
-		end
-	end
+   if config.default_tostring then
+      function c:__tostring() return name end
+   end
 
-	--class metatable to set up constructor call
-	setmetatable(c, {
-		__call = function(self, ...)
-			local instance = setmetatable({}, self)
-			instance:new(...)
-			return instance
-		end,
-		__index = extends,
-	})
+   --class metatable to set up constructor call
+   setmetatable(c, {
+      __call = function(self, ...)
+         local instance = setmetatable({}, self)
+         instance:new(...)
+         return instance
+      end,
+      __index = extends,
+   })
 
-	--checking class membership for probably-too-dynamic code
-	--returns true for both extended classes and implemented interfaces
-	--(implemented with a hashset for fast lookups)
-	c.__is = {}
-	c.__is[c] = true
-	function c:is(t)
-		return self.__is[t] == true
-	end
+   --checking class membership for probably-too-dynamic code
+   --returns true for both extended classes and implemented interfaces
+   --(implemented with a hashset for fast lookups)
+   c.__is = {}
+   c.__is[c] = true
+   function c:is(t) return self.__is[t] == true end
 
-	--get the inherited class for super calls if/as needed
-	--allows overrides that still refer to superclass behaviour
-	c.__super = extends
+   --get the inherited class for super calls if/as needed
+   --allows overrides that still refer to superclass behaviour
+   c.__super = extends
 
-	--perform a (partial) super construction for an instance
-	--for any nested super calls, it'll call the relevant one in the
-	--heirarchy, assuming no super calls have been missed
-	function c:super(...)
-		if not c.__super then return end
-		--hold reference so we can restore
-		local current_super = c.__super
-		--push next super
-		c.__super = c.__super.__super
-		--call
-		current_super.new(self, ...)
-		--restore
-		c.__super = current_super
-	end
+   --perform a (partial) super construction for an instance
+   --for any nested super calls, it'll call the relevant one in the
+   --heirarchy, assuming no super calls have been missed
+   function c:super(...)
+      if not c.__super then return end
+      --hold reference so we can restore
+      local current_super = c.__super
+      --push next super
+      c.__super = c.__super.__super
+      --call
+      current_super.new(self, ...)
+      --restore
+      c.__super = current_super
+   end
 
+   if c.__super then
+      --implement superclass interface
+      implement(c, c.__super)
+   end
 
-	if c.__super then
-		--implement superclass interface
-		implement(c, c.__super)
-	end
+   --implement all the passed interfaces/mixins
+   --in order provided
+   if implements then
+      for _, interface in ipairs(implements) do
+         implement(c, interface)
+      end
+   end
 
+   --default constructor, just proxy to the super constructor
+   --override it and use to set up the properties of the instance
+   --but don't forget to call the super constructor!
+   function c:new(...) self:super(...) end
 
-	--implement all the passed interfaces/mixins
-	--in order provided
-	if implements then
-		for _, interface in ipairs(implements) do
-			implement(c, interface)
-		end
-	end
-
-	--default constructor, just proxy to the super constructor
-	--override it and use to set up the properties of the instance
-	--but don't forget to call the super constructor!
-	function c:new(...)
-		self:super(...)
-	end
-
-	--done
-	return c
+   --done
+   return c
 end
 
 return class
