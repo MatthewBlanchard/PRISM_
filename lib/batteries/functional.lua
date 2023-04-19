@@ -281,7 +281,7 @@ functional.map_cycle = functional.cycle
 function functional.chain(t, f)
 	local result = {}
 	for i = 2, #t do
-		local a = t[i-1]
+		local a = t[i - 1]
 		local b = t[i]
 		local v = f(a, b)
 		if v ~= nil then
@@ -292,7 +292,6 @@ function functional.chain(t, f)
 end
 
 functional.map_chain = functional.chain
-
 
 -----------------------------------------------------------
 --generating data

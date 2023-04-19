@@ -1,4 +1,4 @@
-local Component = require "core.component"
+local Component = require("core.component")
 
 local Controller = Component:extend()
 Controller.name = "Controller"

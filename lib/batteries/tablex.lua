@@ -123,8 +123,10 @@ end
 --find the index in a sequential table that a resides at
 --or nil if nothing was found
 function tablex.index_of(t, a)
-	if a == nil then return nil end
-	for i,b in ipairs(t) do
+	if a == nil then
+		return nil
+	end
+	for i, b in ipairs(t) do
 		if a == b then
 			return i
 		end
@@ -135,7 +137,9 @@ end
 --find the key in a keyed table that a resides at
 --or nil if nothing was found
 function tablex.key_of(t, a)
-	if a == nil then return nil end
+	if a == nil then
+		return nil
+	end
 	for k, v in pairs(t) do
 		if a == v then
 			return k
@@ -191,8 +195,7 @@ if love and love.math and love.math.random then
 	_global_random = love.math.random
 end
 local function _random(min, max, r)
-	return r and r:random(min, max)
-		or _global_random(min, max)
+	return r and r:random(min, max) or _global_random(min, max)
 end
 
 --pick a random value from a table (or nil if it's empty)
@@ -317,7 +320,6 @@ function tablex.compact(t, range)
 		error("tablex.compact - range must be a number or table", 2)
 	end
 	return r
-
 end
 
 --append sequence t2 into t1, modifying t1
@@ -484,7 +486,9 @@ end
 --check if two tables have equal contents at the first level
 --slow, as it needs two loops
 function tablex.shallow_equal(a, b)
-	if a == b then return true end
+	if a == b then
+		return true
+	end
 	for k, v in pairs(a) do
 		if b[k] ~= v then
 			return false
@@ -503,7 +507,9 @@ end
 --check if two tables have equal contents all the way down
 --slow, as it needs two potentially recursive loops
 function tablex.deep_equal(a, b)
-	if a == b then return true end
+	if a == b then
+		return true
+	end
 	--not equal on type
 	if type(a) ~= type(b) then
 		return false
@@ -597,6 +603,5 @@ function tablex.spairs(t, less)
 		end
 	end
 end
-
 
 return tablex

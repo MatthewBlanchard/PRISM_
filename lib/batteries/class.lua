@@ -115,7 +115,9 @@ local function class(config)
 	--for any nested super calls, it'll call the relevant one in the
 	--heirarchy, assuming no super calls have been missed
 	function c:super(...)
-		if not c.__super then return end
+		if not c.__super then
+			return
+		end
 		--hold reference so we can restore
 		local current_super = c.__super
 		--push next super
@@ -126,12 +128,10 @@ local function class(config)
 		c.__super = current_super
 	end
 
-
 	if c.__super then
 		--implement superclass interface
 		implement(c, c.__super)
 	end
-
 
 	--implement all the passed interfaces/mixins
 	--in order provided

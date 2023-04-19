@@ -68,7 +68,7 @@ function sort._merge(array, workspace, low, middle, high, less)
 		if (k >= j) or (j > high) then
 			break
 		end
-		if less(array[j], workspace[i])  then
+		if less(array[j], workspace[i]) then
 			array[k] = array[j]
 			j = j + 1
 		else
@@ -148,7 +148,7 @@ function sort.stable_sort(array, less)
 		local middle = math.ceil(n / 2)
 		workspace[middle] = array[1]
 		--dive in
-		sort._merge_sort_impl( array, workspace, 1, n, less )
+		sort._merge_sort_impl(array, workspace, 1, n, less)
 	end
 	return array
 end

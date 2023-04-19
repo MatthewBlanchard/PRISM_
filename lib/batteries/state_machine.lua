@@ -87,7 +87,7 @@ end
 --add a state
 function state_machine:add_state(name, state)
 	if self:has_state(name) then
-		error("error: added duplicate state "..name)
+		error("error: added duplicate state " .. name)
 	else
 		self.states[name] = state
 		if self:in_state(name) then
@@ -101,7 +101,7 @@ end
 --remove a state
 function state_machine:remove_state(name)
 	if not self:has_state(name) then
-		error("error: removed missing state "..name)
+		error("error: removed missing state " .. name)
 	else
 		if self:in_state(name) then
 			self:_call("exit")

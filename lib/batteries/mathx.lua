@@ -48,8 +48,12 @@ end
 --0, 1, -1 sign of a scalar
 --todo: investigate if a branchless or `/abs` approach is faster in general case
 function mathx.sign(v)
-	if v < 0 then return -1 end
-	if v > 0 then return 1 end
+	if v < 0 then
+		return -1
+	end
+	if v > 0 then
+		return 1
+	end
 	return 0
 end
 
@@ -70,11 +74,7 @@ end
 
 --bilinear interpolation between 4 samples
 function mathx.bilerp(a, b, c, d, u, v)
-	return mathx.lerp(
-		mathx.lerp(a, b, u),
-		mathx.lerp(c, d, u),
-		v
-	)
+	return mathx.lerp(mathx.lerp(a, b, u), mathx.lerp(c, d, u), v)
 end
 
 --easing curves
@@ -127,8 +127,12 @@ end
 
 --(internal; use a provided random generator object, or not)
 local function _random(rng, ...)
-	if rng then return rng:random(...) end
-	if love then return love.math.random(...) end
+	if rng then
+		return rng:random(...)
+	end
+	if love then
+		return love.math.random(...)
+	end
 	return math.random(...)
 end
 

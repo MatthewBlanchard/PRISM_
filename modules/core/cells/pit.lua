@@ -1,5 +1,5 @@
-local Cell = require "core.cell"
-local Tiles = require "display.tiles"
+local Cell = require("core.cell")
+local Tiles = require("display.tiles")
 
 local Pit = Cell:extend()
 Pit.name = "Pit"
