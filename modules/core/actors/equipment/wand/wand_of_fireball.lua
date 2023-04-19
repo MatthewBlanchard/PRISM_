@@ -64,7 +64,6 @@ function Zap:perform(level)
          level:performAction(damage)
       end
    end
-   print("Level from fireball " .. level)
    effects_system:resumeEffects(level)
 end
 

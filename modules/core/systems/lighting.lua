@@ -291,8 +291,7 @@ function LightingSystem:__spreadLight(
 
    local function processCell(curRow, curCol, curLightLevel, depth)
       if
-         level:getCellOpaque(curRow + offsetx, curCol + offsety)
-         or visited:getCell(curRow, curCol)
+         level:getCellOpaque(curRow + offsetx, curCol + offsety) or visited:getCell(curRow, curCol)
       then
          return
       end
