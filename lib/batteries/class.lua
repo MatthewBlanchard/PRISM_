@@ -51,9 +51,7 @@ end
 local function implement(c, interface)
 	c.__is[interface] = true
 	for k, v in pairs(interface) do
-		if c[k] == nil and type(v) == "function" then
-			c[k] = v
-		end
+		if c[k] == nil and type(v) == "function" then c[k] = v end
 	end
 end
 
@@ -78,14 +76,10 @@ local function class(config)
 	c.__type = name
 
 	--return the name of the class
-	function c:type()
-		return self.__type
-	end
+	function c:type() return self.__type end
 
 	if config.default_tostring then
-		function c:__tostring()
-			return name
-		end
+		function c:__tostring() return name end
 	end
 
 	--class metatable to set up constructor call
@@ -103,9 +97,7 @@ local function class(config)
 	--(implemented with a hashset for fast lookups)
 	c.__is = {}
 	c.__is[c] = true
-	function c:is(t)
-		return self.__is[t] == true
-	end
+	function c:is(t) return self.__is[t] == true end
 
 	--get the inherited class for super calls if/as needed
 	--allows overrides that still refer to superclass behaviour
@@ -126,12 +118,10 @@ local function class(config)
 		c.__super = current_super
 	end
 
-
 	if c.__super then
 		--implement superclass interface
 		implement(c, c.__super)
 	end
-
 
 	--implement all the passed interfaces/mixins
 	--in order provided
@@ -144,9 +134,7 @@ local function class(config)
 	--default constructor, just proxy to the super constructor
 	--override it and use to set up the properties of the instance
 	--but don't forget to call the super constructor!
-	function c:new(...)
-		self:super(...)
-	end
+	function c:new(...) self:super(...) end
 
 	--done
 	return c

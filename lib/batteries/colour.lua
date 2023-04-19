@@ -4,8 +4,7 @@
 
 local path = (...):gsub("colour", "")
 
-
-local math = require(path.."mathx")
+local math = require(path .. "mathx")
 
 local colour = {}
 
@@ -24,13 +23,13 @@ if ok then
 		local br = lshift(band(0xff, r * 255), 16)
 		local bg = lshift(band(0xff, g * 255), 8)
 		local bb = lshift(band(0xff, b * 255), 0)
-		return bor( br, bg, bb )
+		return bor(br, bg, bb)
 	end
 
 	function colour.unpack_rgb(rgb)
 		local r = rshift(band(rgb, 0x00ff0000), 16) / 255
-		local g = rshift(band(rgb, 0x0000ff00), 8)  / 255
-		local b = rshift(band(rgb, 0x000000ff), 0)  / 255
+		local g = rshift(band(rgb, 0x0000ff00), 8) / 255
+		local b = rshift(band(rgb, 0x000000ff), 0) / 255
 		return r, g, b
 	end
 
@@ -41,13 +40,13 @@ if ok then
 		local br = lshift(band(0xff, r * 255), 16)
 		local bg = lshift(band(0xff, g * 255), 8)
 		local bb = lshift(band(0xff, b * 255), 0)
-		return bor( br, bg, bb, ba )
+		return bor(br, bg, bb, ba)
 	end
 
 	function colour.unpack_argb(argb)
 		local r = rshift(band(argb, 0x00ff0000), 16) / 255
-		local g = rshift(band(argb, 0x0000ff00), 8)  / 255
-		local b = rshift(band(argb, 0x000000ff), 0)  / 255
+		local g = rshift(band(argb, 0x0000ff00), 8) / 255
+		local b = rshift(band(argb, 0x000000ff), 0) / 255
 		local a = rshift(band(argb, 0xff000000), 24) / 255
 		return r, g, b, a
 	end
@@ -58,14 +57,14 @@ if ok then
 		local bg = lshift(band(0xff, g * 255), 16)
 		local bb = lshift(band(0xff, b * 255), 8)
 		local ba = lshift(band(0xff, a * 255), 0)
-		return bor( br, bg, bb, ba )
+		return bor(br, bg, bb, ba)
 	end
 
 	function colour.unpack_rgba(rgba)
 		local r = rshift(band(rgba, 0xff000000), 24) / 255
 		local g = rshift(band(rgba, 0x00ff0000), 16) / 255
-		local b = rshift(band(rgba, 0x0000ff00), 8)  / 255
-		local a = rshift(band(rgba, 0x000000ff), 0)  / 255
+		local b = rshift(band(rgba, 0x0000ff00), 8) / 255
+		local a = rshift(band(rgba, 0x000000ff), 0) / 255
 		return r, g, b, a
 	end
 else
@@ -111,7 +110,6 @@ else
 		return r, g, b, a
 	end
 end
-
 
 -------------------------------------------------------------------------------
 -- colour space conversion
@@ -186,7 +184,7 @@ function colour.oklab_to_rgb(l, a, b)
 	_s = math.pow(_s, 3.0)
 
 	local red, green, blue = love.math.linearToGamma(
-		( 4.0767245293 * _l - 3.3072168827 * _m + 0.2307590544 * _s),
+		(4.0767245293 * _l - 3.3072168827 * _m + 0.2307590544 * _s),
 		(-1.2681437731 * _l + 2.6093323231 * _m - 0.3411344290 * _s),
 		(-0.0041119885 * _l - 0.7034763098 * _m + 1.7068625689 * _s)
 	)
@@ -215,10 +213,7 @@ end
 --distance of one colour to another (linear space)
 --can be used for finding nearest colours for palette mapping, for example
 
-function colour.distance_rgb(
-	ar, ag, ab,
-	br, bg, bb
-)
+function colour.distance_rgb(ar, ag, ab, br, bg, bb)
 	local dr, dg, db = ar - br, ag - bg, ab - bb
 	return math.sqrt(dr * dr + dg * dg + db * db)
 end
@@ -226,10 +221,7 @@ end
 function colour.distance_packed_rgb(a, b)
 	local ar, ag, ab = colour.unpack_rgb(a)
 	local br, bg, bb = colour.unpack_rgb(b)
-	return colour.distance_rgb(
-		ar, ag, ab,
-		br, bg, bb
-	)
+	return colour.distance_rgb(ar, ag, ab, br, bg, bb)
 end
 
 --todo: rgba and various other unpacks

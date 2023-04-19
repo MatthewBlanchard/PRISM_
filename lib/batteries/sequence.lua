@@ -15,9 +15,7 @@ local sequence = {}
 sequence.__index = sequence
 setmetatable(sequence, {
 	__index = table,
-	__call = function(self, ...)
-		return sequence:new(...)
-	end,
+	__call = function(self, ...) return sequence:new(...) end,
 })
 
 --iterators as method calls
@@ -27,9 +25,7 @@ sequence.ipairs = ipairs
 sequence.iterate = ipairs
 
 --upgrade a table into a sequence, or create a new sequence
-function sequence:new(t)
-	return setmetatable(t or {}, sequence)
-end
+function sequence:new(t) return setmetatable(t or {}, sequence) end
 
 --sorting default to stable
 sequence.sort = stable_sort
@@ -38,7 +34,7 @@ sequence.sort = stable_sort
 
 --import copying tablex
 --(common case where something returns another sequence for chaining)
-for _, v in ipairs({
+for _, v in ipairs {
 	"keys",
 	"values",
 	"dedupe",
@@ -48,24 +44,22 @@ for _, v in ipairs({
 	"deep_overlay",
 	"shallow_copy",
 	"deep_copy",
-}) do
+} do
 	local table_f = table[v]
-	sequence[v] = function(self, ...)
-		return sequence(table_f(self, ...))
-	end
+	sequence[v] = function(self, ...) return sequence(table_f(self, ...)) end
 end
 
 --aliases
-for _, v in ipairs({
-	{"flatten", "collapse"},
-}) do
+for _, v in ipairs {
+	{ "flatten", "collapse" },
+} do
 	sequence[v[1]] = sequence[v[2]]
 end
 
 --import functional interface in method form
 
 --(common case where something returns another sequence for chaining)
-for _, v in ipairs({
+for _, v in ipairs {
 	"map",
 	"map_field",
 	"map_call",
@@ -78,15 +72,13 @@ for _, v in ipairs({
 	"map_cycle",
 	"chain",
 	"map_chain",
-}) do
+} do
 	local functional_f = functional[v]
-	sequence[v] = function(self, ...)
-		return sequence(functional_f(self, ...))
-	end
+	sequence[v] = function(self, ...) return sequence(functional_f(self, ...)) end
 end
 
 --(cases where we don't want to construct a new sequence)
-for _, v in ipairs({
+for _, v in ipairs {
 	"map_inplace",
 	"filter_inplace",
 	"foreach",
@@ -105,18 +97,17 @@ for _, v in ipairs({
 	"find_max",
 	"find_nearest",
 	"find_match",
-}) do
+} do
 	sequence[v] = functional[v]
 end
 
-
 --aliases
-for _, v in ipairs({
-	{"remap", "map_inplace"},
-	{"map_stitch", "stitch"},
-	{"map_cycle", "cycle"},
-	{"find_best", "find_max"},
-}) do
+for _, v in ipairs {
+	{ "remap", "map_inplace" },
+	{ "map_stitch", "stitch" },
+	{ "map_cycle", "cycle" },
+	{ "find_best", "find_max" },
+} do
 	sequence[v[1]] = sequence[v[2]]
 end
 

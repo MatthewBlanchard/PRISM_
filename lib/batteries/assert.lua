@@ -15,15 +15,11 @@ local _assert = assert
 
 --proxy calls to global assert
 local assert = setmetatable({}, {
-	__call = function(self, ...)
-		return _assert(...)
-	end,
+	__call = function(self, ...) return _assert(...) end,
 })
 
 local function _extra(msg)
-	if not msg then
-		return ""
-	end
+	if not msg then return "" end
 	return "\n\n\t(note: " .. msg .. ")"
 end
 
@@ -31,9 +27,7 @@ end
 --return the value, so this can be chained
 function assert:some(v, msg, stack_level)
 	if v == nil then
-		error(("assertion failed: value is nil %s"):format(
-			_extra(msg)
-		), 2 + (stack_level or 0))
+		error(("assertion failed: value is nil %s"):format(_extra(msg)), 2 + (stack_level or 0))
 	end
 	return v
 end
@@ -41,11 +35,14 @@ end
 --assert two values are equal
 function assert:equal(a, b, msg, stack_level)
 	if a ~= b then
-		error(("assertion failed: %s is not equal to %s %s"):format(
-			tostring(a),
-			tostring(b),
-			_extra(msg)
-		), 2 + (stack_level or 0))
+		error(
+			("assertion failed: %s is not equal to %s %s"):format(
+				tostring(a),
+				tostring(b),
+				_extra(msg)
+			),
+			2 + (stack_level or 0)
+		)
 	end
 	return a
 end
@@ -53,9 +50,7 @@ end
 --assert two values are not equal
 function assert:not_equal(a, b, msg, stack_level)
 	if a == b then
-		error(("assertion failed: values are equal %s"):format(
-			_extra(msg)
-		), 2 + (stack_level or 0))
+		error(("assertion failed: values are equal %s"):format(_extra(msg)), 2 + (stack_level or 0))
 	end
 	return a
 end
@@ -63,12 +58,15 @@ end
 --assert a value is of a certain type
 function assert:type(a, t, msg, stack_level)
 	if type(a) ~= t then
-		error(("assertion failed: %s (%s) not of type %s %s"):format(
-			tostring(a),
-			type(a),
-			tostring(t),
-			_extra(msg)
-		), 2 + (stack_level or 0))
+		error(
+			("assertion failed: %s (%s) not of type %s %s"):format(
+				tostring(a),
+				type(a),
+				tostring(t),
+				_extra(msg)
+			),
+			2 + (stack_level or 0)
+		)
 	end
 	return a
 end
@@ -76,17 +74,13 @@ end
 --assert a value is nil or a certain type.
 -- useful for optional parameters.
 function assert:type_or_nil(a, t, msg, stack_level)
-	if a ~= nil then
-		assert:type(a, t, msg, stack_level + 1)
-	end
+	if a ~= nil then assert:type(a, t, msg, stack_level + 1) end
 	return a
 end
 
 --replace everything in assert with nop functions that just return their second argument, for near-zero overhead on release
 function assert:nop()
-	local nop = function(_, a)
-		return a
-	end
+	local nop = function(_, a) return a end
 	setmetatable(self, {
 		__call = nop,
 	})

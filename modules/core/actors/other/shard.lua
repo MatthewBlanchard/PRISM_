@@ -9,7 +9,7 @@ Shard.color = Colors.BLUE
 
 Shard.components = {
 	components.Item(),
-	components.Currency{worth = 1}
+	components.Currency { worth = 1 },
 }
 
 return Shard

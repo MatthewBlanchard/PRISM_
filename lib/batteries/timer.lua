@@ -9,9 +9,9 @@
 
 local path = (...):gsub("timer", "")
 local class = require(path .. "class")
-local timer = class({
+local timer = class {
 	name = "timer",
-})
+}
 
 --create a timer, with optional callbacks
 --callbacks receive as arguments:
@@ -32,25 +32,17 @@ function timer:update(dt)
 
 		--set the expired state and get the relevant callback
 		self.has_expired = self.timer >= self.time
-		local cb = self:expired()
-			and self.on_finish
-			or self.on_progress
+		local cb = self:expired() and self.on_finish or self.on_progress
 
-		if cb then
-			cb(self:progress(), self)
-		end
+		if cb then cb(self:progress(), self) end
 	end
 end
 
 --check if the timer has expired
-function timer:expired()
-	return self.has_expired
-end
+function timer:expired() return self.has_expired end
 
 --get the timer's progress from 0 to 1
-function timer:progress()
-	return math.min(self.timer / self.time, 1)
-end
+function timer:progress() return math.min(self.timer / self.time, 1) end
 
 --reset the timer; optionally change the time
 --will resume calling the same callbacks, so can be used for intervals

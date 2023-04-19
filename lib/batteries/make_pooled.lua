@@ -14,25 +14,19 @@ return function(class, limit)
 
 	--flush the entire pool
 	function class:flush_pool()
-		if #_pool > 0 then
-			_pool = {}
-		end
+		if #_pool > 0 then _pool = {} end
 	end
 
 	--drain one element from the pool, if it exists
 	function class:drain_pool()
-		if #_pool > 0 then
-			return table.remove(_pool)
-		end
+		if #_pool > 0 then return table.remove(_pool) end
 		return nil
 	end
 
 	--get a pooled object
 	--(re-initialised with new, or freshly constructed if the pool was empty)
 	function class:pooled(...)
-		if #_pool == 0 then
-			return class(...)
-		end
+		if #_pool == 0 then return class(...) end
 		local instance = class:drain_pool()
 		instance:new(...)
 		return instance
@@ -40,8 +34,6 @@ return function(class, limit)
 
 	--release an object back to the pool
 	function class:release()
-		if #_pool < _pool_limit then
-			table.insert(_pool, self)
-		end
+		if #_pool < _pool_limit then table.insert(_pool, self) end
 	end
 end

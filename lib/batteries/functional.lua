@@ -25,9 +25,7 @@ local functional = setmetatable({}, {
 })
 
 --the identity function
-function functional.identity(v)
-	return v
-end
+function functional.identity(v) return v end
 
 --simple sequential iteration, f is called for all elements of t
 --f can return non-nil to break the loop (and return the value)
@@ -35,9 +33,7 @@ end
 function functional.foreach(t, f)
 	for i = 1, #t do
 		local result = f(t[i], i)
-		if result ~= nil then
-			return result
-		end
+		if result ~= nil then return result end
 	end
 	return t
 end
@@ -58,9 +54,7 @@ function functional.map(t, f)
 	local result = {}
 	for i = 1, #t do
 		local v = f(t[i], i)
-		if v ~= nil then
-			table.insert(result, v)
-		end
+		if v ~= nil then table.insert(result, v) end
 	end
 	return result
 end
@@ -76,9 +70,7 @@ function functional.map_inplace(t, f)
 			write_i = write_i + 1
 			t[write_i] = v
 		end
-		if i ~= write_i then
-			t[i] = nil
-		end
+		if i ~= write_i then t[i] = nil end
 	end
 	return t
 end
@@ -92,9 +84,7 @@ function functional.map_field(t, k)
 	local result = {}
 	for i = 1, #t do
 		local v = t[i][k]
-		if v ~= nil then
-			table.insert(result, v)
-		end
+		if v ~= nil then table.insert(result, v) end
 	end
 	return result
 end
@@ -109,9 +99,7 @@ function functional.map_call(t, m, ...)
 		local v = t[i]
 		local f = type(m) == "function" and m or v[m]
 		v = f(v, ...)
-		if v ~= nil then
-			table.insert(result, v)
-		end
+		if v ~= nil then table.insert(result, v) end
 	end
 	return result
 end
@@ -124,9 +112,7 @@ function functional.splat(t, f)
 	for i = 1, #t do
 		local v, pos = f(t[i], i)
 		if v ~= nil then
-			if pos == nil then
-				pos = #result + 1
-			end
+			if pos == nil then pos = #result + 1 end
 			result[pos] = v
 		end
 	end
@@ -139,9 +125,7 @@ function functional.filter(t, f)
 	local result = {}
 	for i = 1, #t do
 		local v = t[i]
-		if f(v, i) then
-			table.insert(result, v)
-		end
+		if f(v, i) then table.insert(result, v) end
 	end
 	return result
 end
@@ -156,9 +140,7 @@ function functional.filter_inplace(t, f)
 			write_i = write_i + 1
 			t[write_i] = v
 		end
-		if i ~= write_i then
-			t[i] = nil
-		end
+		if i ~= write_i then t[i] = nil end
 	end
 	return t
 end
@@ -170,9 +152,7 @@ function functional.remove_if(t, f)
 	local result = {}
 	for i = 1, #t do
 		local v = t[i]
-		if not f(v, i) then
-			table.insert(result, v)
-		end
+		if not f(v, i) then table.insert(result, v) end
 	end
 	return result
 end
@@ -201,9 +181,7 @@ function functional.group_by(t, f)
 	for i = 1, #t do
 		local v = t[i]
 		local group = f(v, i)
-		if result[group] == nil then
-			result[group] = {}
-		end
+		if result[group] == nil then result[group] = {} end
 		table.insert(result[group], v)
 	end
 	return result
@@ -220,9 +198,7 @@ function functional.zip(t1, t2, f)
 		local v1 = t1[i]
 		local v2 = t2[i]
 		local zipped = f(v1, v2, i)
-		if zipped ~= nil then
-			table.insert(ret, zipped)
-		end
+		if zipped ~= nil then table.insert(ret, zipped) end
 	end
 	return ret
 end
@@ -265,9 +241,7 @@ function functional.cycle(t, f)
 	for i, a in ipairs(t) do
 		local b = t[mathx.wrap(i + 1, 1, #t + 1)]
 		local v = f(a, b)
-		if v ~= nil then
-			table.insert(result, v)
-		end
+		if v ~= nil then table.insert(result, v) end
 	end
 	return result
 end
@@ -281,18 +255,15 @@ functional.map_cycle = functional.cycle
 function functional.chain(t, f)
 	local result = {}
 	for i = 2, #t do
-		local a = t[i-1]
+		local a = t[i - 1]
 		local b = t[i]
 		local v = f(a, b)
-		if v ~= nil then
-			table.insert(result, v)
-		end
+		if v ~= nil then table.insert(result, v) end
 	end
 	return result
 end
 
 functional.map_chain = functional.chain
-
 
 -----------------------------------------------------------
 --generating data
@@ -305,9 +276,7 @@ function functional.generate(count, f)
 	local result = {}
 	for i = 1, count do
 		local v = f(i)
-		if v ~= nil then
-			table.insert(result, v)
-		end
+		if v ~= nil then table.insert(result, v) end
 	end
 	return result
 end
@@ -320,9 +289,7 @@ function functional.generate_2d(width, height, f)
 	for y = 1, height do
 		for x = 1, width do
 			local v = f(x, y)
-			if v ~= nil then
-				table.insert(result, v)
-			end
+			if v ~= nil then table.insert(result, v) end
 		end
 	end
 	return result
@@ -335,9 +302,7 @@ end
 --true if any element of the table matches f
 function functional.any(t, f)
 	for i = 1, #t do
-		if f(t[i], i) then
-			return true
-		end
+		if f(t[i], i) then return true end
 	end
 	return false
 end
@@ -345,9 +310,7 @@ end
 --true if no element of the table matches f
 function functional.none(t, f)
 	for i = 1, #t do
-		if f(t[i], i) then
-			return false
-		end
+		if f(t[i], i) then return false end
 	end
 	return true
 end
@@ -355,9 +318,7 @@ end
 --true if all elements of the table match f
 function functional.all(t, f)
 	for i = 1, #t do
-		if not f(t[i], i) then
-			return false
-		end
+		if not f(t[i], i) then return false end
 	end
 	return true
 end
@@ -366,9 +327,7 @@ end
 function functional.count(t, f)
 	local c = 0
 	for i = 1, #t do
-		if f(t[i], i) then
-			c = c + 1
-		end
+		if f(t[i], i) then c = c + 1 end
 	end
 	return c
 end
@@ -376,9 +335,7 @@ end
 --true if the table contains element e
 function functional.contains(t, e)
 	for i = 1, #t do
-		if t[i] == e then
-			return true
-		end
+		if t[i] == e then return true end
 	end
 	return false
 end
@@ -395,9 +352,7 @@ end
 --return the numeric mean of all elements of t
 function functional.mean(t)
 	local len = #t
-	if len == 0 then
-		return 0
-	end
+	if len == 0 then return 0 end
 	return functional.sum(t) / len
 end
 
@@ -407,9 +362,7 @@ end
 --	 but that tends to be surprising/annoying in practice)
 function functional.minmax(t)
 	local n = #t
-	if n == 0 then
-		return 0, 0
-	end
+	if n == 0 then return 0, 0 end
 	local max = t[1]
 	local min = t[1]
 	for i = 2, n do
@@ -478,9 +431,7 @@ function functional.find_nearest(t, f, target)
 		if v and v < current_min then
 			current_min = v
 			current = e
-			if v == 0 then
-				break
-			end
+			if v == 0 then break end
 		end
 	end
 	return current
@@ -490,9 +441,7 @@ end
 function functional.find_match(t, f)
 	for i = 1, #t do
 		local v = t[i]
-		if f(v) then
-			return v
-		end
+		if f(v) then return v end
 	end
 	return nil
 end

@@ -21,19 +21,13 @@ local tablex = setmetatable({}, {
 tablex.join = tablex.concat
 
 --return the front element of a table
-function tablex.front(t)
-	return t[1]
-end
+function tablex.front(t) return t[1] end
 
 --return the back element of a table
-function tablex.back(t)
-	return t[#t]
-end
+function tablex.back(t) return t[#t] end
 
 --remove the back element of a table and return it
-function tablex.pop(t)
-	return table.remove(t)
-end
+function tablex.pop(t) return table.remove(t) end
 
 --insert to the back of a table, returning the table for possible chaining
 function tablex.push(t, v)
@@ -42,9 +36,7 @@ function tablex.push(t, v)
 end
 
 --remove the front element of a table and return it
-function tablex.shift(t)
-	return table.remove(t, 1)
-end
+function tablex.shift(t) return table.remove(t, 1) end
 
 --insert to the front of a table, returning the table for possible chaining
 function tablex.unshift(t, v)
@@ -91,9 +83,7 @@ local default_less = sort.default_less
 function tablex.is_sorted(t, less)
 	less = less or default_less
 	for i = 1, #t - 1 do
-		if less(t[i + 1], t[i]) then
-			return false
-		end
+		if less(t[i + 1], t[i]) then return false end
 	end
 	return true
 end
@@ -124,10 +114,8 @@ end
 --or nil if nothing was found
 function tablex.index_of(t, a)
 	if a == nil then return nil end
-	for i,b in ipairs(t) do
-		if a == b then
-			return i
-		end
+	for i, b in ipairs(t) do
+		if a == b then return i end
 	end
 	return nil
 end
@@ -137,9 +125,7 @@ end
 function tablex.key_of(t, a)
 	if a == nil then return nil end
 	for k, v in pairs(t) do
-		if a == v then
-			return k
-		end
+		if a == v then return k end
 	end
 	return nil
 end
@@ -174,9 +160,7 @@ end
 function tablex.next_element(t, v)
 	local i = tablex.index_of(t, v)
 	--not present? just get the front of the table
-	if not i then
-		return tablex.front(t)
-	end
+	if not i then return tablex.front(t) end
 	--(not using mathx to avoid inter-dependency)
 	i = (i % #t) + 1
 	return t[i]
@@ -187,35 +171,24 @@ end
 
 --helper for optionally passed random; defaults to love.math.random if present, otherwise math.random
 local _global_random = math.random
-if love and love.math and love.math.random then
-	_global_random = love.math.random
-end
-local function _random(min, max, r)
-	return r and r:random(min, max)
-		or _global_random(min, max)
-end
+if love and love.math and love.math.random then _global_random = love.math.random end
+local function _random(min, max, r) return r and r:random(min, max) or _global_random(min, max) end
 
 --pick a random value from a table (or nil if it's empty)
 function tablex.random_index(t, r)
-	if #t == 0 then
-		return 0
-	end
+	if #t == 0 then return 0 end
 	return _random(1, #t, r)
 end
 
 --pick a random value from a table (or nil if it's empty)
 function tablex.pick_random(t, r)
-	if #t == 0 then
-		return nil
-	end
+	if #t == 0 then return nil end
 	return t[tablex.random_index(t, r)]
 end
 
 --take a random value from a table (or nil if it's empty)
 function tablex.take_random(t, r)
-	if #t == 0 then
-		return nil
-	end
+	if #t == 0 then return nil end
 	return table.remove(t, tablex.random_index(t, r))
 end
 
@@ -224,11 +197,9 @@ end
 -- todo:
 --	provide normalisation outside of this function, require normalised weights
 function tablex.pick_weighted_random(t, w, r)
-	if #t == 0 then
-		return nil
-	end
+	if #t == 0 then return nil end
 	if #w ~= #t then
-		error("tablex.pick_weighted_random weight and value tables should be the same length")
+		error "tablex.pick_weighted_random weight and value tables should be the same length"
 	end
 	local sum = 0
 	for _, weight in ipairs(w) do
@@ -238,9 +209,7 @@ function tablex.pick_weighted_random(t, w, r)
 	sum = 0
 	for i, weight in ipairs(w) do
 		sum = sum + weight
-		if rnd <= sum then
-			return t[i]
-		end
+		if rnd <= sum then return t[i] end
 	end
 	--shouldn't get here but safety if using a random that returns >= 1
 	return tablex.back(t)
@@ -302,22 +271,17 @@ function tablex.compact(t, range)
 	if type(range) == "table" then
 		for _, k in ipairs(range) do
 			local v = t[k]
-			if v then
-				table.insert(r, v)
-			end
+			if v then table.insert(r, v) end
 		end
 	elseif type(range) == "number" then
 		for i = 1, range do
 			local v = t[i]
-			if v then
-				table.insert(r, v)
-			end
+			if v then table.insert(r, v) end
 		end
 	else
 		error("tablex.compact - range must be a number or table", 2)
 	end
 	return r
-
 end
 
 --append sequence t2 into t1, modifying t1
@@ -325,9 +289,7 @@ function tablex.append_inplace(t1, t2, ...)
 	for i, v in ipairs(t2) do
 		table.insert(t1, v)
 	end
-	if ... then
-		return tablex.append_inplace(t1, ...)
-	end
+	if ... then return tablex.append_inplace(t1, ...) end
 	return t1
 end
 
@@ -486,16 +448,12 @@ end
 function tablex.shallow_equal(a, b)
 	if a == b then return true end
 	for k, v in pairs(a) do
-		if b[k] ~= v then
-			return false
-		end
+		if b[k] ~= v then return false end
 	end
 	-- second loop to ensure a isn't missing any keys from b.
 	-- we don't compare the values - if any are missing we're not equal
 	for k, v in pairs(b) do
-		if a[k] == nil then
-			return false
-		end
+		if a[k] == nil then return false end
 	end
 	return true
 end
@@ -505,24 +463,16 @@ end
 function tablex.deep_equal(a, b)
 	if a == b then return true end
 	--not equal on type
-	if type(a) ~= type(b) then
-		return false
-	end
+	if type(a) ~= type(b) then return false end
 	--bottomed out
-	if type(a) ~= "table" then
-		return a == b
-	end
+	if type(a) ~= "table" then return a == b end
 	for k, v in pairs(a) do
-		if not tablex.deep_equal(v, b[k]) then
-			return false
-		end
+		if not tablex.deep_equal(v, b[k]) then return false end
 	end
 	-- second loop to ensure a isn't missing any keys from b
 	-- we don't compare the values - if any are missing we're not equal
 	for k, v in pairs(b) do
-		if a[k] == nil then
-			return false
-		end
+		if a[k] == nil then return false end
 	end
 	return true
 end
@@ -535,48 +485,30 @@ tablex.flatten = tablex.collapse
 --note: you can use a larger unpack than you need as the rest
 --		can be discarded, but it "feels dirty" :)
 
-function tablex.unpack2(t)
-	return t[1], t[2]
-end
+function tablex.unpack2(t) return t[1], t[2] end
 
-function tablex.unpack3(t)
-	return t[1], t[2], t[3]
-end
+function tablex.unpack3(t) return t[1], t[2], t[3] end
 
-function tablex.unpack4(t)
-	return t[1], t[2], t[3], t[4]
-end
+function tablex.unpack4(t) return t[1], t[2], t[3], t[4] end
 
-function tablex.unpack5(t)
-	return t[1], t[2], t[3], t[4], t[5]
-end
+function tablex.unpack5(t) return t[1], t[2], t[3], t[4], t[5] end
 
-function tablex.unpack6(t)
-	return t[1], t[2], t[3], t[4], t[5], t[6]
-end
+function tablex.unpack6(t) return t[1], t[2], t[3], t[4], t[5], t[6] end
 
-function tablex.unpack7(t)
-	return t[1], t[2], t[3], t[4], t[5], t[6], t[7]
-end
+function tablex.unpack7(t) return t[1], t[2], t[3], t[4], t[5], t[6], t[7] end
 
-function tablex.unpack8(t)
-	return t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8]
-end
+function tablex.unpack8(t) return t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8] end
 
 --internal: reverse iterator function
 local function _ripairs_iter(t, i)
 	i = i - 1
 	local v = t[i]
-	if v then
-		return i, v
-	end
+	if v then return i, v end
 end
 
 --iterator that works like ipairs, but in reverse order, with indices from #t to 1
 --similar to ipairs, it will only consider sequential until the first nil value in the table.
-function tablex.ripairs(t)
-	return _ripairs_iter, t, #t + 1
-end
+function tablex.ripairs(t) return _ripairs_iter, t, #t + 1 end
 
 --works like pairs, but returns sorted table
 --	generates a fair bit of garbage but very nice for more stable output
@@ -592,11 +524,8 @@ function tablex.spairs(t, less)
 	local i = 0
 	return function()
 		i = i + 1
-		if keys[i] then
-			return keys[i], t[keys[i]]
-		end
+		if keys[i] then return keys[i], t[keys[i]] end
 	end
 end
-
 
 return tablex
