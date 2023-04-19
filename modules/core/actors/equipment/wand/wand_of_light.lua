@@ -1,6 +1,4 @@
 local Actor = require "core.actor"
-local Action = require "core.action"
-local Condition = require "core.condition"
 local Tiles = require "display.tiles"
 local LightColor = require "structures.lighting.lightcolor"
 -- The light actor
@@ -37,7 +35,7 @@ function Zap:perform(level)
   orb.position = target
   level:addActor(orb)
 
-  local fov, actors = level:getAOE("fov", target, self.aoeRange)
+  local _, actors = level:getAOE("fov", target, self.aoeRange)
 
   for _, actor in ipairs(actors) do
     if actor:getComponent(components.Stats) then
