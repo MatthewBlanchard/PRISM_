@@ -92,6 +92,7 @@ function Interface:draw()
    local seenActors = self.seenActors
    local scryActors = sight_component.scryActors
 
+   local drawn_actors = {}
    local rememberedActors = {}
 
    for _, _, actor in sight_component.rememberedActors:each() do
@@ -174,14 +175,14 @@ function Interface:draw()
 
                   if actor:getComponent(components.Drawable) then
                      local drawable = actor:getComponent(components.Drawable)
-                     drawable.t = math.min(drawable.t + 1*love.timer.getDelta(), 1)
-                     local x = math.lerp(drawable.last_position.x, drawable.target_position.x, drawable.t)
-                     local y = math.lerp(drawable.last_position.y, drawable.target_position.y, drawable.t)
-                     drawable.current_position = Vector2(x, y)
-                     self:writeOffset(char, x, y, finalColor)
+                     if not drawn_actors[actor] then systems["Animate"]:animate(game.level, actor) end
+                     local vec = drawable.current_position
+
+                     self:writeOffset(char, vec.x, vec.y, finalColor)
                   else
                      self:writeOffset(char, x, y, finalColor)
                   end
+                  drawn_actors[actor] = true
                end
             end
          end
