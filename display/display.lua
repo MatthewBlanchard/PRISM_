@@ -67,13 +67,12 @@ function Display:clear(c, x, y, w, h, fg, bg)
    x = x or 1
    y = y or 1
    w = w or self.widthInChars
-   h = h or self.heightInChars - y + 1
-   --fg = {0,0,0,0.2}--fg or self.defaultForegroundColor
-   --bg = {0,0,0,1}--bg or self.defaultBackgroundColor
+   h = h or self.heightInChars - y
+   fg = fg or {0,0,0,0}
 
    for x = x, x+w do
       for y = y, y+h do
-         --self:write(c, x, y, fg, bg)
+         self:write(c, x, y, fg, bg)
       end
    end
 end
@@ -130,8 +129,14 @@ function Display:draw()
       local transform = object.transform
       local color = object.color
 
-      love.graphics.setColor(color.fg or self.defaultForegroundColor)
       if type(drawable) == "number" then
+
+         if color.bg then
+            love.graphics.setColor(color.bg)
+            love.graphics.draw(self.glyphSprite, self.glyphs[Tiles["grad6"]], transform)
+         end
+
+         love.graphics.setColor(color.fg or self.defaultForegroundColor)
          local quad = self.glyphs[drawable]
          love.graphics.draw(self.glyphSprite, quad, transform)
       else

@@ -20,6 +20,7 @@ function Message:__new(display, parent)
       true
    )
    self.messages = {}
+   self.defaultBackgroundColor = {0,0,0,0.4}
 end
 
 Message.combos = {
@@ -82,7 +83,8 @@ function Message:update(dt)
 end
 
 function Message:draw()
-   self:clear()
+   local bg_a = 0.2 -- background alpha
+   self:clear(nil, nil, {0, 0, 0, bg_a})
    self:drawBorders()
    for i = 1, self.h - 2 do
       local message = self.messages[#self.messages - (i - 1)]

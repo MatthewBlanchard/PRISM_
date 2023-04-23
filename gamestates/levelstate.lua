@@ -100,8 +100,8 @@ end
 
 function LevelState:draw()
    if not game.display then return end
-   game.viewDisplay:clear()
-   game.display:clear()
+   --game.viewDisplay:clear()
+   --game.display:clear()
    game.interface:draw(game.display)
    game.viewDisplay:draw()
    game.display:draw "UI"

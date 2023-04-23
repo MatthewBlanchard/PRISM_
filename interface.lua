@@ -115,6 +115,16 @@ function Interface:draw()
 
    local viewX, viewY = game.viewDisplay.widthInChars, game.viewDisplay.heightInChars
    local sx, sy = game.curActor.position.x, game.curActor.position.y
+   local camera
+   do
+      local drawable = game.curActor:getComponent(components["Drawable"])
+      if drawable then
+         camera = - (drawable.current_position - drawable.target_position)
+      else
+         camera = Vector2(0, 0)
+      end
+   end
+   self.camera = camera
    for x = sx - viewX, sx + viewX do
       for y = sy - viewY, sy + viewY do
          local cell = fov:get(x, y)
@@ -125,9 +135,9 @@ function Interface:draw()
             local finalColor = tileLightingFormula(lightCol, lightValue)
 
             if lightValue ~= lightValue then finalColor = ambientColor end
-            self:writeOffset(cell.tile, x, y, finalColor)
+            self:writeOffset(cell.tile, x+camera.x, y+camera.y, finalColor)
          elseif shouldDrawExplored(explored, x, y) then
-            self:writeOffset(explored:get(x, y).tile, x, y, ambientColor)
+            self:writeOffset(explored:get(x, y).tile, x+camera.x, y+camera.y, ambientColor)
          end
       end
    end
@@ -178,9 +188,9 @@ function Interface:draw()
                      if not drawn_actors[actor] then systems["Animate"]:animate(game.level, actor) end
                      local vec = drawable.current_position
 
-                     self:writeOffset(char, vec.x, vec.y, finalColor)
+                     self:writeOffset(char, vec.x+camera.x, vec.y+camera.y, finalColor)
                   else
-                     self:writeOffset(char, x, y, finalColor)
+                     self:writeOffset(char, x+camera.x, y+camera.y, finalColor)
                   end
                   drawn_actors[actor] = true
                end

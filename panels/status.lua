@@ -6,6 +6,7 @@ local StatusPanel = Panel:extend()
 function StatusPanel:__new(display, parent)
    local x, y = game.display:getWidth() - 20, game.display:getHeight()
    Panel.__new(self, display, parent, x, 1, 21, 9)
+   self.defaultBackgroundColor = {0,0,0,0.4}
 end
 
 function StatusPanel:draw()
