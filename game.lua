@@ -15,9 +15,9 @@ function Game:__new(...)
    local scale = 1
    local w, h = math.floor(81 / scale), math.floor(49 / scale)
    local w2, h2 = math.floor(81 / 2), math.floor(49 / 2)
-   local display = Display:new(w, h, scale, nil, { 1, 1, 1, 0 }, nil, nil, true)
-   local viewDisplay2x = Display:new(w2, h2, 2, nil, { 0.09, 0.09, 0.09 }, nil, nil, false)
-   local viewDisplay1x = Display:new(w, h, 1, nil, { 0.09, 0.09, 0.09 }, nil, nil, false)
+   local display = Display(w, h, scale, nil, { 1, 1, 1, 0 }, nil, nil, true)
+   local viewDisplay2x = Display(w2, h2, 2, nil, { 0.09, 0.09, 0.09 }, nil, nil, false)
+   local viewDisplay1x = Display(w, h, 1, nil, { 0.09, 0.09, 0.09 }, nil, nil, false)
 
    self.music = MusicManager()
    self.display = display
@@ -51,6 +51,7 @@ function Game:generateLevel(depth)
    level:addSystem(systems.Weapon())
    level:addSystem(systems.Lose_condition())
    level:addSystem(systems.Projectile())
+   level:addSystem(systems.Animate())
    return level
 end
 

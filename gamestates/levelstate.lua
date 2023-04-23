@@ -1,6 +1,5 @@
 local GameState = require "gamestates.gamestate"
 local Interface = require "interface"
-local Display = require "display.display"
 local Start = require "panels.start"
 
 local PROFILE = false

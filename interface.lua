@@ -171,7 +171,17 @@ function Interface:draw()
                   if actor.tileLighting then
                      finalColor = tileLightingFormula(lightcolor, lightValue)
                   end
-                  self:writeOffset(char, x, y, finalColor)
+
+                  if actor:getComponent(components.Drawable) then
+                     local drawable = actor:getComponent(components.Drawable)
+                     drawable.t = math.min(drawable.t + 1*love.timer.getDelta(), 1)
+                     local x = math.lerp(drawable.last_position.x, drawable.target_position.x, drawable.t)
+                     local y = math.lerp(drawable.last_position.y, drawable.target_position.y, drawable.t)
+                     drawable.current_position = Vector2(x, y)
+                     self:writeOffset(char, x, y, finalColor)
+                  else
+                     self:writeOffset(char, x, y, finalColor)
+                  end
                end
             end
          end
