@@ -119,7 +119,7 @@ function Interface:draw()
    systems["Animate"]:updateTimers()
    local camera
    do
-      --local drawable = game.curActor:getComponent(components["Drawable"])
+      local drawable = game.curActor:getComponent(components["Drawable"])
       if drawable then
          camera = - (drawable.position - game.curActor.position)
       else
