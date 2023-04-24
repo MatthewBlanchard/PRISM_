@@ -10,6 +10,8 @@ end
 
 function Drawable:initialize(actor)
    self.position = actor.position
+   self.t = 0
+   self.speed = 1
 
    self.animations = {
       position = {}

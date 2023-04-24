@@ -116,7 +116,7 @@ function Interface:draw()
    local viewX, viewY = game.viewDisplay.widthInChars, game.viewDisplay.heightInChars
    local sx, sy = game.curActor.position.x, game.curActor.position.y
 
-   systems["Animate"]:updateTimer()
+   systems["Animate"]:updateTimers()
    local camera
    do
       local drawable = game.curActor:getComponent(components["Drawable"])
