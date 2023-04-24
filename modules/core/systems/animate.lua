@@ -20,17 +20,22 @@ function AnimateSystem:animate(level, actor)
    local drawable = actor:getComponent(components.Drawable)
    if drawable then
       local reached = 0
-      for _, v in pairs(drawable.animations) do
+      local is_finished = true
+      for _, v in ipairs(drawable.animations) do
+
          for _, v2 in ipairs(v) do
-            local finished = v2:func(drawable)
-            if not finished then
-               break
+            if not v2:func(drawable) then
+               is_finished = false
             end
-            reached = reached + 1
          end
-         for i = reached, 1, -1 do
-            table.remove(v, i)
+
+         if not is_finished then
+            break
          end
+         reached = reached + 1
+      end
+      for i = reached, 1, -1 do
+         table.remove(drawable.animations, i)
       end
    end
 end
@@ -54,8 +59,10 @@ end
 function AnimateSystem:beforeAction(_, actor, action)
    local drawable = actor:getComponent(components.Drawable)
    if drawable then
-      local buffered_animations = #drawable.animations.position
-      if buffered_animations == 0 then
+      table.insert(drawable.animations, {})
+
+      local buffered_animations = #drawable.animations
+      if buffered_animations == 1 then
          drawable.speed = 1
       else
          drawable.speed = math.max(drawable.speed, buffered_animations)
@@ -67,9 +74,12 @@ function AnimateSystem:onMove(_, actor, from, to)
    local drawable = actor:getComponent(components.Drawable)
    if drawable then
       local start
-      for i, v in ipairs(drawable.animations.position) do
-         if i == 1 then start = v.start end
-         start = start + 1/v.speed
+      local last_turn = drawable.animations[#drawable.animations-1]
+      if last_turn then
+         if last_turn[1] then
+            -- might need tweaking with a turn of different anim speeds and starts
+            start = last_turn[1].start + (1 / last_turn[1].speed )
+         end
       end
       start = start or drawable.t
 
@@ -82,7 +92,7 @@ function AnimateSystem:onMove(_, actor, from, to)
          func = anim_func
       }
 
-      table.insert(drawable.animations.position, animation)
+      table.insert(drawable.animations[#drawable.animations], animation)
    end
 end
 

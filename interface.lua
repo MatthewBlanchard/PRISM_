@@ -119,14 +119,13 @@ function Interface:draw()
    systems["Animate"]:updateTimers()
    local camera
    do
-      local drawable = game.curActor:getComponent(components["Drawable"])
-      if false then--drawable then
-         camera = - (drawable.position - drawable.target_position)
+      --local drawable = game.curActor:getComponent(components["Drawable"])
+      if drawable then
+         camera = - (drawable.position - game.curActor.position)
       else
          camera = Vector2(0, 0)
       end
    end
-   self.camera = camera
    for x = sx - viewX, sx + viewX do
       for y = sy - viewY, sy + viewY do
          local cell = fov:get(x, y)

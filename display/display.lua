@@ -1,5 +1,4 @@
 local Object = require "object"
-local terminal_display = require "display.terminal_display"
 
 local Tiles = require "display.tiles"
 local json = require "lib.json"
@@ -166,10 +165,6 @@ function Display:getWidth() return self.widthInChars end
 function Display:getHeight() return self.heightInChars end
 function Display:getBackgroundColor()
    return self.defaultBackgroundColor
-end
-
-for k, v in pairs(terminal_display) do
-   --Display[k] = v
 end
 
 

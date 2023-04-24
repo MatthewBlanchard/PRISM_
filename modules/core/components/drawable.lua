@@ -13,9 +13,7 @@ function Drawable:initialize(actor)
    self.t = 0
    self.speed = 1
 
-   self.animations = {
-      position = {}
-   }
+   self.animations = {}
 end
 
 return Drawable
