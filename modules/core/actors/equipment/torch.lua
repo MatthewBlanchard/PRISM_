@@ -2,6 +2,15 @@ local Actor = require "core.actor"
 local Tiles = require "display.tiles"
 local LightColor = require "structures.lighting.lightcolor"
 
+local burnOnHit = conditions.Onhit:extend()
+
+function burnOnHit:onHit(level, attacker, defender) 
+  local roll = ROT.Dice.roll("1d3")
+  if roll == 1 then
+    defender:applyCondition(conditions.Burning) 
+  end
+end
+
 local Torch = Actor:extend()
 Torch.char = Tiles["torch"]
 Torch.name = "torch"
@@ -16,6 +25,15 @@ Torch.components = {
    components.Item(),
    components.Equipment {
       slot = "offhand",
+   },
+   components.Weapon {
+      stat = "ATK",
+      name = "Shortsword",
+      dice = "1d3",
+      time = 75,
+      effects = {
+        burnOnHit
+      }
    },
 }
 
