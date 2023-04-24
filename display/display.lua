@@ -67,11 +67,11 @@ function Display:clear(c, x, y, w, h, fg, bg)
    x = x or 1
    y = y or 1
    w = w or self.widthInChars
-   h = h or self.heightInChars - y
+   h = h or self.heightInChars - y + 1
    fg = fg or {0,0,0,0}
 
    for x = x, x+w do
-      for y = y, y+h do
+      for y = y, y+h-1 do
          self:write(c, x, y, fg, bg)
       end
    end

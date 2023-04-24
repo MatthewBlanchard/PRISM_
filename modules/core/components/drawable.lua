@@ -9,10 +9,11 @@ function Drawable:__new(options)
 end
 
 function Drawable:initialize(actor)
-   self.last_position = actor.position
-   self.current_position = actor.position
-   self.target_position = actor.position
-   self.t = 1
+   self.position = actor.position
+
+   self.animations = {
+      position = {}
+   }
 end
 
 return Drawable

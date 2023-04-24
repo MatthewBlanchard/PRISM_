@@ -3,57 +3,72 @@ local vec2 = require "math.vector"
 
 local AnimateSystem = System:extend()
 AnimateSystem.name = "AnimateSystem"
+AnimateSystem.t = 0
+AnimateSystem.speed = 2
+
+function AnimateSystem:updateTimer()
+   self.t = self.t+(love.timer.getDelta()*self.speed)
+end
 
 function AnimateSystem:animate(level, actor)
    local drawable = actor:getComponent(components.Drawable)
-   if drawable and drawable.anim_type == "to" then
-
-      drawable.t = math.min(drawable.t + 3*love.timer.getDelta(), 1)
-      local x = math.lerp(drawable.last_position.x, drawable.target_position.x, drawable.t)
-      local y = math.lerp(drawable.last_position.y, drawable.target_position.y, drawable.t)
-      drawable.current_position = vec2(x, y)
+   if drawable then
+      local reached = 0
+      for _, v in pairs(drawable.animations) do
+         for _, v2 in ipairs(v) do
+            local finished = v2:func()
+            if not finished then
+               break
+            end
+            reached = reached + 1
+         end
+         for i = reached, 1, -1 do
+            table.remove(v, i)
+         end
+      end
    end
-   -- if drawable and drawable.anim_type == "bounce" then
-      -- drawable.t = math.min(drawable.t + 6*love.timer.getDelta(), 2)
-      -- local x, y
-      -- if drawable.t <= 1 then
-      --    x = math.lerp(drawable.last_position.x, drawable.target_position.x, drawable.t)
-      --    y = math.lerp(drawable.last_position.y, drawable.target_position.y, drawable.t)
-      -- else
-      --    x = math.lerp(drawable.target_position.x, drawable.last_position.x, drawable.t-1)
-      --    y = math.lerp(drawable.target_position.y, drawable.last_position.y, drawable.t-1)
-      -- end
-
-      -- drawable.current_position = vec2(x, y)
-   -- end
 end
 
 function AnimateSystem:onActorAdded(level, actor)
    local drawable = actor:getComponent(components.Drawable)
    if drawable then
-      drawable.last_position = actor.position
-      drawable.target_position = actor.position
+      drawable.position = actor.position
+   end
+end
+
+local anim_func = function(animation)
+   local t = (AnimateSystem.t-animation.start)*animation.speed
+
+   animation.drawable.position = math.lerp(animation.from, animation.to, math.min(t, 1))
+   if t >= 1 then
+      return true
    end
 end
 
 function AnimateSystem:onMove(level, actor, from, to)
    local drawable = actor:getComponent(components.Drawable)
    if drawable then
-      drawable.anim_type = "to"
-      drawable.t = 0
-      drawable.last_position = drawable.current_position
-      drawable.target_position = to
+      local start
+      for i, v in ipairs(drawable.animations.position) do
+         if i == 1 then start = v.start end
+         start = start + 1/v.speed
+      end
+      start = start or self.t
+
+      local animation = {
+         drawable = drawable,
+         from = from,
+         to = to,
+         speed = 2,
+         start = start,
+         func = anim_func
+      }
+
+      table.insert(drawable.animations.position, animation)
    end
 end
 
 function AnimateSystem:beforeAction(level, actor, action)
-   -- local drawable = actor:getComponent(components.Drawable)
-   -- if drawable and action.name == "attack" then
-   --    drawable.anim_type = "bounce"
-   --    drawable.t = 0
-   --    drawable.last_position = actor.position--drawable.current_position
-   --    drawable.target_position = action:getTarget(1).position
-   -- end
 end
 
 return AnimateSystem

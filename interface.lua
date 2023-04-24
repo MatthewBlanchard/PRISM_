@@ -115,11 +115,13 @@ function Interface:draw()
 
    local viewX, viewY = game.viewDisplay.widthInChars, game.viewDisplay.heightInChars
    local sx, sy = game.curActor.position.x, game.curActor.position.y
+
+   systems["Animate"]:updateTimer()
    local camera
    do
       local drawable = game.curActor:getComponent(components["Drawable"])
-      if drawable then
-         camera = - (drawable.current_position - drawable.target_position)
+      if false then--drawable then
+         camera = - (drawable.position - drawable.target_position)
       else
          camera = Vector2(0, 0)
       end
@@ -186,7 +188,7 @@ function Interface:draw()
                   if actor:getComponent(components.Drawable) then
                      local drawable = actor:getComponent(components.Drawable)
                      if not drawn_actors[actor] then systems["Animate"]:animate(game.level, actor) end
-                     local vec = drawable.current_position
+                     local vec = drawable.position
 
                      self:writeOffset(char, vec.x+camera.x, vec.y+camera.y, finalColor)
                   else
