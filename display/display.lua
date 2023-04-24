@@ -32,7 +32,6 @@ function Display:__new(w, h, scale, dfg, dbg, fullOrFlags, tilesetInfo, window)
    
    self.graphics_objects = {}
    
-   
    return self
 end
 
@@ -61,41 +60,28 @@ function Display:setTileset(tilesetInfo)
    self.tilesetChanged = true
 end
 
-function Display:clear(c, x, y, w, h, fg, bg)
-   c = c or Tiles["grad6"]
-   x = x or 1
-   y = y or 1
-   w = w or self.widthInChars
-   h = h or self.heightInChars - y + 1
-   fg = fg or {0,0,0,0}
-
-   for x = x, x+w do
-      for y = y, y+h-1 do
-         self:write(c, x, y, fg, bg)
-      end
-   end
-end
 function Display:write(drawable, x, y, fg, bg)
    local x, y = x - 1, y - 1
 
    local scale = 1
    if type(drawable) == "string" then
-
       for i, v in ipairs(drawable:split()) do
          local x, y = (x+i-1)*15, y*15
-         table.insert(self.graphics_objects, {
+         local object = {
             drawable = Tiles[tostring(v:byte())],
             transform = love.math.newTransform(x, y),
             color = {fg = fg, bg = bg}
-         })
+         }
+         table.insert(self.graphics_objects, object)
       end
    else
       local x, y = x*15*scale, y*15*scale
-      table.insert(self.graphics_objects, {
+      local object = {
          drawable = drawable,
          transform = love.math.newTransform(x, y),
          color = {fg = fg, bg = bg}
-      })
+      }
+      table.insert(self.graphics_objects, object)
    end
 end
 function Display:writeCenter(s, y, fg, bg)
@@ -118,37 +104,6 @@ function Display:writeFormatted(s, x, y, bg)
       end
    end
 end
-
-function Display:draw()
-   
-   love.graphics.setCanvas(self.canvas)
-   love.graphics.clear()
-   for _, object in ipairs(self.graphics_objects) do
-      local drawable = object.drawable
-      local transform = object.transform
-      local color = object.color
-
-      if type(drawable) == "number" then
-
-         if color.bg then
-            love.graphics.setColor(color.bg)
-            love.graphics.draw(self.glyphSprite, self.glyphs[Tiles["grad6"]], transform)
-         end
-
-         love.graphics.setColor(color.fg or self.defaultForegroundColor)
-         local quad = self.glyphs[drawable]
-         love.graphics.draw(self.glyphSprite, quad, transform)
-      else
-         love.graphics.draw(drawable, transform)
-      end
-   end
-   love.graphics.setCanvas()
-
-   love.graphics.setColor(1, 1, 1, 1)
-   love.graphics.draw(self.canvas, self.canvas_transform)
-   love.graphics.setColor(1, 0, 0, 1)
-   self.graphics_objects = {}
-end
 function Display:drawText(x, y, text, maxWidth)
    local x_format, y_format = 0, 0
    for _, v in ipairs(text:split(" ")) do
@@ -161,11 +116,58 @@ function Display:drawText(x, y, text, maxWidth)
       x_format = x_format + string.len(v)
    end
 end
+function Display:clear(c, x, y, w, h, fg, bg)
+   c = c or Tiles["grad6"]
+   x = x or 1
+   y = y or 1
+   w = w or self.widthInChars
+   h = h or self.heightInChars - y + 1
+   fg = fg or {0,0,0,0}
+
+   for x = x, x+w do
+      for y = y, y+h-1 do
+         self:write(c, x, y, fg, bg)
+      end
+   end
+end
+
+
+function Display:draw_object(object)
+   local drawable = object.drawable
+   local transform = object.transform
+   local color = object.color
+
+   if type(drawable) == "number" then
+
+      if color.bg then
+         love.graphics.setColor(color.bg)
+         love.graphics.draw(self.glyphSprite, self.glyphs[Tiles["grad6"]], transform)
+      end
+
+      love.graphics.setColor(color.fg or self.defaultForegroundColor)
+      local quad = self.glyphs[drawable]
+      love.graphics.draw(self.glyphSprite, quad, transform)
+   else
+      love.graphics.draw(drawable, transform)
+   end
+end
+function Display:draw()
+   love.graphics.setCanvas(self.canvas)
+   love.graphics.clear()
+   for _, v in ipairs(self.graphics_objects) do
+      self:draw_object(v)
+   end
+   love.graphics.setCanvas()
+   self.graphics_objects = {}
+
+   love.graphics.setColor(1, 1, 1, 1)
+   love.graphics.draw(self.canvas, self.canvas_transform)
+   love.graphics.setColor(1, 0, 0, 1)
+end
+
 function Display:getWidth() return self.widthInChars end
 function Display:getHeight() return self.heightInChars end
-function Display:getBackgroundColor()
-   return self.defaultBackgroundColor
-end
+function Display:getBackgroundColor() return self.defaultBackgroundColor end
 
 
 
