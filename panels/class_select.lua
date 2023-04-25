@@ -47,6 +47,8 @@ function ClassSelectPanel:draw()
       descHeight = descHeight + math.ceil(#class.description / (self.w - 5))
       extra = extra + 1
    end
+
+   self.display:draw()
 end
 
 function ClassSelectPanel:handleKeyPress(keypress)

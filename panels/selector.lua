@@ -82,6 +82,7 @@ function SelectorPanel:draw()
    end
 
    if self.curTarget.name then self.targetPanel:draw() end
+   self.display:draw()
 end
 
 function SelectorPanel:getTargetPosition()

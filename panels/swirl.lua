@@ -26,6 +26,8 @@ function SwirlPanel:draw()
          self:write(" ", x, y, { 1, 1, 1 }, char)
       end
    end
+
+   self.display:draw()
 end
 
 function SwirlPanel:handleKeypress(key) end

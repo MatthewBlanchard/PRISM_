@@ -12,18 +12,15 @@ function Game:__new(...)
    self.modules = { ... }
    self:export()
 
-   local scale = 1
-   local w, h = math.floor(81 / scale), math.floor(49 / scale)
-   local w2, h2 = math.floor(81 / 2), math.floor(49 / 2)
-   local display = Display(w, h, scale, nil, { 1, 1, 1, 0 }, nil, nil, true)
-   local viewDisplay2x = Display(w2, h2, 2, nil, { 0.09, 0.09, 0.09 }, nil, nil, false)
-   local viewDisplay1x = Display(w, h, 1, nil, { 0.09, 0.09, 0.09 }, nil, nil, false)
+   TILE_LENGTH = 15
+   DISPLAY_WIDTH, DISPLAY_HEIGHT = math.floor(81), math.floor(49)
+   love.window.setMode(
+      DISPLAY_WIDTH * TILE_LENGTH,
+      DISPLAY_HEIGHT * TILE_LENGTH,
+      { vsync = false }
+   )
 
    self.music = MusicManager()
-   self.display = display
-   self.viewDisplay1x = viewDisplay1x
-   self.viewDisplay2x = viewDisplay2x
-   self.viewDisplay = viewDisplay2x
    self.Player = actors.Player()
 end
 

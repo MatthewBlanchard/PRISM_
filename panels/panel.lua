@@ -1,5 +1,6 @@
 local Object = require "object"
 local Tiles = require "display.tiles"
+local Display = require "display.display"
 
 local Panel = Object:extend()
 Panel.borderColor = { 0.5, 0.5, 0.6, 1 }
@@ -7,7 +8,14 @@ Panel.defaultForegroundColor = { 1, 1, 1 }
 Panel.backgroundColor = { 0.09, 0.09, 0.09 }
 
 function Panel:__new(display, parent, x, y, w, h)
-   self.display = display
+   do
+      local scale = 1
+      local w, h = math.floor(81 / scale), math.floor(49 / scale)
+      local display = Display(w, h, scale, nil, { 1, 1, 1, 0 }, nil, nil, false)
+      self.display = display
+   end
+   local display = self.display
+   --self.display = display
    self.parent = parent
    self.x = x or 1
    self.y = y or 1
@@ -84,32 +92,32 @@ function Panel:drawBorders(width, height)
 end
 
 function Panel:writeOffset(toWrite, x, y, fg, bg)
-   local viewX, viewY = game.viewDisplay.widthInChars, game.viewDisplay.heightInChars
+   local viewX, viewY = self.display.widthInChars, self.display.heightInChars
    local mx = (x - (game.curActor.position.x - math.floor(viewX / 2)))
    local my = (y - (game.curActor.position.y - math.floor(viewY / 2)))
 
    if
       mx < 1
-      or mx > game.viewDisplay.widthInChars
+      or mx > self.display.widthInChars
       or my < 1
-      or my > game.viewDisplay.heightInChars
+      or my > self.display.heightInChars
    then
       return
    end
 
-   game.viewDisplay:write(toWrite, mx, my, fg, bg)
+   self.display:write(toWrite, mx, my, fg, bg)
 end
 
 function Panel:effectWriteOffset(toWrite, x, y, fg, bg)
-   local viewX, viewY = game.viewDisplay.widthInChars, game.viewDisplay.heightInChars
+   local viewX, viewY = self.display.widthInChars, self.display.heightInChars
    local mx = (x - (game.curActor.position.x - math.floor(viewX / 2)))
    local my = (y - (game.curActor.position.y - math.floor(viewY / 2)))
 
    if
       mx < 1
-      or mx > game.viewDisplay.widthInChars
+      or mx > self.display.widthInChars
       or my < 1
-      or my > game.viewDisplay.heightInChars
+      or my > self.display.heightInChars
    then
       self.effectWrite = false
       return
@@ -123,19 +131,19 @@ function Panel:effectWriteOffset(toWrite, x, y, fg, bg)
 
    self.effectWrite = true
    self._curEffectDone = false
-   game.viewDisplay:write(toWrite, mx, my, fg, bg)
+   self.display:write(toWrite, mx, my, fg, bg)
 end
 
 function Panel:effectWriteOffsetUI(toWrite, x, y, ofx, ofy, fg, bg)
-   local viewX, viewY = game.viewDisplay.widthInChars, game.viewDisplay.heightInChars
+   local viewX, viewY = self.display.widthInChars, self.display.heightInChars
    local mx = (x - (game.curActor.position.x - math.floor(viewX / 2)))
    local my = (y - (game.curActor.position.y - math.floor(viewY / 2)))
 
    if
       mx < 1
-      or mx > game.viewDisplay.widthInChars
+      or mx > self.display.widthInChars
       or my < 1
-      or my > game.viewDisplay.heightInChars
+      or my > self.display.heightInChars
    then
       return
    end
@@ -144,7 +152,7 @@ function Panel:effectWriteOffsetUI(toWrite, x, y, ofx, ofy, fg, bg)
    if not sight_component.fov:get(x, y) then return end
 
    self.effectWrite = true
-   local scale = game.viewDisplay.scale
+   local scale = self.display.scale
    self._curEffectDone = false
    self:write(toWrite, mx * scale + ofx, my * scale + ofy, fg, bg)
 end

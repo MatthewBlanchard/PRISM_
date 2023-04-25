@@ -36,6 +36,8 @@ function ItemPanel:draw()
    for i = 1, #self.allowedActions do
       self:write(i .. " " .. self.allowedActions[i].name, 2, i + self.descHeight + 3)
    end
+
+   self.display:draw()
 end
 
 function ItemPanel:handleKeyPress(keypress)

@@ -14,8 +14,8 @@ function Message:__new(display, parent)
       display,
       parent,
       1,
-      game.display:getHeight() - Message.initialHeight + 1,
-      game.display:getWidth(),
+      DISPLAY_HEIGHT - Message.initialHeight + 1,
+      DISPLAY_WIDTH,
       Message.initialHeight,
       true
    )
@@ -94,6 +94,8 @@ function Message:draw()
          self:write(msg, 2, i + 1, { 1 / fadeAmount, 1 / fadeAmount, 1 / fadeAmount, 1 })
       end
    end
+
+   self.display:draw()
 end
 
 function Message:toggleHeight()

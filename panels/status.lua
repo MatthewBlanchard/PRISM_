@@ -4,7 +4,7 @@ local Colors = require "math.colors"
 local StatusPanel = Panel:extend()
 
 function StatusPanel:__new(display, parent)
-   local x, y = game.display:getWidth() - 20, game.display:getHeight()
+   local x, y = DISPLAY_WIDTH - 20, DISPLAY_HEIGHT
    Panel.__new(self, display, parent, x, 1, 21, 9)
    self.defaultBackgroundColor = {0,0,0,0.4}
 end
@@ -61,6 +61,8 @@ function StatusPanel:draw()
          end
       end
    end
+
+   self.display:draw()
 end
 
 function StatusPanel:statsToString(actor)

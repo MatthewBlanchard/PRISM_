@@ -15,7 +15,7 @@ function Interface:__new(display)
    Panel.__new(self, display)
    self.statusPanel = Status(display)
    self.messagePanel = Message(display)
-   self.defaultBackgroundColor = display.defaultBackgroundColor
+   self.defaultBackgroundColor = self.display.defaultBackgroundColor
    self.stack = {}
    self.t = 0
 
@@ -113,7 +113,7 @@ function Interface:draw()
       return finalColor
    end
 
-   local viewX, viewY = game.viewDisplay.widthInChars, game.viewDisplay.heightInChars
+   local viewX, viewY = self.display.widthInChars, self.display.heightInChars
    local sx, sy = game.curActor.position.x, game.curActor.position.y
 
    systems["Animate"]:updateTimers()
@@ -241,6 +241,8 @@ function Interface:draw()
    self.statusPanel:draw()
    self.messagePanel:draw()
 
+   self.display:draw()
+
    if not self:peek() then return end
    self:peek():draw()
 end
@@ -297,8 +299,8 @@ function Interface:handleKeyPress(keypress)
       end
 
       if self.keybinds[keypress] == "map" then
-         game.viewDisplay = game.viewDisplay == game.viewDisplay1x and game.viewDisplay2x
-            or game.viewDisplay1x
+         self.display = self.display == self.display1x and self.display2x
+            or self.display1x
       end
    end
 

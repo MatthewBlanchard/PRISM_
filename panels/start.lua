@@ -35,6 +35,8 @@ function Start:draw()
       { tC, tC, tC, a },
       { 0.09, 0.09, 0.09, a }
    )
+
+   self.display:draw()
 end
 
 function Start:handleKeyPress(keypress)

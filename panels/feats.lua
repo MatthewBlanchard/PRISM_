@@ -55,6 +55,8 @@ function FeatsPanel:draw()
          extra = extra + 1
       end
    end
+
+   self.display:draw()
 end
 
 function FeatsPanel:handleKeyPress(keypress)

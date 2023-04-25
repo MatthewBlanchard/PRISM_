@@ -48,6 +48,8 @@ function InventoryPanel:draw()
       self.indices[i] = list[1]
       i = i + 1
    end
+
+   self.display:draw()
 end
 
 function InventoryPanel:update(dt)

@@ -43,7 +43,7 @@ function ContextPanel:draw()
       )
    end
 
-   Panel.draw(self)
+   self.display:draw()
 end
 
 function ContextPanel:handleKeyPress(keypress) Panel.handleKeyPress(self, keypress) end

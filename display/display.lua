@@ -16,19 +16,18 @@ function Display:__new(w, h, scale, dfg, dbg, fullOrFlags, tilesetInfo, window)
    
    self:setTileset(tilesetInfo)
 
-   if window then
-      love.window.setMode(
-         self.charWidth * self.widthInChars,
-         self.charHeight * self.heightInChars,
-         { vsync = false }
-      )
-   end
-
    self.defaultForegroundColor = dfg or {1,1,1,1}
    self.defaultBackgroundColor = dbg or {0,0,0,1}
    
    self.canvas = love.graphics.newCanvas(self.charWidth * self.widthInChars+15, self.charHeight * self.heightInChars+15)
-   self.canvas_transform = love.math.newTransform(0, 0, 0, self.scale, self.scale)
+   self.scale = 1
+   self.canvas_transform = love.math.newTransform(
+      self.canvas:getWidth()/2, self.canvas:getHeight()/2,
+      0,
+      self.scale, self.scale,
+      self.canvas:getWidth()/2, self.canvas:getHeight()/2,
+      0, 0
+   )
    
    self.graphics_objects = {}
    
