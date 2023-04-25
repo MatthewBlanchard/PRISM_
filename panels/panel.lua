@@ -8,27 +8,26 @@ Panel.defaultForegroundColor = { 1, 1, 1 }
 Panel.backgroundColor = { 0.09, 0.09, 0.09 }
 
 function Panel:__new(display, parent, x, y, w, h)
-   do
-      local scale = 1
-      local w, h = math.floor(81 / scale), math.floor(49 / scale)
-      local display = Display(w, h, scale, nil, { 1, 1, 1, 0 }, nil, nil, false)
-      self.display = display
-   end
-
+   self.w = w or 81
+   self.h = h or 49
    self.transform = {
-      x = self.display.canvas:getWidth()/2, y = self.display.canvas:getHeight()/2,
+      x = self.w*15/2, y = self.h*15/2,
       r = 0,
-      sx = self.scale, sy = self.scale,
-      ox = self.display.canvas:getWidth()/2, oy = self.display.canvas:getHeight()/2,
+      sx = 1, sy = 1,
+      ox = self.w*15/2, oy = self.h*15/2,
       kx = 0, ky = 0
    }
+
+   do
+      local w, h = 81, 49
+      local display = Display(w, h, self.transform, nil, { 1, 1, 1, 0 }, nil, nil, false)
+      self.display = display
+   end
 
    local display = self.display
    self.parent = parent
    self.x = x or 1
    self.y = y or 1
-   self.w = w or display and display:getWidth() or 1
-   self.h = h or display and display:getHeight() or 1
    self.defaultBackgroundColor = Panel.backgroundColor
 
    self.panels = {}

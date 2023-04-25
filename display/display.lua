@@ -6,12 +6,11 @@ local json = require "lib.json"
 local Display = Object:extend()
 Display.defaultTileset = "display/atlas"
 
-function Display:__new(w, h, scale, dfg, dbg, fullOrFlags, tilesetInfo, window)
+function Display:__new(w, h, transform, dfg, dbg, fullOrFlags, tilesetInfo, _)
    local tilesetInfo = tilesetInfo or self.defaultTileset
    
    self.widthInChars = w and w or 80
    self.heightInChars = h and h or 24
-   self.scale = scale or 1
    self.glyphs = {}
    
    self:setTileset(tilesetInfo)
@@ -19,14 +18,13 @@ function Display:__new(w, h, scale, dfg, dbg, fullOrFlags, tilesetInfo, window)
    self.defaultForegroundColor = dfg or {1,1,1,1}
    self.defaultBackgroundColor = dbg or {0,0,0,1}
    
-   self.canvas = love.graphics.newCanvas(self.charWidth * self.widthInChars+15, self.charHeight * self.heightInChars+15)
-   self.scale = 1
+   self.canvas = love.graphics.newCanvas(self.charWidth * self.widthInChars, self.charHeight * self.heightInChars)
    self.canvas_transform = love.math.newTransform(
-      self.canvas:getWidth()/2, self.canvas:getHeight()/2,
-      0,
-      self.scale, self.scale,
-      self.canvas:getWidth()/2, self.canvas:getHeight()/2,
-      0, 0
+      transform.x, transform.y,
+      transform.r,
+      transform.sx, transform.sy,
+      transform.ox, transform.oy,
+      transform.kx, transform.ky
    )
    
    self.graphics_objects = {}
@@ -39,8 +37,8 @@ function Display:setTileset(tilesetInfo)
    
    self.imageCharWidth = atlas.grid_width
    self.imageCharHeight = atlas.grid_height
-   self.charWidth = self.imageCharWidth * self.scale
-   self.charHeight = self.imageCharHeight * self.scale
+   self.charWidth = self.imageCharWidth
+   self.charHeight = self.imageCharHeight
    self.glyphSprite = love.graphics.newImage(tilesetInfo .. ".png")
    
    local sorted = {}

@@ -1,4 +1,5 @@
 local Panel = require "panels.panel"
+local Vector2 = require "math.vector"
 
 local Level = Panel:extend()
 
@@ -106,15 +107,15 @@ function Level:draw()
    local sx, sy = game.curActor.position.x, game.curActor.position.y
 
    systems["Animate"]:updateTimers()
-   local camera
    do
       local drawable = game.curActor:getComponent(components["Drawable"])
       if drawable then
-         camera = - (drawable.position - game.curActor.position)
-      else
-         camera = Vector2(0, 0)
+         self.transform.x = self.display.canvas:getWidth()/2 - (drawable.position.x - game.curActor.position.x) * 15
+         self.transform.y = self.display.canvas:getHeight()/2 - (drawable.position.y - game.curActor.position.y) * 15
+         self.display:updateCanvasTransform(self.transform)
       end
    end
+   
    for x = sx - viewX, sx + viewX do
       for y = sy - viewY, sy + viewY do
          local cell = fov:get(x, y)
@@ -125,9 +126,9 @@ function Level:draw()
             local finalColor = tileLightingFormula(lightCol, lightValue)
 
             if lightValue ~= lightValue then finalColor = ambientColor end
-            self:writeOffset(cell.tile, x+camera.x, y+camera.y, finalColor)
+            self:writeOffset(cell.tile, x, y, finalColor)
          elseif shouldDrawExplored(explored, x, y) then
-            self:writeOffset(explored:get(x, y).tile, x+camera.x, y+camera.y, ambientColor)
+            self:writeOffset(explored:get(x, y).tile, x, y, ambientColor)
          end
       end
    end
@@ -178,9 +179,9 @@ function Level:draw()
                      if not drawn_actors[actor] then systems["Animate"]:animate(game.level, actor) end
                      local vec = drawable.position
 
-                     self:writeOffset(char, vec.x+camera.x, vec.y+camera.y, finalColor)
+                     self:writeOffset(char, vec.x, vec.y, finalColor)
                   else
-                     self:writeOffset(char, x+camera.x, y+camera.y, finalColor)
+                     self:writeOffset(char, x, y, finalColor)
                   end
                   drawn_actors[actor] = true
                end
