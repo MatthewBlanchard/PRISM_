@@ -14,8 +14,16 @@ function Panel:__new(display, parent, x, y, w, h)
       local display = Display(w, h, scale, nil, { 1, 1, 1, 0 }, nil, nil, false)
       self.display = display
    end
+
+   self.transform = {
+      x = self.display.canvas:getWidth()/2, y = self.display.canvas:getHeight()/2,
+      r = 0,
+      sx = self.scale, sy = self.scale,
+      ox = self.display.canvas:getWidth()/2, oy = self.display.canvas:getHeight()/2,
+      kx = 0, ky = 0
+   }
+
    local display = self.display
-   --self.display = display
    self.parent = parent
    self.x = x or 1
    self.y = y or 1

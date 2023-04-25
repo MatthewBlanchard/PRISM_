@@ -164,6 +164,16 @@ function Display:draw()
    love.graphics.setColor(1, 0, 0, 1)
 end
 
+function Display:updateCanvasTransform(t)
+   self.canvas_transform:setTransformation(
+      t.x, t.y,
+      t.r,
+      t.sx, t.sy,
+      t.ox, t.oy,
+      t.kx, t.ky
+   )
+end
+
 function Display:getWidth() return self.widthInChars end
 function Display:getHeight() return self.heightInChars end
 function Display:getBackgroundColor() return self.defaultBackgroundColor end
