@@ -106,14 +106,8 @@ function Level:draw()
    local viewX, viewY = self.display.widthInChars, self.display.heightInChars
    local sx, sy = game.curActor.position.x, game.curActor.position.y
 
-   systems["Animate"]:updateTimers()
-   do
-      local drawable = game.curActor:getComponent(components["Drawable"])
-      if drawable then
-         self.transform.x = self.display.canvas:getWidth()/2 - (drawable.position.x - game.curActor.position.x) * 15
-         self.transform.y = self.display.canvas:getHeight()/2 - (drawable.position.y - game.curActor.position.y) * 15
-         self.display:updateCanvasTransform(self.transform)
-      end
+   if game.level:getSystem "Animate" then
+      game.level:getSystem "Animate" :updateTimers()
    end
    
    for x = sx - viewX, sx + viewX do
@@ -176,8 +170,13 @@ function Level:draw()
 
                   if actor:getComponent(components.Drawable) then
                      local drawable = actor:getComponent(components.Drawable)
-                     if not drawn_actors[actor] then systems["Animate"]:animate(game.level, actor) end
-                     local vec = drawable.position
+                     local vec
+                     if game.level:getSystem("Animate") then
+                        if not drawn_actors[actor] then game.level:getSystem "Animate" :animate(game.level, actor) end
+                        vec = drawable.position
+                     else
+                        vec = Vector2(x, y)
+                     end
 
                      self:writeOffset(char, vec.x, vec.y, finalColor)
                   else
@@ -228,12 +227,44 @@ function Level:draw()
       end
    end
 
-   self.display:draw()
+   do
+      local drawable = game.curActor:getComponent(components["Drawable"])
+      if drawable and game.level:getSystem("Animate") then
+         self.transform.x = self.display.canvas:getWidth()/2 - (drawable.position.x - game.curActor.position.x) * 15 * self.transform.sx
+         self.transform.y = self.display.canvas:getHeight()/2 - (drawable.position.y - game.curActor.position.y) * 15 * self.transform.sy
+         self.display:updateCanvasTransform(self.transform)
+      end
+   end
+   
 
-   if not self:peek() then return end
+
+   if not self:peek() then self.display:draw() return end
    self:peek():draw()
+   self.display:draw()
+end
+
+function Level:setAction(action) self.action = action end
+
+function Level:getAction()
+   local action = self.action
+   self.action = nil
+   return action
+end
+
+function Level:push(panel) table.insert(self.stack, panel) end
+
+function Level:pop()
+   local panel = self.stack[#self.stack]
+   self.stack[#self.stack] = nil
+   return panel
 end
 
 function Level:peek() return self.stack[#self.stack] end
+
+function Level:reset()
+   for i = 1, #self.stack do
+      self.stack[i] = nil
+   end
+end
 
 return Level

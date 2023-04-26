@@ -2,7 +2,7 @@ local System = require "core.system"
 local vec2 = require "math.vector"
 
 local AnimateSystem = System:extend()
-AnimateSystem.name = "AnimateSystem"
+AnimateSystem.name = "Animate"
 AnimateSystem.speed = 2
 
 function AnimateSystem:updateTimers()
@@ -69,10 +69,10 @@ function AnimateSystem:beforeAction(_, actor, action)
 end
 
 local anim_func = function(animation, drawable)
-   local t = (drawable.t-animation.start)*animation.speed
+   local t = math.clamp( (drawable.t-animation.start)*animation.speed, 0, 1)
 
-   animation.drawable.position = math.lerp(animation.from, animation.to, math.clamp(animation.easing(t), 0, 1))
-   if t >= 1 then
+   animation.drawable.position = math.lerp(animation.from, animation.to, animation.easing(t))
+   if t == 1 then
       return true
    end
 end
@@ -136,7 +136,7 @@ function AnimateSystem:onMove(_, actor, from, to)
          to = to,
          speed = 2,
          start = get_start_time(drawable),
-         easing = function(f) return f end,
+         easing = function(f) return f*f / (2.0 * (f*f - f) + 1.0) end,--mathx.ease_inout,--function(f) return f end,
          func = anim_func
       }
 

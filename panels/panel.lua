@@ -100,8 +100,8 @@ end
 
 function Panel:writeOffset(toWrite, x, y, fg, bg)
    local viewX, viewY = self.display.widthInChars, self.display.heightInChars
-   local mx = (x - (game.curActor.position.x - math.floor(viewX / 2)))
-   local my = (y - (game.curActor.position.y - math.floor(viewY / 2)))
+   local mx = (x - (game.curActor.position.x - math.floor(viewX / 2))) + 1
+   local my = (y - (game.curActor.position.y - math.floor(viewY / 2))) + 1
 
    if
       mx < 1
@@ -117,8 +117,8 @@ end
 
 function Panel:effectWriteOffset(toWrite, x, y, fg, bg)
    local viewX, viewY = self.display.widthInChars, self.display.heightInChars
-   local mx = (x - (game.curActor.position.x - math.floor(viewX / 2)))
-   local my = (y - (game.curActor.position.y - math.floor(viewY / 2)))
+   local mx = (x - (game.curActor.position.x - math.floor(viewX / 2))) + 1
+   local my = (y - (game.curActor.position.y - math.floor(viewY / 2))) + 1
 
    if
       mx < 1
@@ -143,8 +143,8 @@ end
 
 function Panel:effectWriteOffsetUI(toWrite, x, y, ofx, ofy, fg, bg)
    local viewX, viewY = self.display.widthInChars, self.display.heightInChars
-   local mx = (x - (game.curActor.position.x - math.floor(viewX / 2)))
-   local my = (y - (game.curActor.position.y - math.floor(viewY / 2)))
+   local mx = (x - (game.curActor.position.x - math.floor(viewX / 2))) + 1
+   local my = (y - (game.curActor.position.y - math.floor(viewY / 2))) + 1
 
    if
       mx < 1
@@ -161,7 +161,7 @@ function Panel:effectWriteOffsetUI(toWrite, x, y, ofx, ofy, fg, bg)
    self.effectWrite = true
    local scale = self.display.scale
    self._curEffectDone = false
-   self:write(toWrite, mx * scale + ofx, my * scale + ofy, fg, bg)
+   self:write(toWrite, mx + ofx, my + ofy, fg, bg)
 end
 
 function Panel:writeOffsetBG(x, y, bg)

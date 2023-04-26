@@ -9,8 +9,8 @@ Display.defaultTileset = "display/atlas"
 function Display:__new(w, h, transform, dfg, dbg, fullOrFlags, tilesetInfo, _)
    local tilesetInfo = tilesetInfo or self.defaultTileset
    
-   self.widthInChars = w and w or 80
-   self.heightInChars = h and h or 24
+   self.widthInChars = w or 81
+   self.heightInChars = h or 24
    self.glyphs = {}
    
    self:setTileset(tilesetInfo)
@@ -148,6 +148,9 @@ function Display:draw_object(object)
       love.graphics.draw(drawable, transform)
    end
 end
+
+local upscale_shader = love.graphics.newShader("display/upscale_shader.glsl")
+
 function Display:draw()
    love.graphics.setCanvas(self.canvas)
    love.graphics.clear()
@@ -157,9 +160,11 @@ function Display:draw()
    love.graphics.setCanvas()
    self.graphics_objects = {}
 
+   love.graphics.setShader(upscale_shader)
    love.graphics.setColor(1, 1, 1, 1)
    love.graphics.draw(self.canvas, self.canvas_transform)
    love.graphics.setColor(1, 0, 0, 1)
+   love.graphics.setShader()
 end
 
 function Display:updateCanvasTransform(t)

@@ -13,7 +13,7 @@ function Game:__new(...)
    self:export()
 
    TILE_LENGTH = 15
-   DISPLAY_WIDTH, DISPLAY_HEIGHT = math.floor(81), math.floor(49)
+   DISPLAY_WIDTH, DISPLAY_HEIGHT = 81, 49
    love.window.setMode(
       DISPLAY_WIDTH * TILE_LENGTH,
       DISPLAY_HEIGHT * TILE_LENGTH,
