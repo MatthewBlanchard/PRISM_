@@ -57,8 +57,8 @@ function Display:setTileset(tilesetInfo)
    self.tilesetChanged = true
 end
 
-function Display:write(drawable, x, y, fg, bg)
-   local x, y = x - 1, y - 1
+function Display:write(drawable, transform, fg, bg)
+   local x, y = transform.x - 1, transform.y - 1
 
    local scale = 1
    if type(drawable) == "string" then
@@ -66,7 +66,13 @@ function Display:write(drawable, x, y, fg, bg)
          local x, y = (x+i-1)*15, y*15
          local object = {
             drawable = Tiles[tostring(v:byte())],
-            transform = love.math.newTransform(x, y),
+            transform = love.math.newTransform(
+               x, y,
+               transform.r,
+               transform.sx, transform.sy,
+               transform.ox, transform.oy,
+               transform.kx, transform.ky
+            ),
             color = {fg = fg, bg = bg}
          }
          table.insert(self.graphics_objects, object)
@@ -75,7 +81,13 @@ function Display:write(drawable, x, y, fg, bg)
       local x, y = x*15*scale, y*15*scale
       local object = {
          drawable = drawable,
-         transform = love.math.newTransform(x, y),
+         transform = love.math.newTransform(
+            x, y,
+            transform.r,
+            transform.sx, transform.sy,
+            transform.ox, transform.oy,
+            transform.kx, transform.ky
+         ),
          color = {fg = fg, bg = bg}
       }
       table.insert(self.graphics_objects, object)
@@ -85,7 +97,7 @@ function Display:writeCenter(s, y, fg, bg)
    local x = math.floor((self.widthInChars - #s) / 2)
    y = y and y or math.floor((self:getHeightInChars() - 1) / 2)
 
-   self:write(s, x, y, fg, bg)
+   self:write(s, {x=x, y=y}, fg, bg)
 end
 function Display:writeFormatted(s, x, y, bg)
    assert(type(s) == "table", "Display:writeFormatted() must have table as param")
@@ -94,7 +106,7 @@ function Display:writeFormatted(s, x, y, bg)
    local currentFg = nil
    for i = 1, #s do
       if type(s[i]) == "string" then
-         self:write(s[i], currentX, y, currentFg, nil, bg)
+         self:write(s[i], {x=currentX, y=y}, currentFg, nil, bg)
          currentX = currentX + #s[i]
       elseif type(s[i]) == "table" then
          currentFg = s[i]
@@ -109,7 +121,7 @@ function Display:drawText(x, y, text, maxWidth)
          y_format = y_format + 1
       end
       v = v..' '
-      self:write(v, x+x_format, y+y_format)
+      self:write(v, {x=x+x_format, y=y+y_format})
       x_format = x_format + string.len(v)
    end
 end
@@ -123,7 +135,7 @@ function Display:clear(c, x, y, w, h, fg, bg)
 
    for x = x, x+w do
       for y = y, y+h-1 do
-         self:write(c, x, y, fg, bg)
+         self:write(c, {x=x, y=y}, fg, bg)
       end
    end
 end

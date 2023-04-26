@@ -33,7 +33,7 @@ function MapDebugger:draw()
             tile = Wall.tile
          end
 
-         self.display:write(tile, x, y, { 1, 1, 1 })
+         self.display:write(tile, {x=x, y=y}, { 1, 1, 1 })
       end
    end
 end

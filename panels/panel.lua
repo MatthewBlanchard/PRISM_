@@ -20,7 +20,7 @@ function Panel:__new(display, parent, x, y, w, h)
 
    do
       local w, h = 81, 49
-      local display = Display(w, h, self.transform, nil, { 1, 1, 1, 0 }, nil, nil, false)
+      local display = display or Display(w, h, self.transform, nil, { 1, 1, 1, 0 }, nil, nil, false)
       self.display = display
    end
 
@@ -62,7 +62,7 @@ function Panel:darken(c, fg, bg)
       for y = self.y, self.y + self.h - 1 do
          local bg = self.display:getBackgroundColor(x, y)
          bg = ROT.Color.multiplyScalar(bg, 0.15)
-         self.display:write(" ", x, y, { 1, 1, 1 }, bg)
+         self.display:write(" ", {x=x, y=y}, { 1, 1, 1 }, bg)
       end
    end
 end
@@ -112,7 +112,17 @@ function Panel:writeOffset(toWrite, x, y, fg, bg)
       return
    end
 
-   self.display:write(toWrite, mx, my, fg, bg)
+   self.display:write(toWrite, {x=mx, y=my}, fg, bg)
+end
+
+function Panel:writeOffset2(toWrite, transform, fg, bg)
+   local transform = table.copy(transform)
+
+   local viewX, viewY = self.display.widthInChars, self.display.heightInChars
+   transform.x = (transform.x - (game.curActor.position.x - viewX / 2)) - transform.ox + 1
+   transform.y = (transform.y - (game.curActor.position.y - viewY / 2)) - transform.oy + 1
+
+   self.display:write(toWrite, transform, fg, bg)
 end
 
 function Panel:effectWriteOffset(toWrite, x, y, fg, bg)
@@ -138,7 +148,7 @@ function Panel:effectWriteOffset(toWrite, x, y, fg, bg)
 
    self.effectWrite = true
    self._curEffectDone = false
-   self.display:write(toWrite, mx, my, fg, bg)
+   self.display:write(toWrite, {x=mx, y=my}, fg, bg)
 end
 
 function Panel:effectWriteOffsetUI(toWrite, x, y, ofx, ofy, fg, bg)
@@ -194,8 +204,8 @@ function Panel:write(c, x, y, fg, bg)
 
    self.display:write(
       c,
-      self.x + x - 1,
-      self.y + y - 1,
+      {x=self.x + x - 1,
+      y=self.y + y - 1},
       fg or self.defaultForegroundColor,
       bg or self.defaultBackgroundColor
    )

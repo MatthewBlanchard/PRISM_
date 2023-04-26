@@ -170,15 +170,14 @@ function Level:draw()
 
                   if actor:getComponent(components.Drawable) then
                      local drawable = actor:getComponent(components.Drawable)
-                     local vec
                      if game.level:getSystem("Animate") then
                         if not drawn_actors[actor] then game.level:getSystem "Animate" :animate(game.level, actor) end
-                        vec = drawable.position
                      else
-                        vec = Vector2(x, y)
+                        drawable.transform.x = x + drawable.transform.ox
+                        drawable.transform.y = y + drawable.transform.oy
                      end
 
-                     self:writeOffset(char, vec.x, vec.y, finalColor)
+                     self:writeOffset2(char, drawable.transform, finalColor)
                   else
                      self:writeOffset(char, x, y, finalColor)
                   end
@@ -230,8 +229,8 @@ function Level:draw()
    do
       local drawable = game.curActor:getComponent(components["Drawable"])
       if drawable and game.level:getSystem("Animate") then
-         self.transform.x = self.display.canvas:getWidth()/2 - (drawable.position.x - game.curActor.position.x) * 15 * self.transform.sx
-         self.transform.y = self.display.canvas:getHeight()/2 - (drawable.position.y - game.curActor.position.y) * 15 * self.transform.sy
+         self.transform.x = self.display.canvas:getWidth()/2 - (drawable.transform.x - drawable.transform.ox - game.curActor.position.x) * 15 * self.transform.sx
+         self.transform.y = self.display.canvas:getHeight()/2 - (drawable.transform.y - drawable.transform.oy - game.curActor.position.y) * 15 * self.transform.sy
          self.display:updateCanvasTransform(self.transform)
       end
    end

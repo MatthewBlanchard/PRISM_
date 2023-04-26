@@ -9,7 +9,11 @@ function Drawable:__new(options)
 end
 
 function Drawable:initialize(actor)
-   self.position = actor.position
+   self.image = actor.char
+   self.transform = {
+      ox = 7.5, oy = 7.5,
+   }
+
    self.t = 0
    self.speed = 1
 

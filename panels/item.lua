@@ -52,7 +52,7 @@ function ItemPanel:handleKeyPress(keypress)
          game.interface:setAction(chosenAction(game.curActor, { self.targetActor }))
       else
          self.currentAction = chosenAction
-         game.interface:push(Selector(self.display, self, chosenAction, { self.targetActor }))
+         game.interface:push(Selector(game.interface.levelPanel.display, self, chosenAction, { self.targetActor }))
       end
    end
 end

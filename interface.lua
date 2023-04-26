@@ -172,7 +172,7 @@ function Interface:handleKeyPress(keypress)
          game.interface:reset()
          game.interface:setAction(classAbility(game.curActor))
       else
-         game.interface:push(Selector(self.display, self, classAbility))
+         game.interface:push(Selector(self.levelPanel.display, self, classAbility))
       end
    end
 

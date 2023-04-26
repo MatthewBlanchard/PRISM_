@@ -43,7 +43,10 @@ end
 function AnimateSystem:onActorAdded(level, actor)
    local drawable = actor:getComponent(components.Drawable)
    if drawable then
-      drawable.position = actor.position
+      drawable.transform.x = actor.position.x + drawable.transform.ox
+      drawable.transform.y = actor.position.y + drawable.transform.oy
+
+      drawable.transform.r = drawable.transform.r or 0
    end
 end
 
@@ -71,7 +74,9 @@ end
 local anim_func = function(animation, drawable)
    local t = math.clamp( (drawable.t-animation.start)*animation.speed, 0, 1)
 
-   animation.drawable.position = math.lerp(animation.from, animation.to, animation.easing(t))
+   animation.drawable.transform.x = math.lerp(animation.from.x, animation.to.x, animation.easing(t)) + animation.drawable.transform.ox
+   animation.drawable.transform.y = math.lerp(animation.from.y, animation.to.y, animation.easing(t)) + animation.drawable.transform.oy
+   animation.drawable.transform.r = math.lerp(0, math.pi*2, animation.easing(t))
    if t == 1 then
       return true
    end
