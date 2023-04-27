@@ -177,7 +177,7 @@ function Level:draw()
                         drawable.transform.y = y + drawable.transform.oy
                      end
 
-                     self:writeOffset2(char, drawable.transform, finalColor)
+                     self:writeOffset2(char, drawable.transform, finalColor, nil, drawable.shaderFunc)
                   else
                      self:writeOffset(char, x, y, finalColor)
                   end

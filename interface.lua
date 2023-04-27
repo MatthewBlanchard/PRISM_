@@ -12,11 +12,11 @@ local SparseGrid = require "structures.sparsegrid"
 
 local Interface = Panel()
 
-function Interface:__new(display)
-   Panel.__new(self, display)
-   self.levelPanel = Level(display)
-   self.statusPanel = Status(display)
-   self.messagePanel = Message(display)
+function Interface:__new()
+   Panel.__new(self)
+   self.levelPanel = Level()
+   self.statusPanel = Status()
+   self.messagePanel = Message()
    self.defaultBackgroundColor = self.display.defaultBackgroundColor
    self.stack = {}
    self.t = 0

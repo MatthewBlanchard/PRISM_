@@ -10,10 +10,14 @@ end
 
 function Drawable:initialize(actor)
    self.image = actor.char
+   self.shader = love.graphics.newShader("display/outline_shader.glsl")
+   self.shaderFunc = function(quad)
+      self.shader:send("viewport", {quad:getViewport()})
+      love.graphics.setShader(self.shader)
+   end
    self.transform = {
       ox = 7.5, oy = 7.5,
    }
-
    self.t = 0
    self.speed = 1
 

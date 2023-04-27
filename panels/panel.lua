@@ -115,14 +115,14 @@ function Panel:writeOffset(toWrite, x, y, fg, bg)
    self.display:write(toWrite, {x=mx, y=my}, fg, bg)
 end
 
-function Panel:writeOffset2(toWrite, transform, fg, bg)
+function Panel:writeOffset2(toWrite, transform, fg, bg, shader)
    local transform = table.copy(transform)
 
    local viewX, viewY = self.display.widthInChars, self.display.heightInChars
    transform.x = (transform.x - (game.curActor.position.x - viewX / 2)) - transform.ox + 1
    transform.y = (transform.y - (game.curActor.position.y - viewY / 2)) - transform.oy + 1
 
-   self.display:write(toWrite, transform, fg, bg)
+   self.display:write(toWrite, transform, fg, bg, shader)
 end
 
 function Panel:effectWriteOffset(toWrite, x, y, fg, bg)

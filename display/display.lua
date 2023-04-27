@@ -57,7 +57,7 @@ function Display:setTileset(tilesetInfo)
    self.tilesetChanged = true
 end
 
-function Display:write(drawable, transform, fg, bg)
+function Display:write(drawable, transform, fg, bg, shader)
    local x, y = transform.x - 1, transform.y - 1
 
    local scale = 1
@@ -73,7 +73,8 @@ function Display:write(drawable, transform, fg, bg)
                transform.ox, transform.oy,
                transform.kx, transform.ky
             ),
-            color = {fg = fg, bg = bg}
+            color = {fg = fg, bg = bg},
+            shader = shader
          }
          table.insert(self.graphics_objects, object)
       end
@@ -88,7 +89,8 @@ function Display:write(drawable, transform, fg, bg)
             transform.ox, transform.oy,
             transform.kx, transform.ky
          ),
-         color = {fg = fg, bg = bg}
+         color = {fg = fg, bg = bg},
+         shader = shader
       }
       table.insert(self.graphics_objects, object)
    end
@@ -140,7 +142,6 @@ function Display:clear(c, x, y, w, h, fg, bg)
    end
 end
 
-
 function Display:draw_object(object)
    local drawable = object.drawable
    local transform = object.transform
@@ -153,15 +154,21 @@ function Display:draw_object(object)
          love.graphics.draw(self.glyphSprite, self.glyphs[Tiles["grad6"]], transform)
       end
 
-      love.graphics.setColor(color.fg or self.defaultForegroundColor)
       local quad = self.glyphs[drawable]
+      if type(object.shader) == "function" then
+         object.shader(quad)
+      end
+      love.graphics.setColor(color.fg or self.defaultForegroundColor)
+
       love.graphics.draw(self.glyphSprite, quad, transform)
+      love.graphics.setShader()
    else
       love.graphics.draw(drawable, transform)
    end
 end
 
 local upscale_shader = love.graphics.newShader("display/upscale_shader.glsl")
+
 
 function Display:draw()
    love.graphics.setCanvas(self.canvas)
