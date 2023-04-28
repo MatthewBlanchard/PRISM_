@@ -21,8 +21,7 @@ function Panel:__new(display, parent, x, y, w, h)
    }
 
    do
-      local w, h = DISPLAY_WIDTH, DISPLAY_HEIGHT
-      local display = display or Display(w, h, self.transform, nil, { 1, 1, 1, 0 }, nil, nil, false)
+      local display = display or Display(self.w, self.h, self.transform, nil, { 1, 1, 1, 0 }, nil, nil, false)
       self.display = display
    end
 
@@ -33,6 +32,8 @@ function Panel:__new(display, parent, x, y, w, h)
    self.defaultBackgroundColor = Panel.defaultBackgroundColor
 
    self.panels = {}
+
+
 end
 
 function Panel:getRoot()
@@ -46,6 +47,14 @@ function Panel:getRoot()
 end
 
 function Panel:draw(x, y) end
+
+function Panel:write_plain(char, x, y, fg, bg)
+   self.display:write_plain(char, x, y, fg, bg)
+end
+
+function Panel:write_object(graphics_object)
+   self.display:write_object(graphics_object)
+end
 
 function Panel:clear(c, fg, bg)
    self.display:clear(
@@ -64,7 +73,7 @@ function Panel:darken(c, _, bg)
       for y = 1, self.h - 1 do
          local bg = self.display:getBackgroundColor(x, y)
          bg = ROT.Color.multiplyScalar(bg, 0.15)
-         self.display:write(Tiles["grad6"], x, y, bg)
+         self:write_plain(Tiles["grad6"], x, y, bg)
       end
    end
 end
@@ -76,32 +85,28 @@ function Panel:drawBorders(width, height)
    local half_height = (h - 3) / 2
 
    -- Top border
-   self:write(Tiles["b_top_left_corner"], 1, 1, Panel.borderColor, Panel.defaultBackgroundColor)
+   self:write_plain(Tiles["b_top_left_corner"], 1, 1, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawHorizontal(Tiles["b_top_left"], 1, half_width, 1)
-   self:write(Tiles["b_top_middle"], half_width + 2, 1, Panel.borderColor, Panel.defaultBackgroundColor)
+   self:write_plain(Tiles["b_top_middle"], half_width + 2, 1, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawHorizontal(Tiles["b_top_right"], half_width + 2, half_width * 2 + 1, 1)
-   self:write(Tiles["b_top_right_corner"], w, 1, Panel.borderColor, Panel.defaultBackgroundColor)
+   self:write_plain(Tiles["b_top_right_corner"], w, 1, Panel.borderColor, Panel.defaultBackgroundColor)
 
    -- Bottom border
-   self:write(Tiles["b_left_bottom_corner"], 1, h, Panel.borderColor, Panel.defaultBackgroundColor)
+   self:write_plain(Tiles["b_left_bottom_corner"], 1, h, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawHorizontal(Tiles["b_bottom_left"], 1, half_width, h)
-   self:write(Tiles["b_bottom_middle"], half_width + 2, h, Panel.borderColor, Panel.defaultBackgroundColor)
+   self:write_plain(Tiles["b_bottom_middle"], half_width + 2, h, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawHorizontal(Tiles["b_bottom_right"], half_width + 2, half_width * 2 + 1, h)
-   self:write(Tiles["b_bottom_right_corner"], w, h, Panel.borderColor, Panel.defaultBackgroundColor)
+   self:write_plain(Tiles["b_bottom_right_corner"], w, h, Panel.borderColor, Panel.defaultBackgroundColor)
 
    -- Left border
    self:drawVertical(Tiles["b_left_top"], 1, half_height, 1)
-   self:write(Tiles["b_left_middle"], 1, half_height + 2, Panel.borderColor, Panel.defaultBackgroundColor)
+   self:write_plain(Tiles["b_left_middle"], 1, half_height + 2, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawVertical(Tiles["b_left_bottom"], half_height + 2, half_height * 2 + 1, 1)
 
    -- Right border
    self:drawVertical(Tiles["b_right_top"], 1, half_height, w)
-   self:write(Tiles["b_right_middle"], w, half_height + 2, Panel.borderColor, Panel.defaultBackgroundColor)
+   self:write_plain(Tiles["b_right_middle"], w, half_height + 2, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawVertical(Tiles["b_right_bottom"], half_height + 2, half_height * 2 + 1, w)
-end
-
-function Panel:write(...)
-   self.display:write(...)
 end
 
 function Panel:effectWriteOffset(toWrite, x, y, fg, bg)
@@ -114,7 +119,7 @@ function Panel:effectWriteOffset(toWrite, x, y, fg, bg)
 
    self.effectWrite = true
    self._curEffectDone = false
-   self.display:write(toWrite, x, y, fg, bg)
+   self:write_plain(toWrite, x, y, fg, bg)
 end
 
 function Panel:effectWriteOffsetUI(toWrite, x, y, ofx, ofy, fg, bg)
@@ -124,7 +129,7 @@ function Panel:effectWriteOffsetUI(toWrite, x, y, ofx, ofy, fg, bg)
    self.effectWrite = true
    local scale = self.display.scale
    self._curEffectDone = false
-   self.display:write(toWrite, x + ofx, y + ofy, fg, bg)
+   self:write_plain(toWrite, x + ofx, y + ofy, fg, bg)
 end
 
 function Panel:writeOffsetBG(x, y, bg)
@@ -137,13 +142,13 @@ end
 
 function Panel:drawHorizontal(c, first, last, y)
    for i = first, last do
-      self:write(c, 1 + i, y, Panel.borderColor, Panel.defaultBackgroundColor)
+      self:write_plain(c, 1 + i, y, Panel.borderColor, Panel.defaultBackgroundColor)
    end
 end
 
 function Panel:drawVertical(c, first, last, x)
    for i = first, last do
-      self:write(c, x, 1 + i, Panel.borderColor, Panel.defaultBackgroundColor)
+      self:write_plain(c, x, 1 + i, Panel.borderColor, Panel.defaultBackgroundColor)
    end
 end
 

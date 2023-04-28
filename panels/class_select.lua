@@ -27,7 +27,7 @@ function ClassSelectPanel:draw()
    self:drawBorders()
 
    local msgLen = math.floor(string.len "Gaze upon uncomfortable truths!" / 2)
-   self:write("Gaze upon terrible truths!", math.floor(self.w / 2) - msgLen + 1, 2)
+   self:write_plain("Gaze upon terrible truths!", math.floor(self.w / 2) - msgLen + 1, 2)
 
    local descHeight = 0
    local extra = 0

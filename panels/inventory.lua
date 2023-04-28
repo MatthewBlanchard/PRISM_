@@ -37,14 +37,14 @@ function InventoryPanel:draw()
 
    local title = self:correctWidth("Inventory", self.w - 2)
    local w = string.len(title)
-   self:write(title, 2, 2, { 1, 1, 1, 1 }, { 0.3, 0.3, 0.3, 1 })
+   self:write_plain(title, 2, 2, { 1, 1, 1, 1 }, { 0.3, 0.3, 0.3, 1 })
 
    local i = 1
    for meta, list in pairs(self.items) do
       local inventoryString = self:correctWidth(i .. " " .. meta.name, self.w - 5)
       inventoryString = inventoryString .. (#list > 1 and (" x" .. #list) or "")
-      self:write(inventoryString, 2, 2 + i, { 1, 1, 1, 1 })
-      self:write(meta.char, 3, 2 + i, meta.color)
+      self:write_plain(inventoryString, 2, 2 + i, { 1, 1, 1, 1 })
+      self:write_plain(meta.char, 3, 2 + i, meta.color)
       self.indices[i] = list[1]
       i = i + 1
    end

@@ -34,7 +34,7 @@ function ItemPanel:draw()
    self:clear()
    ContextPanel.draw(self)
    for i = 1, #self.allowedActions do
-      self:write(i .. " " .. self.allowedActions[i].name, 2, i + self.descHeight + 3)
+      self:write_plain(i .. " " .. self.allowedActions[i].name, 2, i + self.descHeight + 3)
    end
 
    self.display:draw()

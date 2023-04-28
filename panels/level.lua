@@ -120,9 +120,9 @@ function Level:draw()
             local finalColor = tileLightingFormula(lightCol, lightValue)
 
             if lightValue ~= lightValue then finalColor = ambientColor end
-            self:write(cell.tile, x, y, finalColor)
+            self:write_plain(cell.tile, x, y, finalColor)
          elseif shouldDrawExplored(explored, x, y) then
-            self:write(explored:get(x, y).tile, x, y, ambientColor)
+            self:write_plain(explored:get(x, y).tile, x, y, ambientColor)
          end
       end
    end
@@ -177,10 +177,9 @@ function Level:draw()
                      end
 
                      drawable.object.colors.fg = finalColor
-
-                     self:write(drawable.object)
+                     self:write_object(drawable.object)
                   else
-                     self:write(char, x, y, finalColor)
+                     self:write_plain(char, x, y, finalColor)
                   end
                   drawn_actors[actor] = true
                end

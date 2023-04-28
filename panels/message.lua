@@ -14,11 +14,13 @@ function Message:__new(display, parent)
       display,
       parent,
       1,
-      DISPLAY_HEIGHT - Message.initialHeight + 1,
+      DISPLAY_HEIGHT - Message.toggledHeight + 1,
       DISPLAY_WIDTH,
-      Message.initialHeight,
+      Message.toggledHeight,
       true
    )
+   self:toggleHeight()
+   
    self.messages = {}
    self.defaultBackgroundColor = {0,0,0,0.4}
 end
@@ -91,7 +93,7 @@ function Message:draw()
       if message then
          local msg = message:sub(1, 1):upper() .. message:sub(2)
          local fadeAmount = (self.h == 11) and i / 3 or i
-         self:write(msg, 2, i + 1, { 1 / fadeAmount, 1 / fadeAmount, 1 / fadeAmount, 1 })
+         self:write_plain(msg, 2, i + 1, { 1 / fadeAmount, 1 / fadeAmount, 1 / fadeAmount, 1 })
       end
    end
 

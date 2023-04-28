@@ -21,7 +21,7 @@ function StatusPanel:draw()
       c = c == "" and " " or c
 
       local bg = barLength >= i and { 0.3, 0.3, 0.3, 1 } or { 0.2, 0.1, 0.1, 1 }
-      self:write(c, i + 1, 2, { 0.75, 0.75, 0.75, 1 }, bg)
+      self:write_plain(c, i + 1, 2, { 0.75, 0.75, 0.75, 1 }, bg)
    end
 
    local attacker = game.curActor:getComponent(components.Attacker)
@@ -33,30 +33,30 @@ function StatusPanel:draw()
          wielded_name_truncated = wielded_name_truncated .. "..."
       end
 
-      self:write(wielded_name_truncated, 2, 3, { 0.75, 0.75, 0.75, 1 })
-      self:write("AC: " .. game.curActor:getAC(), 2, 4, { 0.75, 0.75, 0.75, 1 })
-      self:write("ATK: " .. game.curActor:getStat "ATK", 2, 5, { 0.75, 0.75, 0.75, 1 })
-      self:write("MGK: " .. game.curActor:getStat "MGK", 2, 6, { 0.75, 0.75, 0.75, 1 })
+      self:write_plain(wielded_name_truncated, 2, 3, { 0.75, 0.75, 0.75, 1 })
+      self:write_plain("AC: " .. game.curActor:getAC(), 2, 4, { 0.75, 0.75, 0.75, 1 })
+      self:write_plain("ATK: " .. game.curActor:getStat "ATK", 2, 5, { 0.75, 0.75, 0.75, 1 })
+      self:write_plain("MGK: " .. game.curActor:getStat "MGK", 2, 6, { 0.75, 0.75, 0.75, 1 })
       local wizard_component = game.curActor:getComponent(components.Wizard)
       if wizard_component then
-         self:write("Blast: " .. wizard_component.charges, 2, 7, { 0.75, 0.75, 0.75, 1 })
+         self:write_plain("Blast: " .. wizard_component.charges, 2, 7, { 0.75, 0.75, 0.75, 1 })
       end
       local rogue_component = game.curActor:getComponent(components.Rogue)
       if rogue_component then
-         self:write("Invisibility: " .. rogue_component.charges, 2, 7, { 0.75, 0.75, 0.75, 1 })
+         self:write_plain("Invisibility: " .. rogue_component.charges, 2, 7, { 0.75, 0.75, 0.75, 1 })
       end
       local fighter_component = game.curActor:getComponent(components.Fighter)
       if fighter_component then
-         self:write("Second Wind: " .. fighter_component.charges, 2, 7, { 0.75, 0.75, 0.75, 1 })
+         self:write_plain("Second Wind: " .. fighter_component.charges, 2, 7, { 0.75, 0.75, 0.75, 1 })
       end
 
       local i = 8
       local wallet_component = game.curActor:getComponent(components.Wallet)
       if wallet_component then
          for k, v in pairs(wallet_component.wallet) do
-            self:write(k.name .. "s: ", 2, i, k.color)
-            self:write(k.char, 2 + #k.name + 3, i, k.color)
-            self:write(tostring(v), #k.name + 4, i, k.color)
+            self:write_plain(k.name .. "s: ", 2, i, k.color)
+            self:write_plain(k.char, 2 + #k.name + 3, i, k.color)
+            self:write_plain(tostring(v), #k.name + 4, i, k.color)
             i = i + 1
          end
       end

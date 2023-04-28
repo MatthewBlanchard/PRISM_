@@ -95,8 +95,6 @@ function Interface:draw()
    self.statusPanel:draw()
    self.messagePanel:draw()
 
-   self.display:draw()
-
    if not self:peek() then return end
    self:peek():draw()
 end

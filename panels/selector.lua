@@ -52,7 +52,7 @@ function SelectorPanel:draw()
    if not self.curTarget then return end
 
    if not self.blink then
-      self:write(
+      self:write_plain(
          "X",
          position.x,
          position.y,
@@ -72,12 +72,12 @@ function SelectorPanel:draw()
          x = position.x - 1 - #self.curTarget.name
       end
 
-      self:write(self.curTarget.name, x, y)
+      self:write_plain(self.curTarget.name, x, y)
    end
 
    if self.valid then
       for i = 2, #self.line - 1 do
-         self:write("x", self.line[i][1], self.line[i][2], SelectorPanel.lineColor)
+         self:write_plain("x", self.line[i][1], self.line[i][2], SelectorPanel.lineColor)
       end
    end
 

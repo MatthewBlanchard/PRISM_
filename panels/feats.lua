@@ -29,13 +29,13 @@ function FeatsPanel:draw()
 
    if #self.feats == 1 then
       local msgLen = string.len "Gaze upon terrible truths!"
-      self:write("Gaze upon terrible truths!", 8, 2)
+      self:write_plain("Gaze upon terrible truths!", 8, 2)
       local feat = self.feats[1]
       self:writeText(feat.name, 3, 4)
       self:writeText(feat.description, 3, 5, self.w - 3)
    else
       local msgLen = math.floor(string.len "Gaze upon uncomfortable truths!" / 2)
-      self:write("Gaze upon terrible truths!", math.floor(self.w / 2) - msgLen + 1, 2)
+      self:write_plain("Gaze upon terrible truths!", math.floor(self.w / 2) - msgLen + 1, 2)
 
       local descHeight = 0
       local extra = 0

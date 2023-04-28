@@ -10,8 +10,8 @@ end
 function BuyPanel:draw()
    ItemPanel.draw(self)
    local x = self.w - 2
-   self:write(tostring(self.product.price), x, 2, self.product.currency.color)
-   self:write(self.product.currency.char, x + 1, 2, self.product.currency.color)
+   self:write_plain(tostring(self.product.price), x, 2, self.product.currency.color)
+   self:write_plain(self.product.currency.char, x + 1, 2, self.product.currency.color)
 end
 
 function BuyPanel:handleKeypress(key) game.interface:handleKeypress(key) end

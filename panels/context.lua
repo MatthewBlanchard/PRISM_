@@ -23,14 +23,14 @@ function ContextPanel:draw()
 
    local w = #self.targetActor.name
 
-   self:write(
+   self:write_plain(
       self:correctWidth(self.targetActor.name, self.w - 2),
       2,
       2,
       nil,
       Panel.backgroundColor
    )
-   self:write(self.targetActor.char, w + 3, 2, self.targetActor.color, Panel.backgroundColor)
+   self:write_plain(self.targetActor.char, w + 3, 2, self.targetActor.color, Panel.backgroundColor)
 
    if self.targetActor.description then
       self:writeText(

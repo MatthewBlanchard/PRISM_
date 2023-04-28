@@ -60,16 +60,9 @@ function Display:setTileset(tilesetInfo)
    self.tilesetChanged = true
 end
 
-function Display:write(...)
-   local args = {...}
-   if #args ~= 1 then
-      self:write_batch(tablex.unpack5(args))
-   else
-      self:write2(args[1])
-   end
-end
+local i = 0
 
-function Display:write1(drawable, x, y, fg, bg, shader)
+function Display:write_plain(drawable, x, y, fg, bg, shader)
    local x, y = x - 1, y - 1
 
    local scale = 1
@@ -81,8 +74,8 @@ function Display:write1(drawable, x, y, fg, bg, shader)
             transform = love.math.newTransform(
                x, y
             ),
-            color = {fg = fg, bg = bg},
-            shader = shader
+            colors = {fg = fg, bg = bg},
+            shader_callback = shader
          }
          table.insert(self.graphics_objects, object)
       end
@@ -93,14 +86,14 @@ function Display:write1(drawable, x, y, fg, bg, shader)
          transform = love.math.newTransform(
             x, y
          ),
-         color = {fg = fg, bg = bg},
-         shader = shader
+         colors = {fg = fg, bg = bg},
+         shader_callback = shader
       }
       table.insert(self.graphics_objects, object)
    end
 end
 
-function Display:write2(graphics_object)
+function Display:write_object(graphics_object)
    graphics_object:update_transform()
    table.insert(self.graphics_objects, graphics_object)
 end
@@ -131,12 +124,13 @@ function Display:write_batch(drawable, x, y, fg, bg)
       self.batch:add(self.glyphs[drawable], x, y)
    end
 end
+--Display.write_plain = Display.write_batch
 
 function Display:writeCenter(s, y, fg, bg)
    local x = math.floor((self.widthInChars - #s) / 2)
    y = y and y or math.floor((self:getHeightInChars() - 1) / 2)
 
-   self:write(s, x, y, fg, bg)
+   self:write_plain(s, x, y, fg, bg)
 end
 function Display:writeFormatted(s, x, y, bg)
    assert(type(s) == "table", "Display:writeFormatted() must have table as param")
@@ -145,7 +139,7 @@ function Display:writeFormatted(s, x, y, bg)
    local currentFg = nil
    for i = 1, #s do
       if type(s[i]) == "string" then
-         self:write(s[i], currentX, y, currentFg, nil, bg)
+         self:write_plain(s[i], currentX, y, currentFg, nil, bg)
          currentX = currentX + #s[i]
       elseif type(s[i]) == "table" then
          currentFg = s[i]
@@ -160,7 +154,7 @@ function Display:drawText(x, y, text, maxWidth)
          y_format = y_format + 1
       end
       v = v..' '
-      self:write(v, x+x_format, y+y_format)
+      self:write_plain(v, x+x_format, y+y_format)
       x_format = x_format + string.len(v)
    end
 end
@@ -174,12 +168,17 @@ function Display:clear(c, x, y, w, h, fg, bg)
 
    for x = x, x+w do
       for y = y, y+h-1 do
-         self:write(c, x, y, fg, bg)
+         self:write_plain(c, x, y, fg, bg)
       end
    end
 end
 
 function Display:draw_object(object)
+   local x, y = (self.camera_transform * object.transform):transformPoint(0, 0)
+   if x < 0 or y < 0 or x/15 > self.widthInChars or y/15 > self.heightInChars then
+      print("clipped") return
+   end
+
    local drawable = object.drawable
    local transform = object.transform
    local color = object.colors
@@ -201,6 +200,7 @@ function Display:draw_object(object)
 end
 
 function Display:draw()
+   i = 0
    love.graphics.push()
       love.graphics.applyTransform(self.camera_transform)
 
