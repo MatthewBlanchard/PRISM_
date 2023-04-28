@@ -5,7 +5,7 @@ local Display = require "display.display"
 local Panel = Object:extend()
 Panel.borderColor = { 0.5, 0.5, 0.6, 1 }
 Panel.defaultForegroundColor = { 1, 1, 1 }
-Panel.backgroundColor = { 0.09, 0.09, 0.09 }
+Panel.defaultBackgroundColor = { 0.09, 0.09, 0.09, 1 }
 
 function Panel:__new(display, parent, x, y, w, h)
    self.x = x or 1
@@ -21,7 +21,7 @@ function Panel:__new(display, parent, x, y, w, h)
    }
 
    do
-      local w, h = 81, 49
+      local w, h = DISPLAY_WIDTH, DISPLAY_HEIGHT
       local display = display or Display(w, h, self.transform, nil, { 1, 1, 1, 0 }, nil, nil, false)
       self.display = display
    end
@@ -30,7 +30,7 @@ function Panel:__new(display, parent, x, y, w, h)
    self.parent = parent
    self.x = x or 1
    self.y = y or 1
-   self.defaultBackgroundColor = Panel.backgroundColor
+   self.defaultBackgroundColor = Panel.defaultBackgroundColor
 
    self.panels = {}
 end
@@ -49,7 +49,7 @@ function Panel:draw(x, y) end
 
 function Panel:clear(c, fg, bg)
    self.display:clear(
-      c or " ",
+      c or Tiles["grad6"],
       1,
       1,
       self.w-1,
@@ -59,12 +59,12 @@ function Panel:clear(c, fg, bg)
    )
 end
 
-function Panel:darken(c, fg, bg)
+function Panel:darken(c, _, bg)
    for x = 1, self.w - 1 do
       for y = 1, self.h - 1 do
          local bg = self.display:getBackgroundColor(x, y)
          bg = ROT.Color.multiplyScalar(bg, 0.15)
-         self.display:write(" ", x, y, { 1, 1, 1 }, bg)
+         self.display:write(Tiles["grad6"], x, y, bg)
       end
    end
 end
@@ -76,27 +76,27 @@ function Panel:drawBorders(width, height)
    local half_height = (h - 3) / 2
 
    -- Top border
-   self:write(Tiles["b_top_left_corner"], 1, 1, Panel.borderColor, Panel.backgroundColor)
+   self:write(Tiles["b_top_left_corner"], 1, 1, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawHorizontal(Tiles["b_top_left"], 1, half_width, 1)
-   self:write(Tiles["b_top_middle"], half_width + 2, 1, Panel.borderColor, Panel.backgroundColor)
+   self:write(Tiles["b_top_middle"], half_width + 2, 1, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawHorizontal(Tiles["b_top_right"], half_width + 2, half_width * 2 + 1, 1)
-   self:write(Tiles["b_top_right_corner"], w, 1, Panel.borderColor, Panel.backgroundColor)
+   self:write(Tiles["b_top_right_corner"], w, 1, Panel.borderColor, Panel.defaultBackgroundColor)
 
    -- Bottom border
-   self:write(Tiles["b_left_bottom_corner"], 1, h, Panel.borderColor, Panel.backgroundColor)
+   self:write(Tiles["b_left_bottom_corner"], 1, h, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawHorizontal(Tiles["b_bottom_left"], 1, half_width, h)
-   self:write(Tiles["b_bottom_middle"], half_width + 2, h, Panel.borderColor, Panel.backgroundColor)
+   self:write(Tiles["b_bottom_middle"], half_width + 2, h, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawHorizontal(Tiles["b_bottom_right"], half_width + 2, half_width * 2 + 1, h)
-   self:write(Tiles["b_bottom_right_corner"], w, h, Panel.borderColor, Panel.backgroundColor)
+   self:write(Tiles["b_bottom_right_corner"], w, h, Panel.borderColor, Panel.defaultBackgroundColor)
 
    -- Left border
    self:drawVertical(Tiles["b_left_top"], 1, half_height, 1)
-   self:write(Tiles["b_left_middle"], 1, half_height + 2, Panel.borderColor, Panel.backgroundColor)
+   self:write(Tiles["b_left_middle"], 1, half_height + 2, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawVertical(Tiles["b_left_bottom"], half_height + 2, half_height * 2 + 1, 1)
 
    -- Right border
    self:drawVertical(Tiles["b_right_top"], 1, half_height, w)
-   self:write(Tiles["b_right_middle"], w, half_height + 2, Panel.borderColor, Panel.backgroundColor)
+   self:write(Tiles["b_right_middle"], w, half_height + 2, Panel.borderColor, Panel.defaultBackgroundColor)
    self:drawVertical(Tiles["b_right_bottom"], half_height + 2, half_height * 2 + 1, w)
 end
 
@@ -137,13 +137,13 @@ end
 
 function Panel:drawHorizontal(c, first, last, y)
    for i = first, last do
-      self:write(c, 1 + i, y, Panel.borderColor, Panel.backgroundColor)
+      self:write(c, 1 + i, y, Panel.borderColor, Panel.defaultBackgroundColor)
    end
 end
 
 function Panel:drawVertical(c, first, last, x)
    for i = first, last do
-      self:write(c, x, 1 + i, Panel.borderColor, Panel.backgroundColor)
+      self:write(c, x, 1 + i, Panel.borderColor, Panel.defaultBackgroundColor)
    end
 end
 

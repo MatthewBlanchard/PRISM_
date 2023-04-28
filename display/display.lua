@@ -61,10 +61,10 @@ end
 
 function Display:write(...)
    local args = {...}
-   if #args == 1 then
-      self:write2(args[1])
-   else
+   if #args ~= 1 then
       self:write1(tablex.unpack5(args))
+   else
+      self:write2(args[1])
    end
 end
 
@@ -158,24 +158,26 @@ function Display:clear(c, x, y, w, h, fg, bg)
    end
 end
 
+local alpha_to_color = love.graphics.newShader("display/shaders/alpha_to_color.glsl")
+local shader_callback = function(object)
+   if object.color.bg and object.color.bg[4] ~= 0 and object.color.bg[4] ~= nil then
+      love.graphics.setShader(alpha_to_color)
+      alpha_to_color:send("bg_color", object.color.bg)
+   end
+end
 function Display:draw_object(object)
    local drawable = object.drawable
    local transform = object.transform
    local color = object.color
 
    if type(drawable) == "number" then
-
-      if color.bg then
-         love.graphics.setColor(color.bg)
-         love.graphics.draw(self.glyphSprite, self.glyphs[Tiles["grad6"]], transform)
-      end
-
       local quad = self.glyphs[drawable]
       if type(object.shader) == "function" then
          object.shader(quad)
+      else
+         shader_callback(object)
       end
       love.graphics.setColor(color.fg or self.defaultForegroundColor)
-
       love.graphics.draw(self.glyphSprite, quad, transform)
       love.graphics.setShader()
    else
