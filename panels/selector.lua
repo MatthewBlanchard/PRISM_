@@ -42,7 +42,7 @@ function SelectorPanel:__new(display, parent, action, targets)
    self.line = {}
    self.valid = true
 
-   self.targetPanel = ContextPanel(self.display, self, nil, 52, 12, 29, 11)
+   self.targetPanel = ContextPanel(nil, self, nil, 52, 12, 29, 11)
 end
 
 function SelectorPanel:draw()
@@ -52,7 +52,7 @@ function SelectorPanel:draw()
    if not self.curTarget then return end
 
    if not self.blink then
-      self:writeOffset(
+      self:write(
          "X",
          position.x,
          position.y,
@@ -72,12 +72,12 @@ function SelectorPanel:draw()
          x = position.x - 1 - #self.curTarget.name
       end
 
-      self:writeOffset(self.curTarget.name, x, y)
+      self:write(self.curTarget.name, x, y)
    end
 
    if self.valid then
       for i = 2, #self.line - 1 do
-         self:writeOffset("x", self.line[i][1], self.line[i][2], SelectorPanel.lineColor)
+         self:write("x", self.line[i][1], self.line[i][2], SelectorPanel.lineColor)
       end
    end
 

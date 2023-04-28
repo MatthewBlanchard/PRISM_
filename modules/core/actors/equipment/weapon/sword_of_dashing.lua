@@ -12,7 +12,7 @@ local DashEffect = function(start, target)
       for i = positive and 1 or -1, vertical and vec.y or vec.x, positive and 1 or -1 do
          local x = vertical and start.x or start.x + i
          local y = vertical and start.y + i or start.y
-         interface:writeOffset(Tiles["poof"], x, y)
+         interface:write(Tiles["poof"], x, y)
       end
       t = t + dt
       if t > 0.2 then return true end

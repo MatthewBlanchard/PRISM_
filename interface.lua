@@ -138,7 +138,7 @@ function Interface:handleKeyPress(keypress)
    end
 
    if game.curActor:hasComponent(components.Inventory) then
-      if self.keybinds[keypress] == "inventory" then self:push(Inventory(self.display, self)) end
+      if self.keybinds[keypress] == "inventory" then self:push(Inventory()) end
 
       if self.keybinds[keypress] == "log" then self.messagePanel:toggleHeight() end
 

@@ -3,7 +3,7 @@ local Panel = require "panels.panel"
 local SwirlPanel = Panel:extend()
 
 function SwirlPanel:__new(display, parent)
-   Panel.__new(self, display, parent, 1, 1, display:getWidth(), display:getHeight())
+   Panel.__new(self, display, parent, 1, 1, nil, nil)
    self.time = 0
 end
 

@@ -5,8 +5,8 @@ local Colors = require "math.colors"
 local ClassSelectPanel = Panel:extend()
 
 function ClassSelectPanel:__new(display, parent)
-   local halfx = display:getWidth() / 2 - 33 / 2
-   local halfy = display:getHeight() / 2 - 27 / 2
+   local halfx = DISPLAY_WIDTH / 2 - 33 / 2
+   local halfy = DISPLAY_HEIGHT / 2 - 27 / 2
    Panel.__new(self, display, parent, math.floor(halfx) + 1, math.floor(halfy), 33, 27)
 
    self.classes = {

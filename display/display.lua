@@ -9,8 +9,8 @@ Display.defaultTileset = "display/atlas"
 function Display:__new(w, h, transform, dfg, dbg, fullOrFlags, tilesetInfo, _)
    local tilesetInfo = tilesetInfo or self.defaultTileset
    
-   self.widthInChars = w or 81
-   self.heightInChars = h or 24
+   self.widthInChars = w or DISPLAY_WIDTH
+   self.heightInChars = h or DISPLAY_HEIGHT
    self.glyphs = {}
    
    self:setTileset(tilesetInfo)
@@ -26,6 +26,8 @@ function Display:__new(w, h, transform, dfg, dbg, fullOrFlags, tilesetInfo, _)
       transform.ox, transform.oy,
       transform.kx, transform.ky
    )
+
+   self.camera_transform = love.math.newTransform()
    
    self.graphics_objects = {}
    
@@ -57,8 +59,17 @@ function Display:setTileset(tilesetInfo)
    self.tilesetChanged = true
 end
 
-function Display:write(drawable, transform, fg, bg, shader)
-   local x, y = transform.x - 1, transform.y - 1
+function Display:write(...)
+   local args = {...}
+   if #args == 1 then
+      self:write2(args[1])
+   else
+      self:write1(tablex.unpack5(args))
+   end
+end
+
+function Display:write1(drawable, x, y, fg, bg, shader)
+   local x, y = x - 1, y - 1
 
    local scale = 1
    if type(drawable) == "string" then
@@ -67,11 +78,7 @@ function Display:write(drawable, transform, fg, bg, shader)
          local object = {
             drawable = Tiles[tostring(v:byte())],
             transform = love.math.newTransform(
-               x, y,
-               transform.r,
-               transform.sx, transform.sy,
-               transform.ox, transform.oy,
-               transform.kx, transform.ky
+               x, y
             ),
             color = {fg = fg, bg = bg},
             shader = shader
@@ -83,11 +90,7 @@ function Display:write(drawable, transform, fg, bg, shader)
       local object = {
          drawable = drawable,
          transform = love.math.newTransform(
-            x, y,
-            transform.r,
-            transform.sx, transform.sy,
-            transform.ox, transform.oy,
-            transform.kx, transform.ky
+            x, y
          ),
          color = {fg = fg, bg = bg},
          shader = shader
@@ -95,11 +98,24 @@ function Display:write(drawable, transform, fg, bg, shader)
       table.insert(self.graphics_objects, object)
    end
 end
+
+function Display:write2(graphics_object)
+   graphics_object:update_transform()
+   local object = {
+      drawable = graphics_object.drawable,
+      transform = graphics_object.transform,
+      color = graphics_object.colors,
+      shader = graphics_object.shader_callback
+   }
+
+   table.insert(self.graphics_objects, object)
+end
+
 function Display:writeCenter(s, y, fg, bg)
    local x = math.floor((self.widthInChars - #s) / 2)
    y = y and y or math.floor((self:getHeightInChars() - 1) / 2)
 
-   self:write(s, {x=x, y=y}, fg, bg)
+   self:write(s, x, y, fg, bg)
 end
 function Display:writeFormatted(s, x, y, bg)
    assert(type(s) == "table", "Display:writeFormatted() must have table as param")
@@ -108,7 +124,7 @@ function Display:writeFormatted(s, x, y, bg)
    local currentFg = nil
    for i = 1, #s do
       if type(s[i]) == "string" then
-         self:write(s[i], {x=currentX, y=y}, currentFg, nil, bg)
+         self:write(s[i], currentX, y, currentFg, nil, bg)
          currentX = currentX + #s[i]
       elseif type(s[i]) == "table" then
          currentFg = s[i]
@@ -123,7 +139,7 @@ function Display:drawText(x, y, text, maxWidth)
          y_format = y_format + 1
       end
       v = v..' '
-      self:write(v, {x=x+x_format, y=y+y_format})
+      self:write(v, x+x_format, y+y_format)
       x_format = x_format + string.len(v)
    end
 end
@@ -137,7 +153,7 @@ function Display:clear(c, x, y, w, h, fg, bg)
 
    for x = x, x+w do
       for y = y, y+h-1 do
-         self:write(c, {x=x, y=y}, fg, bg)
+         self:write(c, x, y, fg, bg)
       end
    end
 end
@@ -173,9 +189,13 @@ local upscale_shader = love.graphics.newShader("display/upscale_shader.glsl")
 function Display:draw()
    love.graphics.setCanvas(self.canvas)
    love.graphics.clear()
+
+   love.graphics.push()
+   love.graphics.applyTransform(self.camera_transform)
    for _, v in ipairs(self.graphics_objects) do
       self:draw_object(v)
    end
+   love.graphics.pop()
    love.graphics.setCanvas()
    self.graphics_objects = {}
 

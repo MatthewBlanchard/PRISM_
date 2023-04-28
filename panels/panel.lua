@@ -8,10 +8,12 @@ Panel.defaultForegroundColor = { 1, 1, 1 }
 Panel.backgroundColor = { 0.09, 0.09, 0.09 }
 
 function Panel:__new(display, parent, x, y, w, h)
-   self.w = w or 81
-   self.h = h or 49
+   self.x = x or 1
+   self.y = y or 1
+   self.w = w or DISPLAY_WIDTH
+   self.h = h or DISPLAY_HEIGHT
    self.transform = {
-      x = self.w*15/2, y = self.h*15/2,
+      x = (self.x-1)*15 + self.w*15/2, y = (self.y-1)*15 + self.h*15/2,
       r = 0,
       sx = 1, sy = 1,
       ox = self.w*15/2, oy = self.h*15/2,
@@ -48,21 +50,21 @@ function Panel:draw(x, y) end
 function Panel:clear(c, fg, bg)
    self.display:clear(
       c or " ",
-      self.x,
-      self.y,
-      self.w,
-      self.h,
+      1,
+      1,
+      self.w-1,
+      self.h-1,
       fg,
       bg or self.defaultBackgroundColor
    )
 end
 
 function Panel:darken(c, fg, bg)
-   for x = self.x, self.x + self.w - 1 do
-      for y = self.y, self.y + self.h - 1 do
+   for x = 1, self.w - 1 do
+      for y = 1, self.h - 1 do
          local bg = self.display:getBackgroundColor(x, y)
          bg = ROT.Color.multiplyScalar(bg, 0.15)
-         self.display:write(" ", {x=x, y=y}, { 1, 1, 1 }, bg)
+         self.display:write(" ", x, y, { 1, 1, 1 }, bg)
       end
    end
 end
@@ -74,71 +76,35 @@ function Panel:drawBorders(width, height)
    local half_height = (h - 3) / 2
 
    -- Top border
-   self:write(Tiles["b_top_left_corner"], 1, 1, Panel.borderColor)
+   self:write(Tiles["b_top_left_corner"], 1, 1, Panel.borderColor, Panel.backgroundColor)
    self:drawHorizontal(Tiles["b_top_left"], 1, half_width, 1)
-   self:write(Tiles["b_top_middle"], half_width + 2, 1, Panel.borderColor)
+   self:write(Tiles["b_top_middle"], half_width + 2, 1, Panel.borderColor, Panel.backgroundColor)
    self:drawHorizontal(Tiles["b_top_right"], half_width + 2, half_width * 2 + 1, 1)
-   self:write(Tiles["b_top_right_corner"], w, 1, Panel.borderColor)
+   self:write(Tiles["b_top_right_corner"], w, 1, Panel.borderColor, Panel.backgroundColor)
 
    -- Bottom border
-   self:write(Tiles["b_left_bottom_corner"], 1, h, Panel.borderColor)
+   self:write(Tiles["b_left_bottom_corner"], 1, h, Panel.borderColor, Panel.backgroundColor)
    self:drawHorizontal(Tiles["b_bottom_left"], 1, half_width, h)
-   self:write(Tiles["b_bottom_middle"], half_width + 2, h, Panel.borderColor)
+   self:write(Tiles["b_bottom_middle"], half_width + 2, h, Panel.borderColor, Panel.backgroundColor)
    self:drawHorizontal(Tiles["b_bottom_right"], half_width + 2, half_width * 2 + 1, h)
-   self:write(Tiles["b_bottom_right_corner"], w, h, Panel.borderColor)
+   self:write(Tiles["b_bottom_right_corner"], w, h, Panel.borderColor, Panel.backgroundColor)
 
    -- Left border
    self:drawVertical(Tiles["b_left_top"], 1, half_height, 1)
-   self:write(Tiles["b_left_middle"], 1, half_height + 2, Panel.borderColor)
+   self:write(Tiles["b_left_middle"], 1, half_height + 2, Panel.borderColor, Panel.backgroundColor)
    self:drawVertical(Tiles["b_left_bottom"], half_height + 2, half_height * 2 + 1, 1)
 
    -- Right border
    self:drawVertical(Tiles["b_right_top"], 1, half_height, w)
-   self:write(Tiles["b_right_middle"], w, half_height + 2, Panel.borderColor)
+   self:write(Tiles["b_right_middle"], w, half_height + 2, Panel.borderColor, Panel.backgroundColor)
    self:drawVertical(Tiles["b_right_bottom"], half_height + 2, half_height * 2 + 1, w)
 end
 
-function Panel:writeOffset(toWrite, x, y, fg, bg)
-   local viewX, viewY = self.display.widthInChars, self.display.heightInChars
-   local mx = (x - (game.curActor.position.x - math.floor(viewX / 2))) + 1
-   local my = (y - (game.curActor.position.y - math.floor(viewY / 2))) + 1
-
-   if
-      mx < 1
-      or mx > self.display.widthInChars
-      or my < 1
-      or my > self.display.heightInChars
-   then
-      return
-   end
-
-   self.display:write(toWrite, {x=mx, y=my}, fg, bg)
-end
-
-function Panel:writeOffset2(toWrite, transform, fg, bg, shader)
-   local transform = table.copy(transform)
-
-   local viewX, viewY = self.display.widthInChars, self.display.heightInChars
-   transform.x = (transform.x - (game.curActor.position.x - viewX / 2)) - transform.ox + 1
-   transform.y = (transform.y - (game.curActor.position.y - viewY / 2)) - transform.oy + 1
-
-   self.display:write(toWrite, transform, fg, bg, shader)
+function Panel:write(...)
+   self.display:write(...)
 end
 
 function Panel:effectWriteOffset(toWrite, x, y, fg, bg)
-   local viewX, viewY = self.display.widthInChars, self.display.heightInChars
-   local mx = (x - (game.curActor.position.x - math.floor(viewX / 2))) + 1
-   local my = (y - (game.curActor.position.y - math.floor(viewY / 2))) + 1
-
-   if
-      mx < 1
-      or mx > self.display.widthInChars
-      or my < 1
-      or my > self.display.heightInChars
-   then
-      self.effectWrite = false
-      return
-   end
 
    local sight_component = game.curActor:getComponent(components.Sight)
    if not sight_component.fov:get(x, y) then
@@ -148,30 +114,17 @@ function Panel:effectWriteOffset(toWrite, x, y, fg, bg)
 
    self.effectWrite = true
    self._curEffectDone = false
-   self.display:write(toWrite, {x=mx, y=my}, fg, bg)
+   self.display:write(toWrite, x, y, fg, bg)
 end
 
 function Panel:effectWriteOffsetUI(toWrite, x, y, ofx, ofy, fg, bg)
-   local viewX, viewY = self.display.widthInChars, self.display.heightInChars
-   local mx = (x - (game.curActor.position.x - math.floor(viewX / 2))) + 1
-   local my = (y - (game.curActor.position.y - math.floor(viewY / 2))) + 1
-
-   if
-      mx < 1
-      or mx > self.display.widthInChars
-      or my < 1
-      or my > self.display.heightInChars
-   then
-      return
-   end
-
    local sight_component = game.curActor:getComponent(components.Sight)
    if not sight_component.fov:get(x, y) then return end
 
    self.effectWrite = true
    local scale = self.display.scale
    self._curEffectDone = false
-   self:write(toWrite, mx + ofx, my + ofy, fg, bg)
+   self.display:write(toWrite, x + ofx, y + ofy, fg, bg)
 end
 
 function Panel:writeOffsetBG(x, y, bg)
@@ -196,38 +149,16 @@ end
 
 function Panel:update(dt) end
 
-function Panel:write(c, x, y, fg, bg)
-   local w = type(c) == "string" and x + string.len(c) - 1 or 1
-   if x < 1 or w > self.w or y < 1 or y > self.h then
-      error "Tried to write out of bounds to a panel!"
-   end
-
-   self.display:write(
-      c,
-      {x=self.x + x - 1,
-      y=self.y + y - 1},
-      fg or self.defaultForegroundColor,
-      bg or self.defaultBackgroundColor
-   )
-end
-
 function Panel:writeBG(x, y, bg)
-   if x < 1 or x > self.w or y < 1 or y > self.h then
-      error "Tried to write out of bounds to a panel!"
-   end
-
-   self.display:writeBG(self.x + x - 1, self.y + y - 1, bg)
+   self.display:writeBG(x, y, bg)
 end
 function Panel:writeFormatted(s, x, y, bg)
-   if x < 1 or y < 1 or y > self.h then error "Tried to write out of bounds to a panel!" end
-
-   self.display:writeFormatted(s, self.x + x - 1, self.y + y - 1, bg or self.defaultBackgroundColor)
+   self.display:writeFormatted(s, x, y, bg or self.defaultBackgroundColor)
 end
 
 function Panel:writeText(s, x, y, maxWidth)
-   if x < 1 or y < 1 or y > self.h then error "Tried to write out of bounds to a panel!" end
 
-   self.display:drawText(self.x + x - 1, self.y + y - 1, s, maxWidth)
+   self.display:drawText(x, y, s, maxWidth)
 end
 
 function Panel:correctWidth(s, w)

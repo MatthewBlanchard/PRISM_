@@ -120,9 +120,9 @@ function Level:draw()
             local finalColor = tileLightingFormula(lightCol, lightValue)
 
             if lightValue ~= lightValue then finalColor = ambientColor end
-            self:writeOffset(cell.tile, x, y, finalColor)
+            self:write(cell.tile, x, y, finalColor)
          elseif shouldDrawExplored(explored, x, y) then
-            self:writeOffset(explored:get(x, y).tile, x, y, ambientColor)
+            self:write(explored:get(x, y).tile, x, y, ambientColor)
          end
       end
    end
@@ -157,7 +157,7 @@ function Level:draw()
                local x, y = vec.x, vec.y
                local lightcolor = lighting_system:getLightingAt(x, y, fov, self.dt):to_rgb()
                if actorTable == scryActors then
-                  self:writeOffset(char, x, y, actor.color)
+                  self:write(char, x, y, actor.color)
                elseif lightcolor then
                   local lightValue = lighting_system:getBrightness(x, y, fov) / 31
                   local t = math.max(lightValue - ambientValue, 0)
@@ -173,13 +173,14 @@ function Level:draw()
                      if game.level:getSystem("Animate") then
                         if not drawn_actors[actor] then game.level:getSystem "Animate" :animate(game.level, actor) end
                      else
-                        drawable.transform.x = x + drawable.transform.ox
-                        drawable.transform.y = y + drawable.transform.oy
+                        drawable.object:set_pos(vec)
                      end
 
-                     self:writeOffset2(char, drawable.transform, finalColor, nil, drawable.shaderFunc)
+                     drawable.object.colors.fg = finalColor
+
+                     self:write(drawable.object)
                   else
-                     self:writeOffset(char, x, y, finalColor)
+                     self:write(char, x, y, finalColor)
                   end
                   drawn_actors[actor] = true
                end
@@ -229,12 +230,15 @@ function Level:draw()
    do
       local drawable = game.curActor:getComponent(components["Drawable"])
       if drawable and game.level:getSystem("Animate") then
-         self.transform.x = self.display.canvas:getWidth()/2 - (drawable.transform.x - drawable.transform.ox - game.curActor.position.x) * 15 * self.transform.sx
-         self.transform.y = self.display.canvas:getHeight()/2 - (drawable.transform.y - drawable.transform.oy - game.curActor.position.y) * 15 * self.transform.sy
-         self.display:updateCanvasTransform(self.transform)
+         local viewX, viewY = self.display.widthInChars, self.display.heightInChars
+         self.display.camera_transform:setTransformation(
+            ((-drawable.object.x + math.floor(viewX / 2) + 1)) * 15,
+            ((-drawable.object.y + math.floor(viewY / 2) + 1)) * 15
+         )
       end
    end
-   
+
+
 
 
    if not self:peek() then self.display:draw() return end
