@@ -30,6 +30,7 @@ function Display:__new(w, h, transform, dfg, dbg, fullOrFlags, tilesetInfo, _)
    self.camera_transform = love.math.newTransform()
    
    self.graphics_objects = {}
+   self.batch = love.graphics.newSpriteBatch(self.glyphSprite)
    
    return self
 end
@@ -62,7 +63,7 @@ end
 function Display:write(...)
    local args = {...}
    if #args ~= 1 then
-      self:write1(tablex.unpack5(args))
+      self:write_batch(tablex.unpack5(args))
    else
       self:write2(args[1])
    end
@@ -101,14 +102,34 @@ end
 
 function Display:write2(graphics_object)
    graphics_object:update_transform()
-   local object = {
-      drawable = graphics_object.drawable,
-      transform = graphics_object.transform,
-      color = graphics_object.colors,
-      shader = graphics_object.shader_callback
-   }
+   table.insert(self.graphics_objects, graphics_object)
+end
 
-   table.insert(self.graphics_objects, object)
+function Display:write_batch(drawable, x, y, fg, bg)
+   local x, y = x - 1, y - 1
+
+   if type(drawable) == "string" then
+      for i, v in ipairs(drawable:split()) do
+         local x, y = (x+i-1)*15, y*15
+
+         if bg and bg[4] ~= 0 then
+            self.batch:setColor(bg)
+            self.batch:add(self.glyphs[Tiles["grad6"]], x, y)
+         end
+   
+         self.batch:setColor(fg or self.defaultForegroundColor)
+         self.batch:add(self.glyphs[Tiles[tostring(v:byte())]], x, y)
+      end
+   else
+      local x, y = x*15, y*15
+      if bg and bg[4] ~= 0 then
+         self.batch:setColor(bg)
+         self.batch:add(self.glyphs[Tiles["grad6"]], x, y)
+      end
+
+      self.batch:setColor(fg)
+      self.batch:add(self.glyphs[drawable], x, y)
+   end
 end
 
 function Display:writeCenter(s, y, fg, bg)
@@ -158,54 +179,48 @@ function Display:clear(c, x, y, w, h, fg, bg)
    end
 end
 
-local alpha_to_color = love.graphics.newShader("display/shaders/alpha_to_color.glsl")
-local shader_callback = function(object)
-   if object.color.bg and object.color.bg[4] ~= 0 and object.color.bg[4] ~= nil then
-      love.graphics.setShader(alpha_to_color)
-      alpha_to_color:send("bg_color", object.color.bg)
-   end
-end
 function Display:draw_object(object)
    local drawable = object.drawable
    local transform = object.transform
-   local color = object.color
+   local color = object.colors
+   local shader_callback = object.shader_callback
 
-   if type(drawable) == "number" then
-      local quad = self.glyphs[drawable]
-      if type(object.shader) == "function" then
-         object.shader(quad)
-      else
-         shader_callback(object)
-      end
-      love.graphics.setColor(color.fg or self.defaultForegroundColor)
-      love.graphics.draw(self.glyphSprite, quad, transform)
-      love.graphics.setShader()
-   else
-      love.graphics.draw(drawable, transform)
+   local quad = self.glyphs[drawable]
+   if type(shader_callback) == "function" then
+      shader_callback(object, quad)
    end
+
+   if color.bg then
+      love.graphics.setColor(color.bg)
+      love.graphics.draw(self.glyphSprite, self.glyphs[Tiles["grad6"]], transform)
+   end
+
+   love.graphics.setColor(color.fg or self.defaultForegroundColor)
+   love.graphics.draw(self.glyphSprite, quad, transform)
+   love.graphics.setShader()
 end
 
-local upscale_shader = love.graphics.newShader("display/upscale_shader.glsl")
-
-
 function Display:draw()
-   love.graphics.setCanvas(self.canvas)
-   love.graphics.clear()
-
    love.graphics.push()
-   love.graphics.applyTransform(self.camera_transform)
-   for _, v in ipairs(self.graphics_objects) do
-      self:draw_object(v)
-   end
+      love.graphics.applyTransform(self.camera_transform)
+
+      love.graphics.setCanvas(self.canvas)
+         love.graphics.clear()
+
+         love.graphics.draw(self.batch)
+         for _, v in ipairs(self.graphics_objects) do
+            self:draw_object(v)
+         end
+
+      love.graphics.setCanvas()
+
    love.graphics.pop()
-   love.graphics.setCanvas()
+   
+   self.batch:clear()
    self.graphics_objects = {}
 
-   love.graphics.setShader(upscale_shader)
    love.graphics.setColor(1, 1, 1, 1)
    love.graphics.draw(self.canvas, self.canvas_transform)
-   love.graphics.setColor(1, 0, 0, 1)
-   love.graphics.setShader()
 end
 
 function Display:updateCanvasTransform(t)
