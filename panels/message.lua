@@ -108,14 +108,14 @@ function Message:toggleHeight()
       self.h = Message.initialHeight
       self.y = self.y + (Message.toggledHeight - Message.initialHeight)
    end
-   self.transform = {
-      x = (self.x-1)*15 + self.w*15/2, y = (self.y-1)*15 + self.h*15/2,
+   self.canvas_transform = {
+      x = (self.x-1)*15, y = (self.y-1)*15,
       r = 0,
       sx = 1, sy = 1,
-      ox = self.w*15/2, oy = self.h*15/2,
+      ox = 0, oy = 0,
       kx = 0, ky = 0
    }
-   self.display:updateCanvasTransform(self.transform)
+   self.display:update_canvas_transform(self.canvas_transform)
 end
 
 function Message.actorString(actor, action)

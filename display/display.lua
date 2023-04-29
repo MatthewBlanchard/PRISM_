@@ -38,8 +38,8 @@ end
 function Display:setTileset(tilesetInfo)
    local atlas = json.decode(love.filesystem.read(tilesetInfo .. ".json"))
    
-   self.imageCharWidth = atlas.grid_width
-   self.imageCharHeight = atlas.grid_height
+   self.imageCharWidth = 15--atlas.grid_width
+   self.imageCharHeight = 15--atlas.grid_height
    self.charWidth = self.imageCharWidth
    self.charHeight = self.imageCharHeight
    self.glyphSprite = love.graphics.newImage(tilesetInfo .. ".png")
@@ -60,12 +60,9 @@ function Display:setTileset(tilesetInfo)
    self.tilesetChanged = true
 end
 
-local i = 0
-
 function Display:write_plain(drawable, x, y, fg, bg, shader)
    local x, y = x - 1, y - 1
 
-   local scale = 1
    if type(drawable) == "string" then
       for i, v in ipairs(drawable:split()) do
          local x, y = (x+i-1)*15, y*15
@@ -80,7 +77,7 @@ function Display:write_plain(drawable, x, y, fg, bg, shader)
          table.insert(self.graphics_objects, object)
       end
    else
-      local x, y = x*15*scale, y*15*scale
+      local x, y = x*15, y*15
       local object = {
          drawable = drawable,
          transform = love.math.newTransform(
@@ -173,11 +170,12 @@ function Display:clear(c, x, y, w, h, fg, bg)
    end
 end
 
+local upscale_shader = love.graphics.newShader("display/shaders/upscale_shader.glsl")
 function Display:draw_object(object)
-   local x, y = (self.camera_transform * object.transform):transformPoint(0, 0)
-   if x < 0 or y < 0 or x/15 > self.widthInChars or y/15 > self.heightInChars then
-      print("clipped") return
-   end
+   -- local x, y = (self.camera_transform * object.transform):transformPoint(0, 0)
+   -- if x < 0 or y < 0 or x/15 > self.widthInChars or y/15 > self.heightInChars then
+   --    print("clipped") return
+   -- end
 
    local drawable = object.drawable
    local transform = object.transform
@@ -186,8 +184,9 @@ function Display:draw_object(object)
 
    local quad = self.glyphs[drawable]
    if type(shader_callback) == "function" then
-      shader_callback(object, quad)
+      shader_callback(quad)
    end
+   --love.graphics.setShader(upscale_shader)
 
    if color.bg then
       love.graphics.setColor(color.bg)
@@ -200,7 +199,6 @@ function Display:draw_object(object)
 end
 
 function Display:draw()
-   i = 0
    love.graphics.push()
       love.graphics.applyTransform(self.camera_transform)
 
@@ -223,8 +221,18 @@ function Display:draw()
    love.graphics.draw(self.canvas, self.canvas_transform)
 end
 
-function Display:updateCanvasTransform(t)
+function Display:update_canvas_transform(t)
    self.canvas_transform:setTransformation(
+      t.x, t.y,
+      t.r,
+      t.sx, t.sy,
+      t.ox, t.oy,
+      t.kx, t.ky
+   )
+end
+
+function Display:update_camera_transform(t)
+   self.camera_transform:setTransformation(
       t.x, t.y,
       t.r,
       t.sx, t.sy,

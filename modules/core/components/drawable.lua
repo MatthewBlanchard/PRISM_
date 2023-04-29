@@ -60,8 +60,8 @@ end
 function Drawable:initialize(actor)
    self.object = Graphics_Object(actor, self.options)
 
-   self.shader = love.graphics.newShader("display/outline_shader.glsl")
-   self.shaderFunc = function(quad)
+   self.shader = love.graphics.newShader("display/shaders/outline_shader.glsl")
+   self.object.shader_callback = function(quad)
       self.shader:send("viewport", {quad:getViewport()})
       love.graphics.setShader(self.shader)
    end

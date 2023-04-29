@@ -28,6 +28,17 @@ function Vector2:copy() return Vector2(self.x, self.y) end
 
 function Vector2:length() return math.sqrt(self.x * self.x + self.y * self.y) end
 
+function Vector2:normalize()
+   local length = self:length()
+   return Vector2(self.x / length, self.y / length)
+end
+
+function Vector2:sign()
+   local x = self.x > 0 and 1 or self.x < 0 and -1 or 0
+   local y = self.y > 0 and 1 or self.y < 0 and -1 or 0
+   return Vector2(x, y)
+end
+
 function Vector2:rotateClockwise() return Vector2(self.y, -self.x) end
 
 --- Adds two vectors together.

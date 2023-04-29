@@ -12,16 +12,23 @@ function Panel:__new(display, parent, x, y, w, h)
    self.y = y or 1
    self.w = w or DISPLAY_WIDTH
    self.h = h or DISPLAY_HEIGHT
-   self.transform = {
-      x = (self.x-1)*15 + self.w*15/2, y = (self.y-1)*15 + self.h*15/2,
+   self.canvas_transform = {
+      x = (self.x-1)*15, y = (self.y-1)*15,
       r = 0,
       sx = 1, sy = 1,
-      ox = self.w*15/2, oy = self.h*15/2,
+      ox = 0, oy = 0,
+      kx = 0, ky = 0
+   }
+   self.camera_transform = {
+      x = (self.x-1)*15, y = (self.y-1)*15,
+      r = 0,
+      sx = 1, sy = 1,
+      ox = 0, oy = 0,
       kx = 0, ky = 0
    }
 
    do
-      local display = display or Display(self.w, self.h, self.transform, nil, { 1, 1, 1, 0 }, nil, nil, false)
+      local display = display or Display(self.w, self.h, self.canvas_transform, nil, { 1, 1, 1, 0 }, nil, nil, false)
       self.display = display
    end
 
