@@ -3,7 +3,7 @@ local vec2 = require "math.vector"
 
 local AnimateSystem = System:extend()
 AnimateSystem.name = "Animate"
-AnimateSystem.speed = 0.25
+AnimateSystem.speed = 1
 
 function AnimateSystem:updateTimers()
    local dt = love.timer.getDelta()
@@ -83,66 +83,75 @@ local anim_func = function(animation)
    end
 
    local timeline = {
-      0, 0.25, 0.5, 0.75, 1
-   }
-   local keyframes_sx = {
-      1, 1.5, 1, 0.5, 1
-   }
-   local keyframes_sy = {
-      1, 0.5, 1, 1.5, 1
+      [1] = {
+         t = 0, 
+         func = function(timeline, i)
+            object.x = animation.from.x
+            object.y = animation.from.y
+
+            object.sx = math.lerp(1, 1.5, math.ease_in(map(t, timeline[i].t, timeline[i+1].t)))
+            object.sy = math.lerp(1, 0.5, math.ease_in(map(t, timeline[i].t, timeline[i+1].t)))
+
+            object.oy = 15
+         end
+      },
+      [2] = {
+         t = 0.25, 
+         func = function(timeline, i)
+            object.x = math.lerp(animation.from.x, animation.to.x, math.ease_inout(map(t, 0.25, 0.5)))
+            object.y = 
+               math.lerp(animation.from.y, animation.to.y, math.ease_inout(map(t, 0.25, 0.5)))
+               - math.sin(math.pi*map(t, 0.25, 0.5))
+
+            object.sx = math.lerp(1.5, 0.5, math.ease_out(map(t, timeline[i].t, timeline[i+1].t)))
+            object.sy = math.lerp(0.5, 1.5, math.ease_out(map(t, timeline[i].t, timeline[i+1].t)))
+         end
+      },
+      [3] = {
+         t = 0.5, 
+         func = function(timeline, i)
+            object.x = animation.to.x
+            object.y = animation.to.y
+
+
+            object.sx = math.lerp(0.5, 1.25, math.ease_out(map(t, timeline[i].t, timeline[i+1].t)))
+            object.sy = math.lerp(1.5, 0.75, math.ease_out(map(t, timeline[i].t, timeline[i+1].t)))
+         end
+      },
+      [4] = {
+         t = 0.75, 
+         func = function(timeline, i)
+            object.x = animation.to.x
+            object.y = animation.to.y
+
+            object.sx = math.lerp(1.25, 1, math.ease_out(map(t, timeline[i].t, timeline[i+1].t)))
+            object.sy = math.lerp(0.75, 1, math.ease_out(map(t, timeline[i].t, timeline[i+1].t)))
+         end
+      },
+      [5] = {
+         t = 1, 
+         func = function(timeline, i)
+            object.x = animation.to.x
+            object.y = animation.to.y
+            object.oy = 7.5
+
+            object.sx = 1
+            object.sy = 1
+         end
+      },
    }
 
    for i = 1, #timeline - 1 do
-      if t > timeline[i] and t <= timeline[i+1] then
-         object.sx =
-            math.lerp(keyframes_sx[i], keyframes_sx[i+1], math.ease_inout(map(t, timeline[i], timeline[i+1])))
+      if t > timeline[i].t and t <= timeline[i+1].t then
+         timeline[i].func(timeline, i)
 
-         object.sy =
-            math.lerp(keyframes_sy[i], keyframes_sy[i+1], math.ease_inout(map(t, timeline[i], timeline[i+1])))
-
-         object.y = object.y - object.sy
          break
       end
    end
-
-   local timeline = {
-      0, 0.25
-   }
-   local keyframes_xy = {
-      animation.from, animation.from
-   }
-
-   for i = 1, #timeline - 1 do
-      if t > timeline[i] and t <= timeline[i+1] then
-            object.x = math.lerp(keyframes_xy[i].x, keyframes_xy[i+1].x, math.ease_inout(map(t, timeline[i], timeline[i+1])))
-            object.y = math.lerp(keyframes_xy[i].y, keyframes_xy[i+1].y, math.ease_inout(map(t, timeline[i], timeline[i+1])))
-         break
-      end
-   end
-
-   local timeline = {
-      0.25, 1
-   }
-   local keyframes_xy = {
-      animation.from, animation.to
-   }
-
-   for i = 1, #timeline - 1 do
-      if t > timeline[i] and t <= timeline[i+1] then
-
-         object.x =
-            math.lerp(keyframes_xy[i].x, keyframes_xy[i+1].x, math.ease_inout(map(t, timeline[i], timeline[i+1])))
-
-         object.y =
-            math.lerp(keyframes_xy[i].y, keyframes_xy[i+1].y, math.ease_inout(map(t, timeline[i], timeline[i+1])))
-            --- math.sin(math.pi*map(t, timeline[i], timeline[i+1]))
-         break
-      end
-   end
-
 
 
    if t == 1 then
+      timeline[#timeline].func(timeline, i)
       return true
    end
 end
@@ -207,7 +216,7 @@ function AnimateSystem:onMove(_, actor, from, to)
          drawable = drawable,
          from = from,
          to = to,
-         speed = 2,
+         speed = 1,
          start = get_start_time(drawable),
          easing =
          mathx.ease_inout,
