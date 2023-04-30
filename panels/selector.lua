@@ -1,4 +1,5 @@
 local Panel = require "panels.panel"
+local Vector2 = require "math.vector"
 local ContextPanel = require "panels.context"
 local Vector = require "math.vector"
 local Bresenham = require "math.bresenham"
@@ -25,6 +26,23 @@ SelectorPanel.interceptInput = true
 SelectorPanel.blinkColor = { 0.2, 0.2, 0.6, 1 }
 SelectorPanel.invalidColor = { 0.6, 0, 0, 1 }
 SelectorPanel.lineColor = { 0.5, 0.5, 0.5 }
+
+SelectorPanel.movementTranslation = {
+   -- cardinal
+   w = Vector2(0, -1),
+   s = Vector2(0, 1),
+   a = Vector2(-1, 0),
+   d = Vector2(1, 0),
+
+   -- diagonal disable these and change the target in the Move action
+   -- if you want to disable diagonal movement
+   q = Vector2(-1, -1),
+   e = Vector2(1, -1),
+   z = Vector2(-1, 1),
+   c = Vector2(1, 1),
+
+   x = "wait",
+}
 
 function SelectorPanel:__new(display, parent, action, targets)
    Panel.__new(self, display, parent, 1, 1, display:getWidth(), display:getHeight())

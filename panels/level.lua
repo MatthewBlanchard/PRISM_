@@ -231,8 +231,8 @@ function Level:draw()
       if drawable and game.level:getSystem("Animate") then
          local viewX, viewY = self.display.widthInChars, self.display.heightInChars
 
-         local x2 = 0--(drawable.object.x - game.curActor.position.x)
-         local y2 = 0--(drawable.object.y - game.curActor.position.y)
+         local x2 = (drawable.object.x - game.curActor.position.x)
+         local y2 = (drawable.object.y - game.curActor.position.y)
 
          self.camera_transform.x = (( (-game.curActor.position.x - x2 + 0.5)*self.camera_transform.sx + viewX/2) * 15)
          self.camera_transform.y = (( (-game.curActor.position.y - y2 + 0.5)*self.camera_transform.sy + viewY/2) * 15)

@@ -4,7 +4,7 @@ local vec2 = require "math.vector"
 
 local AnimateSystem = System:extend()
 AnimateSystem.name = "Animate"
-AnimateSystem.speed = 1
+AnimateSystem.speed = 2
 
 function AnimateSystem:updateTimers()
    local dt = love.timer.getDelta()
@@ -69,10 +69,36 @@ function AnimateSystem:beforeAction(_, actor, action)
 
 end
 
-local anim_func = function(animation)
+local function map(input, in_start, in_end, out_start, out_end)
+   local out_start = out_start or 0
+   local out_end = out_end or 1
+   local slope = (out_end - out_start) / (in_end - in_start)
+   return out_start + slope * (input - in_start)
+end
+
+function math.linear(f)
+   return f
+end
+
+local function lerp(easing, a, b)
+   return math.lerp(a, b, easing)
+end
+
+local function call_curve(tl, f, t)
+   for i = 1, #tl - 1 do
+      if tl:in_range(i) then
+         return f[i](map(t, tl:range(i)))
+      end
+   end
+end
+
+local idle = function(animation)
+end
+
+local bounce = function(animation)
    local drawable = animation.drawable
    local object = drawable.object
-   local t = math.clamp( (drawable.t-animation.start)*animation.speed, 0, 1)
+   local t = (drawable.t-animation.start)*animation.speed
 
    local dir = (animation.to - animation.from):sign()
 
@@ -83,7 +109,7 @@ local anim_func = function(animation)
       end
    end
    function Timeline:in_range(n)
-      return t > self[n] and t <= self[n+1]
+      return t >= self[n] and t < self[n+1]
    end
    function Timeline:range(n)
       return self[n], self[n+1]
@@ -99,86 +125,66 @@ local anim_func = function(animation)
       return self[n], self[n+1]
    end
 
-   local function map(input, in_start, in_end, out_start, out_end)
-      local out_start = out_start or 0
-      local out_end = out_end or 1
-      local slope = (out_end - out_start) / (in_end - in_start)
-      return out_start + slope * (input - in_start)
-   end
-
-   local function lerp(easing, a, b)
-      return math.lerp(a, b, easing)
-   end
-
-   local function call_curve(tl, f)
-      for i = 1, #tl - 1 do
-         if tl:in_range(i) then
-            return f[i]()
-         end
-      end
-   end
-
-
    local curves = {}
    curves.oy = function() 
       local tl = Timeline{0, 1, math.huge}
       local kf = Keyframes{15, 7.5}
       local f = {
-         function() return kf[1] end,
-         function() return kf[2] end
+         function(t) return kf[1] end,
+         function(t) return kf[2] end
       }
 
-      return call_curve(tl, f)
+      return call_curve(tl, f, t)
    end
 
    curves.x = function() 
-      local tl = Timeline{0, 0.25, 0.5, 1}
+      local tl = Timeline{0, 0.25, 0.5, math.huge}
       local kf = Keyframes{animation.from.x, animation.to.x}
       local f = {
-         function() return kf[1] end,
-         function() return lerp(math.ease_inout(map(t, tl:range(2))), kf:range(1)) end,
-         function() return kf[2] end,
+         function(t) return kf[1] end,
+         function(t) return lerp(math.ease_inout(t), kf:range(1)) end,
+         function(t) return kf[2] end,
       }
 
-      return call_curve(tl, f)
+      return call_curve(tl, f, t)
    end
    curves.y = function() 
-      local tl = Timeline{0, 0.25, 0.5, 1}
+      local tl = Timeline{0, 0.25, 0.5, math.huge}
       local kf = Keyframes{animation.from.y, animation.to.y}
       local f = {
-         function() return kf[1] end,
-         function() return lerp(math.ease_inout(map(t, tl:range(2))), kf:range(1)) - math.sin(math.pi*map(t, tl:range(2))) end,
-         function() return kf[2] end,
+         function(t) return kf[1] end,
+         function(t) return lerp(math.ease_inout(t), kf:range(1)) - math.sin(t*math.pi) end,
+         function(t) return kf[2] end,
       }
 
-      return call_curve(tl, f)
+      return call_curve(tl, f, t)
    end
 
    curves.sx = function() 
       local tl = Timeline{0, 0.25, 0.5, 0.75, 1, math.huge}
       local kf = Keyframes{1, 1.5, 0.5, 1.25, 1}
       local f = {
-         function() return lerp(math.ease_in(map(t, tl:range(1))), kf:range(1)) end,
-         function() return lerp(math.ease_out(map(t, tl:range(2))), kf:range(2)) end,
-         function() return lerp(math.ease_out(map(t, tl:range(3))), kf:range(3)) end,
-         function() return lerp(math.ease_out(map(t, tl:range(4))), kf:range(4)) end,
-         function() return kf[5] end,
+         function(t) return lerp(math.ease_in(t), kf:range(1)) end,
+         function(t) return lerp(math.ease_out(t), kf:range(2)) end,
+         function(t) return lerp(math.ease_out(t), kf:range(3)) end,
+         function(t) return lerp(math.ease_out(t), kf:range(4)) end,
+         function(t) return kf[5] end,
       }
 
-      return call_curve(tl, f)
+      return call_curve(tl, f, t)
    end
    curves.sy = function() 
       local tl = Timeline{0, 0.25, 0.5, 0.75, 1, math.huge}
       local kf = Keyframes{1, 0.5, 1.5, 0.75, 1}
       local f = {
-         function() return lerp(math.ease_in(map(t, tl:range(1))), kf:range(1)) end,
-         function() return lerp(math.ease_out(map(t, tl:range(2))), kf:range(2)) end,
-         function() return lerp(math.ease_out(map(t, tl:range(3))), kf:range(3)) end,
-         function() return lerp(math.ease_out(map(t, tl:range(4))), kf:range(4)) end,
-         function() return kf[5] end,
+         function(t) return lerp(math.ease_in(t), kf:range(1)) end,
+         function(t) return lerp(math.ease_out(t), kf:range(2)) end,
+         function(t) return lerp(math.ease_out(t), kf:range(3)) end,
+         function(t) return lerp(math.ease_out(t), kf:range(4)) end,
+         function(t) return kf[5] end,
       }
 
-      return call_curve(tl, f)
+      return call_curve(tl, f, t)
    end
 
    for k, v in pairs(curves) do
@@ -186,7 +192,135 @@ local anim_func = function(animation)
    end
 
 
-   if t == 1 then
+   if t >= 1 then
+      return true
+   end
+end
+
+local slide = function(animation)
+   local drawable = animation.drawable
+   local object = drawable.object
+   local t = (drawable.t-animation.start)*animation.speed
+
+   local dir = (animation.to - animation.from):sign()
+
+   local Timeline = Object:extend()
+   function Timeline:__new(t)
+      for i, v in ipairs(t) do
+         table.insert(self, v)
+      end
+   end
+   function Timeline:in_range(n)
+      return t >= self[n] and t < self[n+1]
+   end
+   function Timeline:range(n)
+      return self[n], self[n+1]
+   end
+
+   local Keyframes = Object:extend()
+   function Keyframes:__new(t)
+      for i, v in ipairs(t) do
+         table.insert(self, v)
+      end
+   end
+   function Keyframes:range(n)
+      return self[n], self[n+1]
+   end
+
+   local curves = {}
+
+   curves.x = function() 
+      local tl = Timeline{0, 1, math.huge}
+      local kf = Keyframes{animation.from.x, animation.to.x}
+      local f = {
+         function(t) return lerp(math.ease_inout(t), kf:range(1)) end,
+         function(t) return kf[2] end,
+      }
+
+      return call_curve(tl, f, t)
+   end
+   curves.y = function() 
+      local tl = Timeline{0, 1, math.huge}
+      local kf = Keyframes{animation.from.y, animation.to.y}
+      local f = {
+         function(t) return lerp(math.ease_inout(t), kf:range(1)) end,
+         function(t) return kf[2] end,
+      }
+
+      return call_curve(tl, f, t)
+   end
+
+   for k, v in pairs(curves) do
+      object[k] = v()
+   end
+
+
+   if t >= 1 then
+      return true
+   end
+end
+
+local bump = function(animation)
+   local drawable = animation.drawable
+   local object = drawable.object
+   local t = (drawable.t-animation.start)*animation.speed
+
+   local dir = (animation.to - animation.from):sign()
+
+   local Timeline = Object:extend()
+   function Timeline:__new(t)
+      for i, v in ipairs(t) do
+         table.insert(self, v)
+      end
+   end
+   function Timeline:in_range(n)
+      return t >= self[n] and t < self[n+1]
+   end
+   function Timeline:range(n)
+      return self[n], self[n+1]
+   end
+
+   local Keyframes = Object:extend()
+   function Keyframes:__new(t)
+      for i, v in ipairs(t) do
+         table.insert(self, v)
+      end
+   end
+   function Keyframes:range(n)
+      return self[n], self[n+1]
+   end
+
+   local curves = {}
+
+   curves.x = function() 
+      local tl = Timeline{0, 0.5, 1, math.huge}
+      local kf = Keyframes{animation.from.x, animation.to.x, animation.from.x}
+      local f = {
+         function(t) return lerp(math.ease_inout(t), kf:range(1)) end,
+         function(t) return lerp(math.ease_inout(t), kf:range(2)) end,
+         function(t) return kf[3] end,
+      }
+
+      return call_curve(tl, f, t)
+   end
+   curves.y = function() 
+      local tl = Timeline{0, 0.5, 1, math.huge}
+      local kf = Keyframes{animation.from.y, animation.to.y, animation.from.y}
+      local f = {
+         function(t) return lerp(math.ease_inout(t), kf:range(1)) end,
+         function(t) return lerp(math.ease_inout(t), kf:range(2)) end,
+         function(t) return kf[3] end,
+      }
+
+      return call_curve(tl, f, t)
+   end
+
+   for k, v in pairs(curves) do
+      object[k] = v()
+   end
+
+
+   if t >= 1 then
       return true
    end
 end
@@ -214,8 +348,7 @@ AnimateSystem.animation_by_action["attack"] = function(actor, action)
          to = action:getTarget(1).position,
          speed = 2,
          start = get_start_time(drawable),
-         easing = mathx.pingpong,
-         func = anim_func
+         func = bump
       }
 
       table.insert(drawable.animations[#drawable.animations], animation)
@@ -251,12 +384,9 @@ function AnimateSystem:onMove(_, actor, from, to)
          drawable = drawable,
          from = from,
          to = to,
-         speed = 1,
+         speed = 2,
          start = get_start_time(drawable),
-         easing =
-         mathx.ease_inout,
-         --function(f) return f end,
-         func = anim_func
+         func = slide
       }
 
       table.insert(drawable.animations[#drawable.animations], animation)
