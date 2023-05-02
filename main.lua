@@ -6,7 +6,7 @@ math.random()
 math.random()
 math.random()
 
-love.audio.setVolume(0.2)
+love.audio.setVolume(0.0)
 
 local Game = require "game"
 

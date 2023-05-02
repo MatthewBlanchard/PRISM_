@@ -121,7 +121,7 @@ function Display:write_batch(drawable, x, y, fg, bg)
       self.batch:add(self.glyphs[drawable], x, y)
    end
 end
-Display.write_plain = Display.write_batch
+--Display.write_plain = Display.write_batch
 
 function Display:writeCenter(s, y, fg, bg)
    local x = math.floor((self.widthInChars - #s) / 2)
