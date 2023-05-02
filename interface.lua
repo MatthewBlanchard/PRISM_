@@ -151,9 +151,13 @@ function Interface:handleKeyPress(keypress)
       end
 
       if self.keybinds[keypress] == "map" then
-         local scale = 3 -- must be an odd integer to look good?
-         self.levelPanel.camera_transform.sx = self.levelPanel.camera_transform.sx == 1 and scale or 1
-         self.levelPanel.camera_transform.sy = self.levelPanel.camera_transform.sx
+         self.scale = self.scale or 3
+         self.scale =  -- must be an odd integer to look good?
+            self.scale == 1 and 3 or
+            self.scale == 3 and 7 or
+            self.scale == 7 and 1
+         self.levelPanel.camera_transform.sx = self.scale
+         self.levelPanel.camera_transform.sy = self.scale
          self.levelPanel.display:update_camera_transform(self.levelPanel.camera_transform)
       end
    end

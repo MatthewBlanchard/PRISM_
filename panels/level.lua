@@ -1,7 +1,39 @@
+local Object = require "object"
 local Panel = require "panels.panel"
 local Vector2 = require "math.vector"
 
 local Level = Panel:extend()
+
+local Camera = Object:extend()
+local Second_Order_Dynamics = Object:extend()
+
+function Second_Order_Dynamics:__new(f, z, r, x0)
+   local PI = math.pi
+
+   self.k1 = z / (PI * f)
+   self.k2 = 1 / ((2*PI*f)^2)
+   self.k3 = r * z / (2*PI*f)
+
+   self.xp = x0
+   self.y = x0
+   self.yd = Vector2(0, 0)
+
+end
+
+function Second_Order_Dynamics:update(t, x, xd)
+   local xd = xd or ((x - self.xp) / t) -- estimate velocity
+   local k2_stable = math.max(self.k2, 1.1 * (t*t/4 + t*self.k1/2))
+   self.y = self.y + self.yd*t -- integrate position by velocity
+   self.yd = self.yd + (x + xd*self.k3 - self.y - self.yd*self.k1) / k2_stable * t
+
+   return self.y
+end
+
+function Camera:update()
+   self.ode = self.ode or Second_Order_Dynamics(1, 1, 0, game.curActor.position:copy())
+
+   self.current = self.ode:update(love.timer.getDelta(), game.curActor.position:copy())
+end
 
 function Level:__new(display)
    Panel.__new(self, display)
@@ -13,6 +45,7 @@ function Level:__new(display)
    self.waitTime = nil
 
    self.fov = {}
+   self.camera = Camera()
 end
 
 
@@ -231,11 +264,26 @@ function Level:draw()
       if drawable and game.level:getSystem("Animate") then
          local viewX, viewY = self.display.widthInChars, self.display.heightInChars
 
-         local x2 = (drawable.object.x - game.curActor.position.x)
-         local y2 = (drawable.object.y - game.curActor.position.y)
 
-         self.camera_transform.x = (( (-game.curActor.position.x - x2 + 0.5)*self.camera_transform.sx + viewX/2) * 15)
-         self.camera_transform.y = (( (-game.curActor.position.y - y2 + 0.5)*self.camera_transform.sy + viewY/2) * 15)
+         self.camera:update()
+
+
+         local x2 = self.camera.current.x - game.curActor.position.x
+         local y2 = self.camera.current.y - game.curActor.position.y
+         -- local x2 = (drawable.object.x - game.curActor.position.x)
+         -- local y2 = (drawable.object.y - game.curActor.position.y)
+         -- local x2, y2 = 0, 0
+
+         local function quantize(x, n)
+            return math.round(x/n)*n
+         end
+
+         self.camera_transform.x = ( (-game.curActor.position.x - x2 + 0.5)*self.camera_transform.sx + viewX/2) * 15
+         --self.camera_transform.x = quantize(self.camera_transform.x, 2*self.camera_transform.sx)
+
+         self.camera_transform.y = ( (-game.curActor.position.y - y2 + 0.5)*self.camera_transform.sy + viewY/2) * 15
+         --self.camera_transform.y = quantize(self.camera_transform.y, 2*self.camera_transform.sy)
+
 
          self.display:update_camera_transform(self.camera_transform)
       end

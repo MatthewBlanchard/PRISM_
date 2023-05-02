@@ -65,6 +65,8 @@ function Vector2.__eq(a, b) return a.x == b.x and a.y == b.y end
 --@treturn Vector2 The product of the vector and the scalar.
 function Vector2.__mul(a, b) return Vector2(a.x * b, a.y * b) end
 
+function Vector2.__div(a, b) return Vector2(a.x / b, a.y / b) end
+
 function Vector2.__unm(a) return Vector2(-a.x, -a.y) end
 
 --- Creates a string representation of the vector.

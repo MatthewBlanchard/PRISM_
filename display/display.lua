@@ -121,7 +121,7 @@ function Display:write_batch(drawable, x, y, fg, bg)
       self.batch:add(self.glyphs[drawable], x, y)
    end
 end
---Display.write_plain = Display.write_batch
+Display.write_plain = Display.write_batch
 
 function Display:writeCenter(s, y, fg, bg)
    local x = math.floor((self.widthInChars - #s) / 2)
@@ -170,7 +170,6 @@ function Display:clear(c, x, y, w, h, fg, bg)
    end
 end
 
-local upscale_shader = love.graphics.newShader("display/shaders/upscale_shader.glsl")
 function Display:draw_object(object)
    -- local x, y = (self.camera_transform * object.transform):transformPoint(0, 0)
    -- if x < 0 or y < 0 or x/15 > self.widthInChars or y/15 > self.heightInChars then
@@ -186,7 +185,6 @@ function Display:draw_object(object)
    if type(shader_callback) == "function" then
       shader_callback(quad)
    end
-   --love.graphics.setShader(upscale_shader)
 
    if color.bg then
       love.graphics.setColor(color.bg)
