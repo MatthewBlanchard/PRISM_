@@ -1,5 +1,6 @@
 local Component = require "core.component"
 local Object = require "object"
+local vec2 = require "math.vector"
 
 local Graphics_Object = Object:extend()
 
@@ -31,7 +32,7 @@ function Graphics_Object:set_pos(grid_space_vec)
 end
 
 function Graphics_Object:get_pos()
-
+   return vec2(self.x, self.y)
 end
 
 function Graphics_Object:set(name, arg)
