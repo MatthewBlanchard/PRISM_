@@ -47,12 +47,14 @@ end
 Map.insert_actor = Map.insert_entity -- temp alias
 
 function Map:remove_entities(x, y)
-   for k, v in pairs(self.entities.sparsemap:get(x, y)) do
+   for k, _ in pairs(self.entities.sparsemap:get(x, y)) do
       self.entities.sparsemap:remove(x, y, k)
    end
 end
 
-function Map:get_entities(x, y) return self.entities.sparsemap:get(x, y) end
+function Map:get_entities(x, y) 
+   return self.entities.sparsemap:get(x, y)
+end
 
 function Map:for_cells()
    local x = 0
@@ -279,7 +281,6 @@ function Map:planar_embedding(graph)
 
          v.chunk = chunk
          v.outline_edges = edges
-         v.num_of_points = num_of_points
          v.polygon = path
       end
    end
@@ -298,7 +299,7 @@ function Map:planar_embedding(graph)
    end
    local function find_domain_range_max()
       local chunk_dimensions_sum = vec2(0, 0)
-      for i, v in ipairs(graph.vertices) do
+      for _, v in ipairs(graph.vertices) do
          local chunk_dimensions = vec2(v.chunk.width, v.chunk.height)
          chunk_dimensions_sum = chunk_dimensions_sum + chunk_dimensions
       end
@@ -325,7 +326,6 @@ function Map:planar_embedding(graph)
    end
 
    local domain_constraints = {}
-   local edge_matches = {}
    local function point_in_polygon(point, polygon)
       local oddNodes = false
       local j = #polygon
@@ -352,120 +352,6 @@ function Map:planar_embedding(graph)
       --local memoize = function(f) return f end
 
       local constraints = {}
-
-      local function common_edge(variables, assignment)
-         local shares_common_edge = memoize(function(vertex_1, vertex_2, assignment_1, assignment_2)
-            local function get_offset_edges(vertex, assignment)
-               local edges = vertex.outline_edges
-               local offset = assignment
-
-               local offset_edges = tablex.deep_copy(edges)
-
-               for _, edge in ipairs(offset_edges) do
-                  for i, point in ipairs(edge) do
-                     edge[i] = vec2(point.x + offset.x, point.y + offset.y)
-                  end
-               end
-
-               return offset_edges
-            end
-
-            local function are_intersecting(p1, q1, p2, q2)
-               local function on_segment(p, q, r)
-                  if
-                     q.x <= math.max(p.x, r.x)
-                     and q.x >= math.min(p.x, r.x)
-                     and q.y <= math.max(p.y, r.y)
-                     and q.y >= math.min(p.y, r.y)
-                  then
-                     return true
-                  else
-                     return false
-                  end
-               end
-
-               local function orientation(p, q, r)
-                  local val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)
-                  if val == 0 then
-                     return 0
-                  else
-                     return val > 0 and 1 or 2
-                  end
-               end
-
-               local function do_intersect(p1, q1, p2, q2)
-                  local o1 = orientation(p1, q1, p2)
-                  local o2 = orientation(p1, q1, q2)
-                  local o3 = orientation(p2, q2, p1)
-                  local o4 = orientation(p2, q2, q1)
-
-                  if o1 ~= o2 and o3 ~= o4 then
-                     return true
-                  elseif o1 == 0 and on_segment(p1, p2, q1) then
-                     return true
-                  elseif o2 == 0 and on_segment(p1, q2, q1) then
-                     return true
-                  elseif o3 == 0 and on_segment(p2, p1, q2) then
-                     return true
-                  elseif o4 == 0 and on_segment(p2, q1, q2) then
-                     return true
-                  else
-                     return false
-                  end
-               end
-
-               return do_intersect(p1, q1, p2, q2)
-            end
-
-            local edges_1 = get_offset_edges(vertex_1, assignment_1)
-            local edges_2 = get_offset_edges(vertex_2, assignment_2)
-
-            local shares_common_edge = false
-            for _, edge_1 in ipairs(edges_1) do
-               for _, edge_2 in ipairs(edges_2) do
-                  local p1, q1 = edge_1[1], edge_1[#edge_1]
-                  local p2, q2 = edge_2[1], edge_2[#edge_2]
-
-                  local dx1, dy1 = p1.x - q1.x, p1.y - q1.y
-                  local dx2, dy2 = p2.x - q2.x, p2.y - q2.y
-
-                  local d1 = vec2(p1.x - q1.x, p1.y - q1.y)
-                  local d2 = vec2(p2.x - q2.x, p2.y - q2.y)
-
-                  if math.sign(dx1) == -math.sign(dx2) and math.sign(dy1) == -math.sign(dy2) then
-                     if
-                        (p1 ~= p2 and q1 ~= q2)
-                        and (edge_1[1 + 1] ~= p2)
-                        and (edge_1[#edge_1 - 1] ~= q2)
-                     then
-                        if are_intersecting(p1, q1, p2, q2) then
-                           edge_matches[get_id(vertex_1) .. ":" .. get_id(vertex_2)] =
-                              { edge_1 = edge_1, edge_2 = edge_2 }
-                           shares_common_edge = true
-                           break
-                        end
-                     end
-                  end
-               end
-            end
-
-            return shares_common_edge
-         end)
-
-         for _, v in ipairs(graph.edges) do
-            local vertex_1, vertex_2 = v.vertex_1, v.vertex_2
-            if assignment[vertex_1] ~= nil and assignment[vertex_2] ~= nil then
-               if
-                  shares_common_edge(vertex_1, vertex_2, assignment[vertex_1], assignment[vertex_2])
-                  == false
-               then
-                  return false, { vertex_1, vertex_2 }
-               end
-            end
-         end
-
-         return true
-      end
 
       local function no_overlap(variables, assignment)
          local does_intersect = memoize(function(vertex_1, vertex_2, assignment_1, assignment_2)
@@ -547,7 +433,6 @@ function Map:planar_embedding(graph)
          return true
       end
 
-      table.insert(constraints, common_edge)
       table.insert(constraints, no_overlap)
 
       return constraints
@@ -861,7 +746,7 @@ function Map:planar_embedding(graph)
    local length = find_domain_range_max()
    local map = Map:new(length, length, 0)
 
-   for i, v in ipairs(variables) do
+   for _, v in ipairs(variables) do
       map:blit(v.chunk, assignment[v].x, assignment[v].y, false)
    end
 
@@ -879,6 +764,122 @@ function Map:planar_embedding(graph)
          end
          return t
       end
+
+      local edge_matches = {}
+      local function common_edge(variables, assignment)
+         local shares_common_edge = function(vertex_1, vertex_2, assignment_1, assignment_2)
+            local function get_offset_edges(vertex, assignment)
+               local edges = vertex.outline_edges
+               local offset = assignment
+
+               local offset_edges = tablex.deep_copy(edges)
+
+               for _, edge in ipairs(offset_edges) do
+                  for i, point in ipairs(edge) do
+                     edge[i] = vec2(point.x + offset.x, point.y + offset.y)
+                  end
+               end
+
+               return offset_edges
+            end
+
+            local function are_intersecting(p1, q1, p2, q2)
+               local function on_segment(p, q, r)
+                  if
+                     q.x <= math.max(p.x, r.x)
+                     and q.x >= math.min(p.x, r.x)
+                     and q.y <= math.max(p.y, r.y)
+                     and q.y >= math.min(p.y, r.y)
+                  then
+                     return true
+                  else
+                     return false
+                  end
+               end
+
+               local function orientation(p, q, r)
+                  local val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)
+                  if val == 0 then
+                     return 0
+                  else
+                     return val > 0 and 1 or 2
+                  end
+               end
+
+               local function do_intersect(p1, q1, p2, q2)
+                  local o1 = orientation(p1, q1, p2)
+                  local o2 = orientation(p1, q1, q2)
+                  local o3 = orientation(p2, q2, p1)
+                  local o4 = orientation(p2, q2, q1)
+
+                  if o1 ~= o2 and o3 ~= o4 then
+                     return true
+                  elseif o1 == 0 and on_segment(p1, p2, q1) then
+                     return true
+                  elseif o2 == 0 and on_segment(p1, q2, q1) then
+                     return true
+                  elseif o3 == 0 and on_segment(p2, p1, q2) then
+                     return true
+                  elseif o4 == 0 and on_segment(p2, q1, q2) then
+                     return true
+                  else
+                     return false
+                  end
+               end
+
+               return do_intersect(p1, q1, p2, q2)
+            end
+
+            local edges_1 = get_offset_edges(vertex_1, assignment_1)
+            local edges_2 = get_offset_edges(vertex_2, assignment_2)
+
+            local shares_common_edge = false
+            for _, edge_1 in ipairs(edges_1) do
+               for _, edge_2 in ipairs(edges_2) do
+                  local p1, q1 = edge_1[1], edge_1[#edge_1]
+                  local p2, q2 = edge_2[1], edge_2[#edge_2]
+
+                  local dx1, dy1 = p1.x - q1.x, p1.y - q1.y
+                  local dx2, dy2 = p2.x - q2.x, p2.y - q2.y
+
+                  local d1 = vec2(p1.x - q1.x, p1.y - q1.y)
+                  local d2 = vec2(p2.x - q2.x, p2.y - q2.y)
+
+                  if math.sign(dx1) == -math.sign(dx2) and math.sign(dy1) == -math.sign(dy2) then
+                     if
+                        (p1 ~= p2 and q1 ~= q2)
+                        and (edge_1[1 + 1] ~= p2)
+                        and (edge_1[#edge_1 - 1] ~= q2)
+                     then
+                        if are_intersecting(p1, q1, p2, q2) then
+                           edge_matches[get_id(vertex_1) .. ":" .. get_id(vertex_2)] =
+                              { edge_1 = edge_1, edge_2 = edge_2 }
+                           shares_common_edge = true
+                           break
+                        end
+                     end
+                  end
+               end
+            end
+
+            return shares_common_edge
+         end
+
+         for _, v in ipairs(graph.edges) do
+            local vertex_1, vertex_2 = v.vertex_1, v.vertex_2
+            if assignment[vertex_1] ~= nil and assignment[vertex_2] ~= nil then
+               if
+                  shares_common_edge(vertex_1, vertex_2, assignment[vertex_1], assignment[vertex_2])
+                  == false
+               then
+                  return false, { vertex_1, vertex_2 }
+               end
+            end
+         end
+
+         return true
+      end
+      common_edge(variables, assignment)
       for k, v in pairs(edge_matches) do
          local split_string = mysplit(k, ":")
          local edge_1 = v.edge_1
@@ -920,7 +921,7 @@ function Map:planar_embedding(graph)
          end
       end
 
-      for i, v in ipairs(graph.vertices) do
+      for _, v in ipairs(graph.vertices) do
          local info = {
             vertex = v,
             map = map,
@@ -1028,7 +1029,7 @@ function Map:new_from_outline()
 
    for x, y in outline_map:for_cells() do
       local is_adjacent_to_air = false
-      for k, v in ipairs(Map:getNeighborhood "moore") do
+      for k, v in ipairs(Map:get_neighborhood "moore") do
          if outline_map:get_cell(x + v[1], y + v[2]) == 0 then
             is_adjacent_to_air = true
             break
@@ -1056,7 +1057,7 @@ function Map:new_from_outline_strict()
       local current_tile = table.remove(to_check)
       local x, y = current_tile[1], current_tile[2]
 
-      for k, v in ipairs(Map:getNeighborhood "moore") do
+      for _, v in ipairs(Map:get_neighborhood "moore") do
          local x, y = x + v[1], y + v[2]
          if not checked[tostring(x) .. "," .. tostring(y)] then
             if self:get_cell(x, y) == 0 then
@@ -1083,8 +1084,8 @@ function Map:find_edges()
 
    local edges = { { startPos } }
 
-   local moore = Map:getNeighborhood "moore"
-   local vonNeuman = Map:getNeighborhood "vonNeuman"
+   local moore = Map:get_neighborhood "moore"
+   local vonNeuman = Map:get_neighborhood "vonNeuman"
    local winding = { vonNeuman.e, vonNeuman.s, vonNeuman.w, vonNeuman.n }
    --local winding = {moore.e, moore.se, moore.s, moore.sw, moore.w, moore.nw, moore.n, moore.ne}
 
@@ -1285,7 +1286,7 @@ end
 --   return size
 -- end
 
-function Map:getNeighborhood(choice)
+function Map:get_neighborhood(choice)
    local neighborhood = {}
 
    neighborhood.vonNeuman = {
@@ -1324,7 +1325,7 @@ function Map:getNeighborhood(choice)
 end
 
 -- function Map:spacePropogation(value, neighborhood, cell, size)
---   local neighborhood = self:getNeighborhood(neighborhood)
+--   local neighborhood = self:get_neighborhood(neighborhood)
 
 --   self.cells[cell.x][cell.y] = value
 
@@ -1346,10 +1347,10 @@ end
 
 function Map:dijkstra(start, neighborhood)
    local neighborhood = neighborhood or "vonNeuman"
-   local neighbors = Map:getNeighborhood(neighborhood)
+   local neighbors = Map:get_neighborhood(neighborhood)
    local map = Map:new(self.width, self.height, math.huge)
 
-   for i, v in ipairs(start) do
+   for _, v in ipairs(start) do
       map:set_cell(v.x, v.y, 0)
    end
 
@@ -1361,7 +1362,7 @@ function Map:dijkstra(start, neighborhood)
       local x, y = current_tile.x, current_tile.y
       local minimum_distance_value = map:get_cell(x, y)
 
-      for k, v in ipairs(neighbors) do
+      for _, v in ipairs(neighbors) do
          local x, y = x + v[1], y + v[2]
 
          if self:get_cell(x, y) then
@@ -1381,11 +1382,11 @@ function Map:dijkstra(start, neighborhood)
       if #to_check == 0 then break end
    end
 
-   return map, max
+   return map
 end
 
 function Map:aStar(x1, y1, x2, y2)
-   local vonNeuman = Map:getNeighborhood "vonNeuman"
+   local vonNeuman = Map:get_neighborhood "vonNeuman"
    local aStar_map = Map:new(self.width, self.height, 0)
 
    local toTravel = {}

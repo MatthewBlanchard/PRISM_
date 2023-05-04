@@ -1,5 +1,4 @@
 love.math.setRandomSeed(0)
---love.audio.setVolume(0) --gitignore
 
 local Map = require "maps.map"
 local Object = require "object"
@@ -26,6 +25,92 @@ local function point_in_polygon(point, polygon)
    return oddNodes and 1 or 0
 end
 local Bresenham = require "math.bresenham"
+local Rasterizer = require "math.rasterizer"
+
+local Graph = Object:extend()
+function Graph:__new()
+   self.vertices = {}
+   self.edges = {}
+
+   return self
+end
+function Graph:add_vertex(parameters)
+   local vertex = {
+      parameters = parameters,
+      chunk = nil,
+      outline_edges = nil,
+      polygon = nil,
+      num_of_points = nil,
+
+      edges = {},
+   }
+
+   vertex.specify = function(self, specifications)
+      self.specifications = specifications
+
+      return self
+   end
+
+   table.insert(self.vertices, vertex)
+   self.vertices[vertex] = #self.vertices
+
+   return vertex
+end
+function Graph:add_edge(meta, ...)
+   local vertices = { ... }
+   for i = 1, #vertices - 1 do
+      local vertex_1 = vertices[i]
+      local vertex_2 = vertices[i + 1]
+
+      table.insert(self.edges, { meta = meta, vertex_1 = vertex_1, vertex_2 = vertex_2 })
+      table.insert(vertex_1.edges, { meta = meta, vertex = vertex_2 })
+      table.insert(vertex_2.edges, { meta = meta, vertex = vertex_1 })
+   end
+end
+function Graph:get_connected_vertices(vertex)
+   local vertices = {}
+   for i, v in ipairs(vertex.edges) do
+      table.insert(vertices, v.vertex)
+   end
+   return vertices
+end
+function Graph:splice(v1, v2, splicer)
+   for _, v in ipairs(v1.edges) do
+      if v.vertex == v2 then
+         v.vertex = splicer
+         break
+      end
+   end
+   for _, v in ipairs(v2.edges) do
+      if v.vertex == v1 then
+         v.vertex = splicer
+         break
+      end
+   end
+
+   for _, edge in ipairs(self.edges) do
+      if edge.vertex_1 == v1 and edge.vertex_2 == v2 then
+         local copy = { meta = edge.meta, vertex_1 = v2, vertex_2 = v1 }
+         copy.vertex_2 = splicer
+         edge.vertex_2 = splicer
+         table.insert(self.edges, copy)
+
+         table.insert(splicer.edges, { meta = edge.meta, vertex = v1 })
+         table.insert(splicer.edges, { meta = edge.meta, vertex = v2 })
+         break
+      elseif edge.vertex_1 == v2 and edge.vertex_2 == v1 then
+         v1, v2 = v2, v1
+         local copy = { meta = edge.meta, vertex_1 = v2, vertex_2 = v1 }
+         copy.vertex_2 = splicer
+         edge.vertex_2 = splicer
+         table.insert(self.edges, copy)
+
+         table.insert(splicer.edges, { meta = edge.meta, vertex = v1 })
+         table.insert(splicer.edges, { meta = edge.meta, vertex = v2 })
+         break
+      end
+   end
+end
 
 local Level = Object:extend()
 
@@ -37,92 +122,6 @@ end
 
 function Level:create(callback)
    local map = self._map
-
-   local Graph = Object:extend()
-   function Graph:__new()
-      self.vertices = {}
-      self.edges = {}
-
-      return self
-   end
-   function Graph:add_vertex(parameters)
-      local vertex = {
-         parameters = parameters,
-         chunk = nil,
-         outline_edges = nil,
-         polygon = nil,
-         num_of_points = nil,
-
-         edges = {},
-      }
-
-      vertex.specify = function(self, specifications)
-         self.specifications = specifications
-
-         return self
-      end
-
-      table.insert(self.vertices, vertex)
-      self.vertices[vertex] = #self.vertices
-
-      return vertex
-   end
-   function Graph:add_edge(meta, ...)
-      local vertices = { ... }
-      for i = 1, #vertices - 1 do
-         local vertex_1 = vertices[i]
-         local vertex_2 = vertices[i + 1]
-
-         table.insert(self.edges, { meta = meta, vertex_1 = vertex_1, vertex_2 = vertex_2 })
-         table.insert(vertex_1.edges, { meta = meta, vertex = vertex_2 })
-         table.insert(vertex_2.edges, { meta = meta, vertex = vertex_1 })
-      end
-   end
-   function Graph:get_connected_vertices(vertex)
-      local vertices = {}
-      for i, v in ipairs(vertex.edges) do
-         table.insert(vertices, v.vertex)
-      end
-      return vertices
-   end
-   function Graph:splice(v1, v2, splicer)
-      for _, v in ipairs(v1.edges) do
-         if v.vertex == v2 then
-            v.vertex = splicer
-            break
-         end
-      end
-      for _, v in ipairs(v2.edges) do
-         if v.vertex == v1 then
-            v.vertex = splicer
-            break
-         end
-      end
-
-      for _, edge in ipairs(self.edges) do
-         if edge.vertex_1 == v1 and edge.vertex_2 == v2 then
-            local copy = { meta = edge.meta, vertex_1 = v2, vertex_2 = v1 }
-            copy.vertex_2 = splicer
-            edge.vertex_2 = splicer
-            table.insert(self.edges, copy)
-
-            table.insert(splicer.edges, { meta = edge.meta, vertex = v1 })
-            table.insert(splicer.edges, { meta = edge.meta, vertex = v2 })
-            break
-         elseif edge.vertex_1 == v2 and edge.vertex_2 == v1 then
-            v1, v2 = v2, v1
-            local copy = { meta = edge.meta, vertex_1 = v2, vertex_2 = v1 }
-            copy.vertex_2 = splicer
-            edge.vertex_2 = splicer
-            table.insert(self.edges, copy)
-
-            table.insert(splicer.edges, { meta = edge.meta, vertex = v1 })
-            table.insert(splicer.edges, { meta = edge.meta, vertex = v2 })
-            break
-         end
-      end
-   end
-
    local graph = Graph()
 
    local id_generator = require "maps.uuid"
@@ -146,94 +145,6 @@ function Level:create(callback)
       end
    end
    loadItems("maps/chunks", chunks, false)
-
-   local edge_join = {}
-   edge_join.door = {
-      type = "Join",
-      callback = function(chunk, info)
-         local point = info.points[1]
-
-         chunk:remove_entities(point.x, point.y)
-
-         chunk
-            :clear_cell(point.x, point.y)
-            :clear_cell(point.x + info.slope.y, point.y + info.slope.x)
-            :clear_cell(point.x - info.slope.y, point.y - info.slope.x)
-            :insert_entity("Door", point.x, point.y)
-      end,
-   }
-   edge_join.breakable_wall = {
-      type = "Join",
-      callback = function(chunk, info)
-         local point = info.points[1]
-
-         chunk
-            :clear_cell(point.x, point.y)
-            :clear_cell(point.x + info.slope.y, point.y + info.slope.x)
-            :clear_cell(point.x - info.slope.y, point.y - info.slope.x)
-            :insert_entity("Breakable_wall", point.x, point.y)
-      end,
-   }
-   edge_join.river = {
-      type = "Join",
-      callback = function(chunk, info)
-         local bridge_dir_type = math.abs(info.slope.x) == 1 and "_v" or "_h"
-         local river_dir_type = info.slope.x == 0 and "_v" or "_h"
-
-         if #info.points % 2 == 0 then
-            local point = info.points[math.floor(#info.points / 2)]
-            chunk
-               :clear_cell(point.x, point.y)
-               :clear_cell(point.x + info.slope.y, point.y + info.slope.x)
-               :clear_cell(point.x - info.slope.y, point.y - info.slope.x)
-               :insert_entity("Bridge" .. bridge_dir_type, point.x, point.y)
-
-            local point = info.points[math.floor(#info.points / 2) + 1]
-            chunk
-               :clear_cell(point.x, point.y)
-               :clear_cell(point.x + info.slope.y, point.y + info.slope.x)
-               :clear_cell(point.x - info.slope.y, point.y - info.slope.x)
-               :insert_entity("Bridge" .. bridge_dir_type, point.x, point.y)
-         else
-            local point = info.points[math.ceil(#info.points / 2)]
-            chunk
-               :clear_cell(point.x, point.y)
-               :clear_cell(point.x + info.slope.y, point.y + info.slope.x)
-               :clear_cell(point.x - info.slope.y, point.y - info.slope.x)
-               :insert_entity("Bridge" .. bridge_dir_type, point.x, point.y)
-
-            -- for i = math.ceil(#info.points / 2)+1, #info.points do
-            --   local point = info.points[i]
-            --   chunk:clear_cell(point.x, point.y)
-            --   :clear_cell(point.x+info.slope.y, point.y+info.slope.x)
-            --   :clear_cell(point.x-info.slope.y, point.y-info.slope.x)
-            --   :insert_entity('River'..river_dir_type, point.x, point.y)
-
-            --   local point = info.points[#info.points-2*i]
-            --   chunk:clear_cell(point.x, point.y)
-            --   :clear_cell(point.x+info.slope.y, point.y+info.slope.x)
-            --   :clear_cell(point.x-info.slope.y, point.y-info.slope.x)
-            --   :insert_entity('River'..river_dir_type, point.x, point.y)
-            -- end
-         end
-      end,
-   }
-   edge_join.boss_door = {
-      type = "Join",
-      callback = function(chunk, info)
-         local point = info.points[1]
-
-         chunk
-            :clear_cell(point.x, point.y)
-            :clear_cell(point.x + info.slope.y, point.y + info.slope.x)
-            :clear_cell(point.x - info.slope.y, point.y - info.slope.x)
-            :insert_entity("Door_locked", point.x, point.y, function(actor, entities_by_unique_id)
-               if not entities_by_unique_id[boss_key_uuid] then return "Delay" end
-               local chest_lock = actor:getComponent(components.Lock_id)
-               chest_lock:setKey(entities_by_unique_id[boss_key_uuid])
-            end)
-      end,
-   }
 
    local edges = {}
    edges.empty = {
@@ -306,12 +217,8 @@ function Level:create(callback)
       end,
    }
 
-   -- rules
    local function graph_writer(graph)
       local Chunk = require "maps.chunk"
-      local level_specifications = {
-         chunk_count = 2,
-      }
 
       local function get_id(id)
          if type(id) == "string" then
@@ -423,8 +330,8 @@ function Level:create(callback)
                   and point_in_polygon(vec2(x, y), polygon) ~= 0
                then
                   local x, y = x + offset.x, y + offset.y
+                  map:remove_entities(x, y)
                   map:insert_entity(get_id(id), x, y)
-                  --map:clear_cell(x, y)
                end
             end
          end,
@@ -512,6 +419,57 @@ function Level:create(callback)
                map:insert_entity("Shard", spot.x, spot.y)
             end
          end,
+
+         bezier = function (self, info, id, callback, uuid)
+            local chunk, map, offset, polygon, vertex, edges_info =
+            info.chunk, info.map, info.offset, info.polygon, info.vertex, info.edges
+            local center = vec2(chunk:get_center()) + offset
+
+            local endpoints = {}
+            for k, v in ipairs(edges_info[vertex]) do
+               local edge = v
+               local points = edge.points
+
+               local point = points[math.floor(#points / 2) + 1]
+               table.insert(endpoints, point)
+            end
+
+            local path_map = map:new(chunk.width, chunk.height, 0)
+            local blur_map = map:new(chunk.width, chunk.height, 0)
+            local plot = function(x, y)
+               path_map:set_cell(x, y, 1)
+            end
+            Rasterizer:plot({endpoints[1]-offset, center-offset, endpoints[2]-offset}, {weight=3}, plot)
+
+            local function gaussian(x, y, sigma)
+               local e = 2.7182818284590
+               return 1 / (2*math.pi*sigma^2) * e^(-(x^2+y^2) / (2*sigma^2))
+            end
+            for x, y, cell in path_map:for_cells() do
+               local neighbors = path_map:get_neighborhood('moore')
+               local cell_weighted_sum = cell * gaussian(0, 0, 0.5)
+               --local gauss_sum = gaussian(0, 0, 0.5)
+               for _, v in ipairs(neighbors) do
+                  --gauss_sum = gauss_sum + gaussian(v[1], v[2], 0.5)
+                  cell_weighted_sum = cell_weighted_sum + (path_map:get_cell(x+v[1], y+v[2]) or 0) * gaussian(v[1], v[2], 0.5)
+               end
+               --local cell_average = cell_sum / #neighbors
+               --print(gauss_sum)
+               
+               blur_map:set_cell(x, y, cell_weighted_sum)
+            end
+
+            for x, y, cell in blur_map:for_cells() do
+               if cell > 0 then--and cell >= love.math.random(0, 0.5) then
+                  local x, y = x + offset.x, y + offset.y
+                  local entities = map:get_entities(x, y)
+                  if not (next(entities) and cells[next(entities).id]) then
+                     map:remove_entities(x, y)
+                     map:insert_entity(cell >= 0.5 and "Dirt_2" or "Dirt_1", x, y)
+                  end
+               end
+            end
+         end,
       }
 
       local function parameterize_vertex_from_specification(vertex)
@@ -556,7 +514,7 @@ function Level:create(callback)
          chunks[k] = v
       end
 
-      local function clarify_level_specifications(level_specifications)
+      local function clarify_level_specifications_1(level_specifications)
 
         -- how many open tiles are there
         -- what are the qualities of the paths between chunks
@@ -569,53 +527,52 @@ function Level:create(callback)
         -- what is the entitiy's importance level in its chunk
         -- how accessible should the entity be in its chunk
 
-        local entities = {}
-        entities.shopkeep = {
-          uuid = id_generator(),
-          callback = function()
-          end
-        }
-        entities.product = {
-          uuid = id_generator(),
-          callback = function(actor, actors_by_unique_id)
-            if actors_by_unique_id[entities.shopkeep.uuid] then
-              local sellable_component = actor:getComponent(components.Sellable)
-              sellable_component:setItem(actors.Bomb())
-              sellable_component:setPrice(actors.Shard, 1)
-
-              actor:initialize()
-
-              sellable_component:setShopkeep(actors_by_unique_id[entities.shopkeep.uuid])
-            else
-              return 'Delay'
+         local entities = {}
+         entities.shopkeep = {
+            uuid = id_generator(),
+            callback = function()
             end
-          end
-        }
+         }
+         entities.product = {
+            uuid = id_generator(),
+            callback = function(actor, actors_by_unique_id)
+               if actors_by_unique_id[entities.shopkeep.uuid] then
+               local sellable_component = actor:getComponent(components.Sellable)
+               sellable_component:setItem(actors.Bomb())
+               sellable_component:setPrice(actors.Shard, 1)
 
-        entities.telepad_1 = {
-          uuid = id_generator(),
-          callback = function(entity, entities_by_unique_id)
-            if entities_by_unique_id[entities.telepad_2.uuid] then
-              local destination = entities_by_unique_id[entities.telepad_2.uuid].position
-              entity.teleport_destination = vec2(destination.x, destination.y)
-            else
-              return 'Delay'
-            end
-          end
-        }
-        entities.telepad_2 = {
-          uuid = id_generator(),
-          callback = function(entity, entities_by_unique_id)
-            if entities_by_unique_id[entities.telepad_1.uuid] then
-              local destination = entities_by_unique_id[entities.telepad_1.uuid].position
-              entity.teleport_destination = vec2(destination.x, destination.y)
-            else
-              return 'Delay'
-            end
-          end
-        }
+               actor:initialize()
 
-        chunks.add_chunk('start', graph:add_vertex(Chunk:extend()):specify{
+               sellable_component:setShopkeep(actors_by_unique_id[entities.shopkeep.uuid])
+               else
+               return 'Delay'
+               end
+            end
+         }
+         entities.telepad_1 = {
+            uuid = id_generator(),
+            callback = function(entity, entities_by_unique_id)
+               if entities_by_unique_id[entities.telepad_2.uuid] then
+               local destination = entities_by_unique_id[entities.telepad_2.uuid].position
+               entity.teleport_destination = vec2(destination.x, destination.y)
+               else
+               return 'Delay'
+               end
+            end
+         }
+         entities.telepad_2 = {
+            uuid = id_generator(),
+            callback = function(entity, entities_by_unique_id)
+               if entities_by_unique_id[entities.telepad_1.uuid] then
+               local destination = entities_by_unique_id[entities.telepad_1.uuid].position
+               entity.teleport_destination = vec2(destination.x, destination.y)
+               else
+               return 'Delay'
+               end
+            end
+         }
+
+         chunks.add_chunk('start', graph:add_vertex(Chunk:extend()):specify{
           width = 3,
           height = 3,
 
@@ -624,249 +581,236 @@ function Level:create(callback)
           },
 
           population = {
-            {id = 'Prism', type = 'center'},
             {id = 'Player', type = 'center'},
             {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
           }
-        })
-        stack.push(current_chunk)
+         })
+         stack.push(current_chunk)
 
-        chunks.add_chunk('finish', graph:add_vertex(Chunk:extend()):specify{
-          width = 3,
-          height = 3,
+         chunks.add_chunk('finish', graph:add_vertex(Chunk:extend()):specify{
+            width = 3,
+            height = 3,
 
-          shape = {
-            {'square'}
-          },
+            shape = {
+               {'square'}
+            },
 
-          population = {
-            {id = 'Stairs', type = 'center'},
-            {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
-          }
-        })
-        graph:add_edge(edges.narrow, stack.get(), current_chunk)
+            population = {
+               {id = 'Stairs', type = 'center'},
+               {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
+            }
+         })
+         graph:add_edge(edges.narrow, stack.get(), current_chunk)
 
-        chunks.add_chunk('entrance', graph:add_vertex(Chunk:extend()):specify{
-          width = 15,
-          height = 15,
+         chunks.add_chunk('entrance', graph:add_vertex(Chunk:extend()):specify{
+            width = 15,
+            height = 15,
 
-          shape = {
-            {'circle', {size = 5}},
-            function(i, t)
-              for n = 1, 20 do table.insert(t, i+1, {'DLA1'}) end
-            end,
-          },
+            shape = {
+               {'circle', {size = 5}},
+               function(i, t)
+               for n = 1, 20 do table.insert(t, i+1, {'DLA1'}) end
+               end,
+            },
 
-          population = {
-            function(i, t)
-              for n = 1, 10 do table.insert(t, i+1, {id = {'Glowshroom_1', 'Glowshroom_2'}, type = 'random'}) end
-            end,
-            {id = '', type = 'bridge'},
-            {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
-          }
-        })
-        graph:splice(stack.get(), graph:get_connected_vertices(stack.get())[1], current_chunk)
-        stack.push(current_chunk)
+            population = {
+               function(i, t)
+               for n = 1, 10 do table.insert(t, i+1, {id = {'Glowshroom_1', 'Glowshroom_2'}, type = 'random'}) end
+               end,
+               {id = '', type = 'bezier'},
+               {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
+            }
+         })
+         graph:splice(stack.get(), graph:get_connected_vertices(stack.get())[1], current_chunk)
+         stack.push(current_chunk)
 
-        chunks.add_chunk('foyer', graph:add_vertex(Chunk:extend()):specify{
-          width = 20,
-          height = 20,
+         chunks.add_chunk('foyer', graph:add_vertex(Chunk:extend()):specify{
+            width = 20,
+            height = 20,
 
-          shape = {
-            {'circle', {size = 5}},
-            function(i, t)
-              for n = 1, 50 do table.insert(t, i+1, {'DLA1'}) end
-            end,
-            function(i, t)
-              for n = 1, 50 do table.insert(t, i+1, {'DLA2'}) end
-            end,
-          },
+            shape = {
+               {'circle', {size = 5}},
+               function(i, t)
+               for n = 1, 50 do table.insert(t, i+1, {'DLA1'}) end
+               end,
+               function(i, t)
+               for n = 1, 50 do table.insert(t, i+1, {'DLA2'}) end
+               end,
+            },
 
-          population = {
-            function(i, t)
-              for n = 1, 10 do table.insert(t, i+1, {id = {'Glowshroom_1', 'Glowshroom_2'}, type = 'random'}) end
-            end,
-            function(i, t)
-              for n = 1, 3 do table.insert(t, i+1, {id = 'Sqeeto', type = 'random'}) end
-            end,
-            {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
-          }
-        })
-        graph:splice(stack.get(), graph:get_connected_vertices(stack.get())[2], current_chunk)
-        stack.push(current_chunk)
+            population = {
+               function(i, t)
+               for n = 1, 10 do table.insert(t, i+1, {id = {'Glowshroom_1', 'Glowshroom_2'}, type = 'random'}) end
+               end,
+               function(i, t)
+               for n = 1, 3 do table.insert(t, i+1, {id = 'Sqeeto', type = 'random'}) end
+               end,
+               {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
+            }
+         })
+         graph:splice(stack.get(), graph:get_connected_vertices(stack.get())[2], current_chunk)
+         stack.push(current_chunk)
 
-        chunks.add_chunk('shop', graph:add_vertex(Chunk:extend()):specify{
-          width = 9,
-          height = 9,
+         chunks.add_chunk('shop', graph:add_vertex(Chunk:extend()):specify{
+            width = 9,
+            height = 9,
 
-          shape = {
-            {'circle', {size = 3}},
-          },
+            shape = {
+               {'circle', {size = 4}},
+            },
 
-          population = {
-            {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_4', 'Bricks_5'}, type = 'all_wall'},
-            {id = 'Shopkeep', type = 'center', info = entities.shopkeep, meta = {offset = vec2(0,0)} },
-            {id = 'Product', type = 'center', info = entities.product, meta = {offset = vec2(0,2)} },
+            population = {
+               {id = {'Bricks_1', 'Bricks_2', 'Bricks_3', 'Bricks_4', 'Bricks_5'}, type = 'all_wall'},
+               {id = 'Shopkeep', type = 'center', info = entities.shopkeep, meta = {offset = vec2(0,0)} },
+               {id = 'Stationarytorch', type = 'center', meta = {offset = vec2(2,0)} },
+               {id = 'Stationarytorch', type = 'center', meta = {offset = vec2(-2,0)} },
 
-          }
-        })
-        graph:add_edge(edges.door, stack.get(), current_chunk)
-        stack.push(current_chunk)
+               {id = 'Product', type = 'center', info = entities.product, meta = {offset = vec2(0,2)} },
 
-        chunks.add_chunk('backroom', graph:add_vertex(Chunk:extend()):specify{
-          width = 3,
-          height = 3,
+            }
+         })
+         graph:add_edge(edges.door, stack.get(), current_chunk)
+         stack.push(current_chunk)
 
-          shape = {
-            {'square', {size = 3}},
-          },
+         chunks.add_chunk('backroom', graph:add_vertex(Chunk:extend()):specify{
+            width = 3,
+            height = 3,
 
-          population = {
-            {id = 'Telepad', type = 'center', info = entities.telepad_1}
-          }
-        })
-        graph:add_edge(edges.breakable_wall, stack.get(), current_chunk)
-        stack.pop()
+            shape = {
+               {'square', {size = 3}},
+            },
 
-        chunks.add_chunk('prism', graph:add_vertex(Chunk:extend()):specify{
-          width = 15,
-          height = 15,
+            population = {
+               {id = 'Telepad', type = 'center', info = entities.telepad_1}
+            }
+         })
+         graph:add_edge(edges.breakable_wall, stack.get(), current_chunk)
+         stack.pop()
 
-          shape = {
-            {'circle', {size = 5}},
-            function(i, t)
-              for n = 1, 20 do table.insert(t, i+1, {'DLA1'}) end
-            end,
-          },
+         chunks.add_chunk('prism', graph:add_vertex(Chunk:extend()):specify{
+            width = 15,
+            height = 15,
 
-          population = {
-            {id = 'Prism', type = 'center'},
-            function(i, t)
-              for n = 1, 6 do table.insert(t, i+1, {id = 'Sqeeto', type = 'random'}) end
-            end,
-            {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
-          }
-        })
-        graph:add_edge(edges.door, stack.get(), current_chunk)
-        stack.push(current_chunk)
+            shape = {
+               {'circle', {size = 5}},
+               function(i, t)
+               for n = 1, 20 do table.insert(t, i+1, {'DLA1'}) end
+               end,
+            },
 
-        chunks.add_chunk('pit', graph:add_vertex(Chunk:extend()):specify{
-          width = 15,
-          height = 15,
+            population = {
+               {id = 'Prism', type = 'center'},
+               function(i, t)
+               for n = 1, 6 do table.insert(t, i+1, {id = 'Sqeeto', type = 'random'}) end
+               end,
+               {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
+            }
+         })
+         graph:add_edge(edges.door, stack.get(), current_chunk)
+         stack.push(current_chunk)
 
-          shape = {
-            {'circle', {size = 5}},
-            function(i, t)
-              for n = 1, 20 do table.insert(t, i+1, {'DLA1'}) end
-            end,
-          },
+         chunks.add_chunk('pit', graph:add_vertex(Chunk:extend()):specify{
+            width = 15,
+            height = 15,
 
-          population = {
-            {id = 'Pit', type = 'inner_floor'},
-            {id = '', type = 'bridge'},
-            function(i, t)
-              for n = 1, 3 do table.insert(t, i+1, {id = 'Sqeeto', type = 'random'}) end
-            end,
-            {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
-          }
-        })
-        graph:splice(stack.get(1), stack.get(0), current_chunk)
-        stack.pop()
+            shape = {
+               {'circle', {size = 5}},
+               function(i, t)
+               for n = 1, 20 do table.insert(t, i+1, {'DLA1'}) end
+               end,
+            },
 
-        chunks.add_chunk('crystals', graph:add_vertex(Chunk:extend()):specify{
-          width = 10,
-          height = 10,
+            population = {
+               {id = 'Pit', type = 'inner_floor'},
+               {id = '', type = 'bridge'},
+               function(i, t)
+               for n = 1, 3 do table.insert(t, i+1, {id = 'Sqeeto', type = 'random'}) end
+               end,
+               {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
+            }
+         })
+         graph:splice(stack.get(1), stack.get(0), current_chunk)
+         stack.pop()
 
-          shape = {
-            {'circle', {size = 3}},
-            function(i, t)
-              for n = 1, 10 do table.insert(t, i+1, {'DLA1'}) end
-            end,
-          },
+         chunks.add_chunk('crystals', graph:add_vertex(Chunk:extend()):specify{
+            width = 10,
+            height = 10,
 
-          population = {
-            {id = {'Crystals_2', 'Crystals_3', 'Crystals_4', 'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
-            {id = 'Crystal', type = 'center'},
-            {id = 'Golem', type = 'random'},
-            function(i, t)
-              for n = 1, 5 do table.insert(t, i+1, {id = 'Shard', type = 'random'}) end
-            end,
-          }
-        })
-        graph:add_edge(edges.narrow, stack.get(), current_chunk)
+            shape = {
+               {'circle', {size = 3}},
+               function(i, t)
+               for n = 1, 10 do table.insert(t, i+1, {'DLA1'}) end
+               end,
+            },
 
-        chunks.add_chunk('hall', graph:add_vertex(Chunk:extend()):specify{
-          width = 30,
-          height = 30,
+            population = {
+               {id = {'Crystals_2', 'Crystals_3', 'Crystals_4', 'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
+               {id = 'Crystal', type = 'center'},
+               {id = 'Golem', type = 'random'},
+               function(i, t)
+               for n = 1, 5 do table.insert(t, i+1, {id = 'Shard', type = 'random'}) end
+               end,
+            }
+         })
+         graph:add_edge(edges.narrow, stack.get(), current_chunk)
 
-          shape = {
-            {'tunnel'}
-          },
+         chunks.add_chunk('hall', graph:add_vertex(Chunk:extend()):specify{
+            width = 30,
+            height = 30,
 
-          population = {
-            {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
-            {id = 'Glowshroom_1', type = 'heat_map'}
-          }
-        })
-        graph:add_edge(edges.narrow, stack.get(), current_chunk)
-        stack.push(current_chunk)
+            shape = {
+               {'tunnel'}
+            },
 
-        chunks.add_chunk('spider_nest', graph:add_vertex(Chunk:extend()):specify{
-          width = 10,
-          height = 10,
+            population = {
+               {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
+               {id = 'Glowshroom_1', type = 'heat_map'}
+            }
+         })
+         graph:add_edge(edges.narrow, stack.get(), current_chunk)
+         stack.push(current_chunk)
 
-          shape = {
-            {'circle', {size = 1}},
-            {'tunnel'},
-            function(i, t)
-              for n = 1, 10 do table.insert(t, i+1, {'DLA2'}) end
-            end,
-          },
+         chunks.add_chunk('spider_nest', graph:add_vertex(Chunk:extend()):specify{
+            width = 10,
+            height = 10,
 
-          population = {
-            function(i, t)
-              for n = 1, 7 do table.insert(t, i+1, {id = {'Bones_1', 'Bones_2', 'Web'}, type = 'random'}) end
-            end,
-            {id = 'Webweaver', type = 'random'},
-            {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
-          }
-        })
-        graph:add_edge(edges.door, stack.get(), current_chunk)
-        stack.push(current_chunk)
+            shape = {
+               {'circle', {size = 1}},
+               {'tunnel'},
+               function(i, t)
+               for n = 1, 10 do table.insert(t, i+1, {'DLA2'}) end
+               end,
+            },
 
-        chunks.add_chunk('backroom', graph:add_vertex(Chunk:extend()):specify{
-          width = 3,
-          height = 3,
+            population = {
+               function(i, t)
+               for n = 1, 7 do table.insert(t, i+1, {id = {'Bones_1', 'Bones_2', 'Web'}, type = 'random'}) end
+               end,
+               {id = 'Webweaver', type = 'random'},
+               {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
+            }
+         })
+         graph:add_edge(edges.door, stack.get(), current_chunk)
+         stack.push(current_chunk)
 
-          shape = {
-            {'square', {size = 3}},
-          },
+         chunks.add_chunk('backroom', graph:add_vertex(Chunk:extend()):specify{
+            width = 3,
+            height = 3,
 
-          population = {
-            {id = 'Telepad', type = 'center', info = entities.telepad_2}
-          }
-        })
-        graph:add_edge(edges.door, stack.get(), current_chunk)
-        stack.pop()
+            shape = {
+               {'square', {size = 3}},
+            },
 
-        -- chunks.add_chunk('crossroads', graph:add_vertex(Chunk:extend()):specify{
-        --   width = 30,
-        --   height = 30,
+            population = {
+               {id = 'Telepad', type = 'center', info = entities.telepad_2}
+            }
+         })
+         graph:add_edge(edges.door, stack.get(), current_chunk)
+         stack.pop()
 
-        --   shape = {
-        --     {'tunnel2'},
-        --     {'tunnel2'}
-        --   },
-
-        --   population = {
-        --     {id = {'Rocks_1', 'Rocks_2', 'Rocks_3'}, type = 'all_wall'},
-        --   }
-        -- })
-        -- graph:add_edge(edges.wide, stack.get(), current_chunk)
-
-        for _, v in ipairs(graph.vertices) do
-          parameterize_vertex_from_specification(v)
-        end
+         for _, v in ipairs(graph.vertices) do
+            parameterize_vertex_from_specification(v)
+         end
       end
 
       local function clarify_level_specifications_2(level_specifications)
@@ -969,7 +913,7 @@ function Level:create(callback)
          end
       end
 
-      clarify_level_specifications(level_specifications)
+      clarify_level_specifications_1(level_specifications)
 
       for _, v in ipairs(graph.vertices) do
          parameterize_vertex_from_specification(v)

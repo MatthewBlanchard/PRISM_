@@ -62,6 +62,7 @@ AnimateSystem.animation_by_action["attack"] = function(actor, action)
    if drawable then
       local object = drawable.object
       local to = (action:getTarget(1).position - actor.position) / 2 + actor.position
+      object.ode:clear_buffer()
       object.ode:buffer_input(to, 0)
       object.ode:buffer_input(actor.position, 0.2)
       object.ode:set_params(2, 0.5, -2)
@@ -72,6 +73,7 @@ function AnimateSystem:onMove(_, actor, from, to)
    local drawable = actor:getComponent(components.Drawable)
    if drawable then
       local object = drawable.object
+      object.ode:clear_buffer()
       object.ode:buffer_input(to, 0)
       object.ode:set_params(1, 1, 2)
    end

@@ -22,6 +22,10 @@ function Second_Order_Dynamics:buffer_input(x, t)
    table.insert(self.buffered, {x = x, t = t or 0})
 end
 
+function Second_Order_Dynamics:clear_buffer(x, t)
+   self.buffered = {}
+end
+
 function Second_Order_Dynamics:update_buffer(t)
    if self.buffered[1] then
       self.buffered[1].t = self.buffered[1].t - t
