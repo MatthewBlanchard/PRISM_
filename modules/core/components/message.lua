@@ -1,14 +1,10 @@
-local Component = require "component"
+local Component = require "core.component"
 
 local Message = Component:extend()
 Message.name = "message"
 
-function Message:__new()
-  self.messages = {}
-end
+function Message:initialize(actor) self.messages = {} end
 
-function Message:initialize(actor)
-  actor.messages = self.messages
-end
+function Message:add(message) table.insert(self.messages, message) end
 
 return Message

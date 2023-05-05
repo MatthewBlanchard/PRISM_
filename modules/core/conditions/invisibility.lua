@@ -1,4 +1,4 @@
-local Condition = require "condition"
+local Condition = require "core.condition"
 
 local Invisible = Condition:extend()
 Invisible.name = "invisible"

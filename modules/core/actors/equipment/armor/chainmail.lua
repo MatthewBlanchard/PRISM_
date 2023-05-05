@@ -1,5 +1,5 @@
-local Actor = require "actor"
-local Tiles = require "tiles"
+local Actor = require "core.actor"
+local Tiles = require "display.tiles"
 
 local JerkinOfGrease = Actor:extend()
 JerkinOfGrease.char = Tiles["armor"]

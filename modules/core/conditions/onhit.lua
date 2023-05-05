@@ -1,4 +1,4 @@
-local Condition = require "condition"
+local Condition = require "core.condition"
 
 local OnHit = Condition:extend()
 OnHit.name = "OnHit"

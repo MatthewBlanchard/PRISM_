@@ -1,4 +1,4 @@
-local Condition = require "condition"
+local Condition = require "core.condition"
 
 local Regeneration = Condition:extend()
 Regeneration.name = "regeneration"

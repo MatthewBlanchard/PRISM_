@@ -1,5 +1,5 @@
-local Action = require "action"
-local Consume = require "actions/consume"
+local Action = require "core.action"
+local Consume = require "modules.core.actions.consume"
 
 local Drink = Consume:extend()
 Drink.name = "drink"

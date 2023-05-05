@@ -1,5 +1,5 @@
-local Actor = require "actor"
-local Tiles = require "tiles"
+local Actor = require "core.actor"
+local Tiles = require "display.tiles"
 
 local BandOfChanneling = Actor:extend()
 BandOfChanneling.char = Tiles["tiara"]

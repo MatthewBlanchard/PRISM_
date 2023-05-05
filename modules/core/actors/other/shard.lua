@@ -1,6 +1,6 @@
-local Actor = require "actor"
-local Tiles = require "tiles"
-local Colors = require "colors"
+local Actor = require "core.actor"
+local Tiles = require "display.tiles"
+local Colors = require "math.colors"
 
 local Shard = Actor:extend()
 Shard.name = "shard"

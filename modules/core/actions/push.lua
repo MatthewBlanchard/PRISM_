@@ -1,4 +1,4 @@
-local Action = require "action"
+local Action = require "core.action"
 
 local targetPushable = targets.Actor:extend()
 targetPushable.range = 1

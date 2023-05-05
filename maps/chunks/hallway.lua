@@ -1,5 +1,4 @@
 local Chunk = require "maps.chunk"
-local Clipper = require "maps.clipper.clipper"
 
 local Hallway = Chunk:extend()
 

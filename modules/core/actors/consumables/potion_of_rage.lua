@@ -1,7 +1,7 @@
-local Actor = require "actor"
-local Action = require "action"
-local Condition = require "condition"
-local Tiles = require "tiles"
+local Actor = require "core.actor"
+local Action = require "core.action"
+local Condition = require "core.condition"
+local Tiles = require "display.tiles"
 
 local Drink = actions.Drink:extend()
 Drink.name = "drink"

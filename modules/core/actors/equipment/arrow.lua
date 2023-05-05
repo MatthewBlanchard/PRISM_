@@ -1,6 +1,6 @@
-local Actor = require "actor"
-local Action = require "action"
-local Tiles = require "tiles"
+local Actor = require "core.actor"
+local Action = require "core.action"
+local Tiles = require "display.tiles"
 
 local Arrow = Actor:extend()
 Arrow.name = "arrow"

@@ -1,4 +1,4 @@
-local Component = require "component"
+local Component = require "core.component"
 
 local Readable = Component:extend()
 Readable.name = "Readable"

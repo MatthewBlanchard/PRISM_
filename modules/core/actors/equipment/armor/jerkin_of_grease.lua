@@ -1,6 +1,6 @@
-local Actor = require "actor"
-local Condition = require "condition"
-local Tiles = require "tiles"
+local Actor = require "core.actor"
+local Condition = require "core.condition"
+local Tiles = require "display.tiles"
 
 local FreedomOfMovement = Condition:extend()
 FreedomOfMovement.name = "FreedomOfMovement"

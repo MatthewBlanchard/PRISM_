@@ -1,19 +1,25 @@
-local Component = require "component"
+local Component = require "core.component"
 
 local Move = Component:extend()
 Move.name = "Move"
 
-function Move:__new(options)
-  self.speed = options.speed
-  self.passable = options.passable or false
-end
+Move.actions = {
+   -- we leave this empty because we create our move action
+   -- in the initialize function
+}
+
+function Move:__new(options) self.speed = options.speed end
 
 function Move:initialize(actor)
-  local moveAction = actions.Move:extend()
-  moveAction.time = self.speed or 100
+   -- we create a new move action for each actor that has this component
+   -- this allows us to have different speeds for different actors
+   local moveAction = actions.Move:extend()
+   moveAction.time = self.speed or 100
 
-  actor:addAction(moveAction)
-  actor.passable = self.passable
+   self.actions = {
+      moveAction,
+      actions.Wait,
+   }
 end
 
 return Move

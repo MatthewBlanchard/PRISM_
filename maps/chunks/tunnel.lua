@@ -1,5 +1,4 @@
 local Chunk = require "maps.chunk"
-local Clipper = require "maps.clipper.clipper"
 
 local tunnel = Chunk:extend()
 function tunnel:parameters()
@@ -21,9 +20,9 @@ end
 function tunnel:populater(chunk, clipping)
    for i = 1, 1 do
       local x, y
-      repeat
-         x, y = love.math.random(1, chunk.width - 1) + 1, love.math.random(1, chunk.height - 1) + 1
-      until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
+      --repeat
+      x, y = love.math.random(1, chunk.width - 1) + 1, love.math.random(1, chunk.height - 1) + 1
+      --until Clipper.PointInPolygon(Clipper.IntPoint(x, y), clipping) == 1
       if love.math.random(0, 1) == 1 then
          chunk:insert_actor("Glowshroom_1", x, y)
       else

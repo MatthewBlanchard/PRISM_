@@ -1,44 +1,22 @@
-local Actor = require "actor"
-local Action = require "action"
-local BuyPanel = require "panels.buy"
+local Actor = require "core.actor"
+local Action = require "core.action"
 
 local Product = Actor:extend()
-Product.passable = false
 
 local targetProduct = targets.Actor:extend()
 
-function targetProduct:validate(owner, actor)
-  return actor:is(actors.Product)
-end
-
-local Buy = Action:extend()
-Buy.name = "buy"
-Buy.targets = {targetProduct}
-
-function Buy:perform(level)
-  local product = self.targetActors[1]
-
-  if not product.forSale then
-    product.forSale = true
-    local itemPanel = BuyPanel(game.display, game.interface, product, 10, 20, 31, 31)
-    game.interface:push(itemPanel)
-    return
-  end
-
-  if self.owner:withdraw(product.currency, product.price) then
-    level:performAction(self.owner:getAction(actions.Pickup)(self.owner, product.item), true)
-    level:removeActor(product)
-    if product.shopkeep then
-      level:addEffect(product.soldEffect())
-    end
-  elseif product.shopkeep then
-    level:addEffect(product.notSoldEffect())
-  end
-end
+function targetProduct:validate(owner, actor) return actor:is(actors.Product) end
 
 Product.components = {
-  components.Sellable(),
-  components.Usable({actions.Buy}, actions.Buy)
+   components.Collideable_box(),
+   components.Sellable(),
+   components.Usable({ actions.Buy }, actions.Buy),
 }
 
+function Product:initialize()
+   local sellable_component = self:getComponent(components.Sellable)
+   self.char = sellable_component.char
+   self.color = sellable_component.color
+   self.name = sellable_component.name
+end
 return Product

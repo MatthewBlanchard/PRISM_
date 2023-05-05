@@ -1,7 +1,8 @@
-local Action = require "action"
+local Action = require "core.action"
 
 local LevelUp = Action:extend()
 LevelUp.time = 0
+LevelUp.silent = true
 
 function LevelUp:__new(owner, feat)
    Action.__new(self, owner)

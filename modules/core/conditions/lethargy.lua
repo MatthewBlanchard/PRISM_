@@ -1,4 +1,4 @@
-local Condition = require "condition"
+local Condition = require "core.condition"
 
 local Lethargy = Condition:extend()
 Lethargy.duration = 1000

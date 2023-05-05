@@ -1,17 +1,15 @@
-local Reaction = require "reaction"
+local Reaction = require "core.reaction"
 
 local Die = Reaction:extend()
 Die.name = "die"
 Die.messageIgnoreTarget = true
 
-function Die:__new(owner, targets, damage)
-  Reaction.__new(self, owner, targets)
-  self.dealer = targets[1]
-  self.damage = damage
+function Die:__new(owner, dealer, damage)
+   Reaction.__new(self, owner, nil)
+   self.dealer = dealer
+   self.damage = damage
 end
 
-function Die:perform(level)
-  level:destroyActor(self.owner)
-end
+function Die:perform(level) level:removeActor(self.owner) end
 
 return Die

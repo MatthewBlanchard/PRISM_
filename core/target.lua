@@ -1,150 +1,131 @@
 local Object = require "object"
+local Vector2 = require "math.vector"
+local Actor = require "core.actor"
 
 local targets = {}
 
 local Target = Object:extend()
-Target.range = 0
+Target.range = nil
 targets.Target = Target
 
 function Target:extend()
-  local self = Object.extend(self)
+   local self = Object.extend(self)
 
-  if self.requirements then
-
-    local comp = {}
-    for k, v in pairs(self.requirements) do
-      table.insert(comp, v)
-    end
-    self.requirements = comp
-  else
-    self.requirements = {}
-  end
-
-  return self
+   return self
 end
 
 function Target:__new(range)
-  self.range = range or self.range
-  self.canTargetSelf = false
-end
-
-function Target:addRequirement(component)
-  table.insert(self.requirements, component)
+   self.range = range or self.range
+   self.canTargetSelf = false
 end
 
 function Target:setRange(range, enum)
-  self.range = range
-  self.rtype = enum
+   self.range = range
+   self.rtype = enum
 end
 
-function Target:validate(owner, toValidate)
-
-end
-
-function Target:checkRequirements(actor)
-
-end
+function Target:validate(owner, toValidate) end
 
 local ActorTarget = Target:extend()
+ActorTarget.rtype = "box"
 
 function ActorTarget:__new(range)
-  Target.__new(self, range)
-  self.canTargetSelf = false
+   Target.__new(self, range)
+   self.canTargetSelf = false
 end
 
 function ActorTarget:validate(owner, actor)
-  local range = false
+   assert(actor:is(Actor), "Invalid target for ActorTarget")
+   local range = false
 
-  if owner == actor and not self.canTargetSelf then return false end
+   if owner == actor and not self.canTargetSelf then return false end
 
-  if self.range == 0 then
-    if owner:hasComponent(components.Inventory) then
-      for k, v in pairs(owner.inventory) do
-        if v == actor then
-          range = true
-        end
-      end
-    end
+   if not self.range then return true end
 
-    if owner.position == actor.position then
-      range = true
-    end
-  else
-    range = owner:getRange(self.rtype, actor) <= self.range
-  end
+   if self.range == 0 then
+      local inventory = owner:getComponent(components.Inventory)
+      if inventory and inventory:hasItem(actor) then range = true end
 
-  return self:checkRequirements(actor) and range
-end
+      if owner.position == actor.position then range = true end
+   else
+      range = owner:getRange(self.rtype, actor) <= self.range
+   end
 
-function ActorTarget:checkRequirements(actor)
-  local foundreqs = {}
-
-  for k, component in pairs(actor.components) do
-    for k, req in pairs(self.requirements) do
-      if component:is(req) then
-        table.insert(foundreqs, component)
-      end
-    end
-  end
-
-  if #foundreqs == #self.requirements then
-    return true
-  end
-
-  return false
+   return range
 end
 
 local PointTarget = Target:extend()
 
 function PointTarget:validate(owner, vec2)
-  if not vec2.x and vec2.y then return false end
-
-  return owner:getRange(self.rtype, vec2)
+   if not vec2 or not vec2.is or not vec2:is(Vector2) then return false end
+   return owner:getRangeVec(self.rtype, vec2)
 end
 
-function PointTarget:checkRequirements(vec2)
-  return vec2.x and vec2.y
-end
+function PointTarget:checkRequirements(vec2) return vec2.x and vec2.y end
 
 targets.Actor = ActorTarget
 targets.Point = PointTarget
 
 targets.Creature = targets.Actor:extend()
-targets.Creature.requirements = {components.Stats}
+
+function targets.Creature:validate(owner, actor)
+   return ActorTarget.validate(self, owner, actor) and actor:hasComponent(components.Stats)
+end
 
 targets.Living = targets.Actor:extend()
-targets.Living.requirements = {components.Stats, components.Aicontroller}
+
+function targets.Living:validate(owner, actor)
+   return targets.Actor.validate(self, owner, actor)
+      and actor:hasComponent(components.Stats)
+      and actor:hasComponent(components.Controller)
+end
 
 targets.Item = targets.Actor:extend()
-targets.Item.name = "item"
-targets.Item.requirements = {components.Item}
+
+function targets.Item:validate(owner, actor)
+   return targets.Actor.validate(self, owner, actor) and actor:hasComponent(components.Item)
+end
 
 targets.Equipment = targets.Item:extend()
-targets.Equipment:addRequirement(components.Equipment)
 
 function targets.Equipment:validate(owner, actor)
-  return targets.Item.validate(self, owner, actor) and owner:hasSlot(actor.slot) and not owner.slots[actor.slot]
+   local equipper = owner:getComponent(components.Equipper)
+   local equipment = actor:getComponent(components.Equipment)
+   local hasSlot = equipment and equipper and equipper:hasSlot(equipment.slot) or false
+   local slotEmpty = equipment and equipper and equipper:getSlot(equipment.slot) == false
+
+   return targets.Item.validate(self, owner, actor) and hasSlot and slotEmpty
 end
 
 targets.Weapon = targets.Item:extend()
-targets.Weapon:addRequirement(components.Weapon)
 
 function targets.Weapon:validate(owner, actor)
-  return targets.Item.validate(self, owner, actor) and owner:hasComponent(components.Attacker) and not (owner.wielded == actor)
+   local weapon_component = actor:getComponent(components.Weapon)
+   local attacker_component = owner:getComponent(components.Attacker)
+
+   local wielded = attacker_component and attacker_component.wielded == actor or false
+   return targets.Item.validate(self, owner, actor) and weapon_component and not wielded
 end
 
 targets.Unequip = targets.Item:extend()
-targets.Unequip:addRequirement(components.Equipment)
+targets.Unequip.range = math.huge -- Target is bounded by being equipped so we can set range to infinite
 
 function targets.Unequip:validate(owner, actor)
-  return targets.Item.validate(self, owner, actor) and owner.slots[actor.slot] == actor
+   local equipper = owner:getComponent(components.Equipper)
+   local equipment = actor:getComponent(components.Equipment)
+
+   local isEquipped = equipment and equipper and equipper.slots[equipment.slot] == actor
+   return targets.Item.validate(self, owner, actor) and isEquipped
 end
 
 targets.Unwield = targets.Item:extend()
-targets.Unwield:addRequirement(components.Weapon)
 
 function targets.Unwield:validate(owner, actor)
-  return targets.Item.validate(self, owner, actor) and owner.wielded == actor
+   local weapon_component = actor:getComponent(components.Weapon)
+   local attacker = owner:getComponent(components.Attacker)
+
+   local wielded = attacker and attacker.wielded == actor or false
+   return targets.Item.validate(self, owner, actor) and weapon_component and wielded
 end
 
 return targets

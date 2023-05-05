@@ -1,4 +1,4 @@
-local Component = require "component"
+local Component = require "core.component"
 
 local Stats = Component:extend()
 Stats.name = "Stats"

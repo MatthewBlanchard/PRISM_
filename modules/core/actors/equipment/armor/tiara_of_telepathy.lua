@@ -1,6 +1,6 @@
-local Actor = require "actor"
-local Tiles = require "tiles"
-local Condition = require "condition"
+local Actor = require "core.actor"
+local Tiles = require "display.tiles"
+local Condition = require "core.condition"
 
 local Scrying = Condition:extend()
 Scrying.name = "Scrying"

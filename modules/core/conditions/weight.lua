@@ -1,4 +1,4 @@
-local ModifyStats = require "conditions.modifystats"
+local ModifyStats = require "modules.core.conditions.modifystats"
 
 local Weight = ModifyStats:extend()
 Weight.name = "weight"

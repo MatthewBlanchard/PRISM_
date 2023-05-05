@@ -1,16 +1,17 @@
-local Actor = require "actor"
-local Tiles = require "tiles"
+local Actor = require "core.actor"
+local Tiles = require "display.tiles"
+local LightColor = require "structures.lighting.lightcolor"
 
 local Glowshroom = Actor:extend()
 Glowshroom.char = Tiles["mushroom_2"]
 Glowshroom.name = "Glowshroom"
-Glowshroom.color = { 0.5, 0.9, 0.5, 1}
+Glowshroom.color = { 0.5, 0.9, 0.5, 1 }
 
 Glowshroom.components = {
-  components.Light{
-    color = { 0.4, 0.7, 0.4, 1},
-    intensity = 2
-  }
+   components.Light {
+      color = LightColor(8, 22, 10),
+      falloff = 0.7,
+   },
 }
 
 return Glowshroom

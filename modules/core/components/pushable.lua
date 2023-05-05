@@ -1,4 +1,4 @@
-local Component = require "component"
+local Component = require "core.component"
 
 local Pushable = Component:extend()
 Pushable.name = "Pushable"

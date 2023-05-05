@@ -1,41 +1,60 @@
-local Action = require "action"
+local Action = require "core.action"
+
+local AttackTarget = targets.Creature:extend()
 
 local Attack = Action:extend()
 Attack.name = "attack"
-Attack.targets = {targets.Creature}
+Attack.targets = { AttackTarget }
 
-function Attack:__new(owner, targets, weapon)
-  Action.__new(self, owner, targets)
-  self.weapon = weapon or owner.wielded
-  self.time = self.weapon.time or 100
-  self.damageBonus = 0
-  self.attackBonus = 0
-  self.criticalOn = 20
+function Attack:__new(owner, defender, weapon)
+   Action.__new(self, owner, { defender })
+   self.weapon = weapon or owner:getComponent(components.Attacker).wielded
+   self.time = self.weapon.time or 100
+   self.damageBonus = 0
+   self.diceBonuses = {}
+   self.attackBonus = 0
+   self.criticalOn = 20
 end
 
 function Attack:perform(level)
-  local weapon = self.weapon
-  local weaponBonus = weapon.bonus or 0
-  local bonus = self.owner:getStatBonus(weapon.stat) + weaponBonus + self.attackBonus
-  local naturalRoll = self.owner:rollCheck(weapon.stat)
-  local roll = naturalRoll + bonus
+   local effects_system = level:getSystem "Effects"
+   local weapon = self.weapon
+   local weaponBonus = weapon.bonus or 0
+   local bonus = self.owner:getStatBonus(weapon.stat) + weaponBonus + self.attackBonus
+   local naturalRoll = self.owner:rollCheck(weapon.stat)
+   local roll = naturalRoll + bonus
 
-  local target = self:getTarget(1)
-  local dmg = ROT.Dice.roll(weapon.dice) + self.owner:getStatBonus(weapon.stat)
+   local defender = self:getTarget(1)
+   local dmg = ROT.Dice.roll(weapon.dice) + self.owner:getStatBonus(weapon.stat) + self.damageBonus
 
-  local critical = naturalRoll >= self.criticalOn
-  if roll >= target:getAC() or critical then
-    self.hit = true
-    if critical then
-      dmg = dmg * 2
-    end
-    local damage = target:getReaction(reactions.Damage)(target, {self.owner}, dmg)
+   for _, dice in ipairs(self.diceBonuses) do
+      dmg = dmg + ROT.Dice.roll(dice)
+   end
 
-    level:performAction(damage)
-    return
-  end
+   local critical = naturalRoll >= self.criticalOn
 
-  level:addEffect(effects.DamageEffect(self.owner.position, target, dmg, false))
+   if roll >= defender:getAC() or critical then
+      self.hit = true
+      if critical then
+         self.crit = true
+         dmg = dmg * 2
+         effects_system:addEffect(level, effects.CritEffect(defender))
+      end
+
+      local damage = defender:getReaction(reactions.Damage)(defender, { self.owner }, dmg)
+
+      level:performAction(damage)
+      return
+   end
+
+   if effects_system then
+      effects_system:addEffect(
+         level,
+         effects.DamageEffect(self.owner.position, defender, dmg, false)
+      )
+   end
 end
+
+function Attack:addDiceBonus(dice) table.push(self.diceBonuses, dice) end
 
 return Attack

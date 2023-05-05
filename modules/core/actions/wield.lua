@@ -1,13 +1,17 @@
-local Action = require "action"
+local Action = require "core.action"
 
 local Wield = Action:extend()
 Wield.name = "wield"
-Wield.targets = {targets.Weapon}
+Wield.targets = { targets.Weapon }
 
 function Wield:perform(level)
-  local weapon = self:getTarget(1)
+   local weapon = self:getTarget(1)
 
-  self.owner.wielded = weapon
+   self.owner:getComponent(components.Attacker).wielded = weapon
+
+   for k, effect in pairs(weapon.effects) do
+      self.owner:applyCondition(effect)
+   end
 end
 
 return Wield

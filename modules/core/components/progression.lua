@@ -1,13 +1,14 @@
-local Component = require "component"
+local Component = require "core.component"
 
 local Progression = Component:extend()
 Progression.name = "Progression"
-Progression.requirements = {components.Stats}
+Progression.requirements = { components.Stats }
+
+Progression.actions = { actions.Level }
 
 function Progression:initialize(actor)
-  actor.level = 1
-  actor.feats = {}
-  actor:addAction(actions.LevelUp)
+   self.level = 0
+   self.classAbility = nil
 end
 
 return Progression

@@ -1,18 +1,10 @@
-local Action = require "action"
-
-local Vector2 = require "vector"
+local Action = require "core.action"
+local Vector2 = require "math.vector"
 
 local Drop = Action:extend()
 Drop.name = "drop"
-Drop.targets = {targets.Item}
+Drop.targets = { targets.Item }
 
-function Drop:perform(level)
-  for k, v in pairs(self.owner.inventory) do
-    if v == self.targetActors[1] then
-      level:moveActor(v, self.owner.position)
-      break
-    end
-  end
-end
+function Drop:perform(level) level:moveActor(self.targetActors[1], self.owner.position) end
 
 return Drop
