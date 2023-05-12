@@ -39,7 +39,7 @@ function ClassSelectPanel:draw()
          k * 2 + 3 + extra + descHeight
       )
       self:writeText(
-         "%b{black}" .. class.description,
+         class.description,
          5,
          k * 2 + 4 + extra + descHeight,
          self.w - 5
