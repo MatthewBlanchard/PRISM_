@@ -2,9 +2,9 @@ local Component = require "core.component"
 local Object = require "object"
 local vec2 = require "math.vector"
 
-local Graphics_Object = Object:extend()
+local GraphicsObject = Object:extend()
 
-function Graphics_Object:__new(actor, options)
+function GraphicsObject:__new(actor, options)
    self.drawable = actor.char
    self.shader_callback = options.shader_callback
    self.colors = {fg = options.fg, bg = options.bg}
@@ -26,20 +26,20 @@ function Graphics_Object:__new(actor, options)
    self.transform = love.math.newTransform()
 end
 
-function Graphics_Object:set_pos(grid_space_vec)
+function GraphicsObject:set_pos(grid_space_vec)
    self.x = grid_space_vec.x
    self.y = grid_space_vec.y
 end
 
-function Graphics_Object:get_pos()
+function GraphicsObject:get_pos()
    return vec2(self.x, self.y)
 end
 
-function Graphics_Object:set(name, arg)
+function GraphicsObject:set(name, arg)
 
 end
 
-function Graphics_Object:update_transform()
+function GraphicsObject:update_transform()
    self.transform:setTransformation(
       self.ox + (self.x-1)*15, self.oy + (self.y-1)*15,
       self.r,
@@ -59,7 +59,7 @@ function Drawable:__new(options)
 end
 
 function Drawable:initialize(actor)
-   self.object = Graphics_Object(actor, self.options)
+   self.object = GraphicsObject(actor, self.options)
 
    self.shader = love.graphics.newShader("display/shaders/outline_shader.glsl")
    self.object.shader_callback = function(quad)
