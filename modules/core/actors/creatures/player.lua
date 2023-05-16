@@ -46,6 +46,9 @@ Player.components = {
    components.Animated {
       sheet = { Tiles["player_1"], Tiles["player_2"] },
    },
+
+   components.Drawable(),
+
    components.Faction { "player", "warmblooded" },
 }
 

@@ -34,8 +34,10 @@ function ItemPanel:draw()
    self:clear()
    ContextPanel.draw(self)
    for i = 1, #self.allowedActions do
-      self:write(i .. " " .. self.allowedActions[i].name, 2, i + self.descHeight + 3)
+      self:write_plain(i .. " " .. self.allowedActions[i].name, 2, i + self.descHeight + 3)
    end
+
+   self.display:draw()
 end
 
 function ItemPanel:handleKeyPress(keypress)
@@ -50,7 +52,7 @@ function ItemPanel:handleKeyPress(keypress)
          game.interface:setAction(chosenAction(game.curActor, { self.targetActor }))
       else
          self.currentAction = chosenAction
-         game.interface:push(Selector(self.display, self, chosenAction, { self.targetActor }))
+         game.interface:push(Selector(game.interface.levelPanel.display, self, chosenAction, { self.targetActor }))
       end
    end
 end

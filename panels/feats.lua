@@ -29,13 +29,13 @@ function FeatsPanel:draw()
 
    if #self.feats == 1 then
       local msgLen = string.len "Gaze upon terrible truths!"
-      self:write("Gaze upon terrible truths!", 8, 2)
+      self:write_plain("Gaze upon terrible truths!", 8, 2)
       local feat = self.feats[1]
       self:writeText(feat.name, 3, 4)
       self:writeText(feat.description, 3, 5, self.w - 3)
    else
       local msgLen = math.floor(string.len "Gaze upon uncomfortable truths!" / 2)
-      self:write("Gaze upon terrible truths!", math.floor(self.w / 2) - msgLen + 1, 2)
+      self:write_plain("Gaze upon terrible truths!", math.floor(self.w / 2) - msgLen + 1, 2)
 
       local descHeight = 0
       local extra = 0
@@ -46,7 +46,7 @@ function FeatsPanel:draw()
             k * 2 + 3 + extra + descHeight
          )
          self:writeText(
-            "%b{black}" .. feat.description,
+            feat.description,
             5,
             k * 2 + 4 + extra + descHeight,
             self.w - 5
@@ -55,6 +55,8 @@ function FeatsPanel:draw()
          extra = extra + 1
       end
    end
+
+   self.display:draw()
 end
 
 function FeatsPanel:handleKeyPress(keypress)

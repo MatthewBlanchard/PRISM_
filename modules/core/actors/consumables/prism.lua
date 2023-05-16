@@ -39,18 +39,16 @@ function Gaze:perform(level)
    local progression_component = self.owner:getComponent(components.Progression)
    if progression_component.level == 0 then
       game.music:changeSong(game.music.ominousmusic, true)
-      game.interface:push(SwirlPanel(game.interface.display, game.interface))
-      game.interface:push(ClassSelectPanel(game.interface.display, game.interface))
+      game.interface:push(SwirlPanel())
+      game.interface:push(ClassSelectPanel())
    else
       local feat1 = table.remove(feats, love.math.random(1, #feats))
       local feat2 = table.remove(feats, love.math.random(1, #feats))
       local feat3 = table.remove(feats, love.math.random(1, #feats))
 
       game.music:changeSong(game.music.ominousmusic, true)
-      game.interface:push(SwirlPanel(game.interface.display, game.interface))
-      game.interface:push(
-         FeatsPanel(game.interface.display, game.interface, { feat1, feat2, feat3 })
-      )
+      game.interface:push(SwirlPanel())
+      game.interface:push(FeatsPanel(nil, nil, { feat1, feat2, feat3 }))
    end
 
    self.owner.maxHP = self.owner.maxHP + 5

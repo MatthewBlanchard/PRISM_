@@ -3,7 +3,7 @@ local ItemPanel = require "panels.item"
 
 local InventoryPanel = Panel:extend()
 InventoryPanel.interceptInput = true
-InventoryPanel.bg = { 0.09, 0.09, 0.09 }
+InventoryPanel.bg = { 0.09, 0.09, 0.09, 1 }
 
 function InventoryPanel:__new(display, parent)
    Panel.__new(self, display, parent, 47, 12, 35, 11)
@@ -37,17 +37,19 @@ function InventoryPanel:draw()
 
    local title = self:correctWidth("Inventory", self.w - 2)
    local w = string.len(title)
-   self:write(title, 2, 2, { 1, 1, 1, 1 }, { 0.3, 0.3, 0.3, 1 })
+   self:write_plain(title, 2, 2, { 1, 1, 1, 1 }, { 0.3, 0.3, 0.3, 1 })
 
    local i = 1
    for meta, list in pairs(self.items) do
       local inventoryString = self:correctWidth(i .. " " .. meta.name, self.w - 5)
       inventoryString = inventoryString .. (#list > 1 and (" x" .. #list) or "")
-      self:write(inventoryString, 2, 2 + i, { 1, 1, 1, 1 })
-      self:write(meta.char, 3, 2 + i, meta.color)
+      self:write_plain(inventoryString, 2, 2 + i, { 1, 1, 1, 1 })
+      self:write_plain(meta.char, 3, 2 + i, meta.color)
       self.indices[i] = list[1]
       i = i + 1
    end
+
+   self.display:draw()
 end
 
 function InventoryPanel:update(dt)

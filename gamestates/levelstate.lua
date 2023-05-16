@@ -1,6 +1,5 @@
 local GameState = require "gamestates.gamestate"
 local Interface = require "interface"
-local Display = require "display.display"
 local Start = require "panels.start"
 
 local PROFILE = false
@@ -100,12 +99,7 @@ function LevelState:update(dt)
 end
 
 function LevelState:draw()
-   if not game.display then return end
-   game.viewDisplay:clear()
-   game.display:clear()
-   game.interface:draw(game.display)
-   game.viewDisplay:draw()
-   game.display:draw "UI"
+   game.interface:draw()
 
    love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 10)
    love.graphics.print("TurnDT: " .. self.turnDT, 10, 20)

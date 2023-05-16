@@ -5,8 +5,8 @@ local Colors = require "math.colors"
 local ClassSelectPanel = Panel:extend()
 
 function ClassSelectPanel:__new(display, parent)
-   local halfx = display:getWidth() / 2 - 33 / 2
-   local halfy = display:getHeight() / 2 - 27 / 2
+   local halfx = DISPLAY_WIDTH / 2 - 33 / 2
+   local halfy = DISPLAY_HEIGHT / 2 - 27 / 2
    Panel.__new(self, display, parent, math.floor(halfx) + 1, math.floor(halfy), 33, 27)
 
    self.classes = {
@@ -27,7 +27,7 @@ function ClassSelectPanel:draw()
    self:drawBorders()
 
    local msgLen = math.floor(string.len "Gaze upon uncomfortable truths!" / 2)
-   self:write("Gaze upon terrible truths!", math.floor(self.w / 2) - msgLen + 1, 2)
+   self:write_plain("Gaze upon terrible truths!", math.floor(self.w / 2) - msgLen + 1, 2)
 
    local descHeight = 0
    local extra = 0
@@ -39,7 +39,7 @@ function ClassSelectPanel:draw()
          k * 2 + 3 + extra + descHeight
       )
       self:writeText(
-         "%b{black}" .. class.description,
+         class.description,
          5,
          k * 2 + 4 + extra + descHeight,
          self.w - 5
@@ -47,6 +47,8 @@ function ClassSelectPanel:draw()
       descHeight = descHeight + math.ceil(#class.description / (self.w - 5))
       extra = extra + 1
    end
+
+   self.display:draw()
 end
 
 function ClassSelectPanel:handleKeyPress(keypress)

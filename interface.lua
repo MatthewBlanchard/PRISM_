@@ -3,6 +3,7 @@ local Vector2 = require "math.vector"
 local Tiles = require "display.tiles"
 
 local Panel = require "panels.panel"
+local Level = require "panels.level"
 local Inventory = require "panels.inventory"
 local Status = require "panels.status"
 local Message = require "panels.message"
@@ -11,11 +12,12 @@ local SparseGrid = require "structures.sparsegrid"
 
 local Interface = Panel()
 
-function Interface:__new(display)
-   Panel.__new(self, display)
-   self.statusPanel = Status(display)
-   self.messagePanel = Message(display)
-   self.defaultBackgroundColor = display.defaultBackgroundColor
+function Interface:__new()
+   Panel.__new(self)
+   self.levelPanel = Level()
+   self.statusPanel = Status()
+   self.messagePanel = Message()
+   self.defaultBackgroundColor = self.display.defaultBackgroundColor
    self.stack = {}
    self.t = 0
 
@@ -25,6 +27,8 @@ function Interface:__new(display)
 end
 
 function Interface:update(dt)
+   self.levelPanel:update(dt)
+
    self.t = (self.t + dt)
    self.dt = dt
 
@@ -86,135 +90,7 @@ end
 
 local ambientColor = { 0.175, 0.175, 0.175 }
 function Interface:draw()
-   local sight_component = game.curActor:getComponent(components.Sight)
-   local fov = self.fov
-   local explored = sight_component.explored
-   local seenActors = self.seenActors
-   local scryActors = sight_component.scryActors
-
-   local rememberedActors = {}
-
-   for _, _, actor in sight_component.rememberedActors:each() do
-      table.insert(rememberedActors, actor)
-   end
-
-   local lighting_system = game.level:getSystem "Lighting"
-   lighting_system:rebuildLighting(game.level, self.dt)
-   local ambientValue = sight_component.darkvision / 31
-
-   local function tileLightingFormula(color, brightness)
-      local finalColor
-      local t = math.min(1, math.max(brightness - ambientValue, 0))
-      t = math.min(t / (1 - ambientValue), 1)
-      finalColor = clerp(ambientColor, color, t)
-
-      if brightness ~= brightness then finalColor = ambientColor end
-      return finalColor
-   end
-
-   local viewX, viewY = game.viewDisplay.widthInChars, game.viewDisplay.heightInChars
-   local sx, sy = game.curActor.position.x, game.curActor.position.y
-   for x = sx - viewX, sx + viewX do
-      for y = sy - viewY, sy + viewY do
-         local cell = fov:get(x, y)
-         if cell then
-            local lightCol = lighting_system:getLightingAt(x, y, fov, self.dt):to_rgb()
-            local lightValue = lighting_system:getBrightness(x, y, fov) / 31
-
-            local finalColor = tileLightingFormula(lightCol, lightValue)
-
-            if lightValue ~= lightValue then finalColor = ambientColor end
-            self:writeOffset(cell.tile, x, y, finalColor)
-         elseif shouldDrawExplored(explored, x, y) then
-            self:writeOffset(explored:get(x, y).tile, x, y, ambientColor)
-         end
-      end
-   end
-
-   local function getAnimationChar(actor)
-      if not actor:hasComponent(components.Animated) then return actor.char end
-
-      local animation = actor:getComponent(components.Animated)
-      if self.t % 0.600 > 0.400 then
-         return animation.sheet[2]
-      else
-         return animation.sheet[1]
-      end
-   end
-
-   local distortion = false
-   for k, actor in pairs(seenActors) do
-      if actor:hasComponent(components.Realitydistortion) then distortion = true end
-   end
-
-   if distortion then
-      game.music:startDistortion()
-   else
-      game.music:endDistortion()
-   end
-
-   local function drawActors(actorTable, conditional)
-      for _, actor in ipairs(actorTable) do
-         local char = getAnimationChar(actor)
-         if conditional and conditional(actor) or true then
-            for vec in game.level:eachActorTile(actor) do
-               local x, y = vec.x, vec.y
-               local lightcolor = lighting_system:getLightingAt(x, y, fov, self.dt):to_rgb()
-               if actorTable == scryActors then
-                  self:writeOffset(char, x, y, actor.color)
-               elseif lightcolor then
-                  local lightValue = lighting_system:getBrightness(x, y, fov) / 31
-                  local t = math.max(lightValue - ambientValue, 0)
-                  t = math.min(t / (1 - ambientValue), 1)
-
-                  local finalColor = clerp(ambientColor, actor.color, t)
-                  if actor.tileLighting then
-                     finalColor = tileLightingFormula(lightcolor, lightValue)
-                  end
-                  self:writeOffset(char, x, y, finalColor)
-               end
-            end
-         end
-      end
-   end
-
-   drawActors(rememberedActors)
-   drawActors(scryActors)
-
-   -- draw things that don't move furst
-   drawActors(seenActors, function(actor) return not actor:hasComponent(components.Move) end)
-
-   -- next up draw things that move but don't block movement
-   drawActors(
-      seenActors,
-      function(actor)
-         return actor:hasComponent(components.Move)
-            and not actor:hasComponent(components.Collideable)
-      end
-   )
-
-   -- now we draw the stuff that moves and blocks movement
-   drawActors(
-      seenActors,
-      function(actor)
-         return actor:hasComponent(components.Move) and actor:hasComponent(components.Collideable)
-      end
-   )
-
-   drawActors({ game.curActor }, function() return true end)
-
-   local effect_system = game.level:getSystem "Effects"
-
-   self.effectWrite = false
-   while not self.effectWrite and #effect_system.effects ~= 0 do
-      for i = #effect_system.effects, 1, -1 do
-         local curEffect = effect_system.effects[i]
-         self._curEffectDone = true
-         local done = curEffect(self.dt, self) or self._curEffectDone
-
-         if done then table.remove(effect_system.effects, i) end
-      end
-   end
+   self.levelPanel:draw()
 
    self.statusPanel:draw()
    self.messagePanel:draw()
@@ -260,7 +136,7 @@ function Interface:handleKeyPress(keypress)
    end
 
    if game.curActor:hasComponent(components.Inventory) then
-      if self.keybinds[keypress] == "inventory" then self:push(Inventory(self.display, self)) end
+      if self.keybinds[keypress] == "inventory" then self:push(Inventory()) end
 
       if self.keybinds[keypress] == "log" then self.messagePanel:toggleHeight() end
 
@@ -275,8 +151,14 @@ function Interface:handleKeyPress(keypress)
       end
 
       if self.keybinds[keypress] == "map" then
-         game.viewDisplay = game.viewDisplay == game.viewDisplay1x and game.viewDisplay2x
-            or game.viewDisplay1x
+         self.scale = self.scale or 3
+         self.scale =  -- must be an odd integer to look good?
+            self.scale == 1 and 3 or
+            self.scale == 3 and 7 or
+            self.scale == 7 and 1
+         self.levelPanel.camera_transform.sx = self.scale
+         self.levelPanel.camera_transform.sy = self.scale
+         self.levelPanel.display:update_camera_transform(self.levelPanel.camera_transform)
       end
    end
 
@@ -291,7 +173,7 @@ function Interface:handleKeyPress(keypress)
          game.interface:reset()
          game.interface:setAction(classAbility(game.curActor))
       else
-         game.interface:push(Selector(self.display, self, classAbility))
+         game.interface:push(Selector(self.levelPanel.display, self, classAbility))
       end
    end
 

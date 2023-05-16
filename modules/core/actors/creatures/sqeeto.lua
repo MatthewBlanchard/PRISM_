@@ -34,6 +34,7 @@ Sqeeto.components = {
    components.Animated {
       sheet = { Tiles["sqeeto_1"], Tiles["sqeeto_2"] },
    },
+   components.Drawable(),
    components.Faction { "sqeeter" },
 }
 

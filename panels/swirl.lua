@@ -1,9 +1,10 @@
 local Panel = require "panels.panel"
+local Tiles = require "display.tiles"
 
 local SwirlPanel = Panel:extend()
 
 function SwirlPanel:__new(display, parent)
-   Panel.__new(self, display, parent, 1, 1, display:getWidth(), display:getHeight())
+   Panel.__new(self, display, parent, 1, 1, nil, nil)
    self.time = 0
 end
 
@@ -23,9 +24,11 @@ function SwirlPanel:draw()
    for x = 1, self.display:getWidth() do
       for y = 1, self.display:getHeight() do
          local char = chars[math.floor(love.math.noise(x / 10, y / 10, self.time) * #chars)]
-         self:write(" ", x, y, { 1, 1, 1 }, char)
+         self:write_plain(Tiles["grad6"], x, y, char)
       end
    end
+
+   self.display:draw()
 end
 
 function SwirlPanel:handleKeypress(key) end

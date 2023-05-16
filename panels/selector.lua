@@ -1,4 +1,5 @@
 local Panel = require "panels.panel"
+local Vector2 = require "math.vector"
 local ContextPanel = require "panels.context"
 local Vector = require "math.vector"
 local Bresenham = require "math.bresenham"
@@ -26,6 +27,23 @@ SelectorPanel.blinkColor = { 0.2, 0.2, 0.6, 1 }
 SelectorPanel.invalidColor = { 0.6, 0, 0, 1 }
 SelectorPanel.lineColor = { 0.5, 0.5, 0.5 }
 
+SelectorPanel.movementTranslation = {
+   -- cardinal
+   w = Vector2(0, -1),
+   s = Vector2(0, 1),
+   a = Vector2(-1, 0),
+   d = Vector2(1, 0),
+
+   -- diagonal disable these and change the target in the Move action
+   -- if you want to disable diagonal movement
+   q = Vector2(-1, -1),
+   e = Vector2(1, -1),
+   z = Vector2(-1, 1),
+   c = Vector2(1, 1),
+
+   x = "wait",
+}
+
 function SelectorPanel:__new(display, parent, action, targets)
    Panel.__new(self, display, parent, 1, 1, display:getWidth(), display:getHeight())
    self.action = action
@@ -42,7 +60,7 @@ function SelectorPanel:__new(display, parent, action, targets)
    self.line = {}
    self.valid = true
 
-   self.targetPanel = ContextPanel(self.display, self, nil, 52, 12, 29, 11)
+   self.targetPanel = ContextPanel(nil, self, nil, 52, 12, 29, 11)
 end
 
 function SelectorPanel:draw()
@@ -52,7 +70,7 @@ function SelectorPanel:draw()
    if not self.curTarget then return end
 
    if not self.blink then
-      self:writeOffset(
+      self:write_plain(
          "X",
          position.x,
          position.y,
@@ -72,16 +90,17 @@ function SelectorPanel:draw()
          x = position.x - 1 - #self.curTarget.name
       end
 
-      self:writeOffset(self.curTarget.name, x, y)
+      self:write_plain(self.curTarget.name, x, y)
    end
 
    if self.valid then
       for i = 2, #self.line - 1 do
-         self:writeOffset("x", self.line[i][1], self.line[i][2], SelectorPanel.lineColor)
+         self:write_plain("x", self.line[i][1], self.line[i][2], SelectorPanel.lineColor)
       end
    end
 
    if self.curTarget.name then self.targetPanel:draw() end
+   self.display:draw()
 end
 
 function SelectorPanel:getTargetPosition()

@@ -22,7 +22,7 @@ function Start:draw()
    end
 
    local tC = math.max(0.09, 0.9 * t)
-   self.display:clear(nil, nil, nil, nil, nil, nil, { 0.09, 0.09, 0.09, a })
+   self.display:clear(nil, nil, nil, nil, nil, { 0.09, 0.09, 0.09, a })
    self.display:writeCenter(
       "The Garden",
       math.floor(self.h / 2) - 10,
@@ -35,6 +35,8 @@ function Start:draw()
       { tC, tC, tC, a },
       { 0.09, 0.09, 0.09, a }
    )
+
+   self.display:draw()
 end
 
 function Start:handleKeyPress(keypress)

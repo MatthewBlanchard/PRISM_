@@ -14,12 +14,15 @@ function Message:__new(display, parent)
       display,
       parent,
       1,
-      game.display:getHeight() - Message.initialHeight + 1,
-      game.display:getWidth(),
-      Message.initialHeight,
+      DISPLAY_HEIGHT - Message.toggledHeight + 1,
+      DISPLAY_WIDTH,
+      Message.toggledHeight,
       true
    )
+   self:toggleHeight()
+   
    self.messages = {}
+   self.defaultBackgroundColor = {0,0,0,0.4}
 end
 
 Message.combos = {
@@ -82,16 +85,19 @@ function Message:update(dt)
 end
 
 function Message:draw()
-   self:clear()
+   local bg_a = 0.2 -- background alpha
+   self:clear(nil, nil, {0, 0, 0, bg_a})
    self:drawBorders()
    for i = 1, self.h - 2 do
       local message = self.messages[#self.messages - (i - 1)]
       if message then
          local msg = message:sub(1, 1):upper() .. message:sub(2)
          local fadeAmount = (self.h == 11) and i / 3 or i
-         self:write(msg, 2, i + 1, { 1 / fadeAmount, 1 / fadeAmount, 1 / fadeAmount, 1 })
+         self:write_plain(msg, 2, i + 1, { 1 / fadeAmount, 1 / fadeAmount, 1 / fadeAmount, 1 })
       end
    end
+
+   self.display:draw()
 end
 
 function Message:toggleHeight()
@@ -102,6 +108,14 @@ function Message:toggleHeight()
       self.h = Message.initialHeight
       self.y = self.y + (Message.toggledHeight - Message.initialHeight)
    end
+   self.canvas_transform = {
+      x = (self.x-1)*15, y = (self.y-1)*15,
+      r = 0,
+      sx = 1, sy = 1,
+      ox = 0, oy = 0,
+      kx = 0, ky = 0
+   }
+   self.display:update_canvas_transform(self.canvas_transform)
 end
 
 function Message.actorString(actor, action)
