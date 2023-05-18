@@ -177,13 +177,17 @@ function Actor:hasComponent(type)
 end
 
 -- Returns the first component of the given type that the actor has.
+-- @function Actor:getComponent
+-- @tparam Component type The type of the component to return.
 function Actor:getComponent(type) return self.componentCache[type] end
 
 --
 -- Actions
 --
 
--- Get a list of actions from the actor and all of it's components.
+--- Get a list of actions from the actor and all of its components.
+-- @function Actor:getActions
+-- @treturn table total_actions Returns a table of all actions.
 function Actor:getActions()
    local total_actions = {}
 
@@ -202,8 +206,10 @@ function Actor:getActions()
    return total_actions
 end
 
--- Add an action to the actor. This function will throw an error if the action
--- is already present on the actor.
+--- Add an action to the actor.
+-- This function will throw an error if the action is already present on the actor.
+-- @function Actor:addAction
+-- @tparam Action action The action to add to the actor.
 function Actor:addAction(action)
    assert(action:is(Action), "Expected argument action to be of type Action!")
 
@@ -213,7 +219,9 @@ function Actor:addAction(action)
    table.insert(self.actions, action)
 end
 
--- Remove an action from the actor.
+--- Remove an action from the actor.
+-- @function Actor:removeAction
+-- @tparam Action action The action to remove from the actor.
 function Actor:removeAction(action)
    for k, v in pairs(self.actions) do
       if v:is(action) then
@@ -223,8 +231,10 @@ function Actor:removeAction(action)
    end
 end
 
--- Get's an action from the actor. This function will check the actor's actions
--- and all of it's components for the action.
+--- Get's an action from the actor.
+-- This function will check the actor's actions and all of its components for the action.
+-- @function Actor:getAction
+-- @tparam Action prototype The prototype of the action to get.
 function Actor:getAction(prototype)
    assert(prototype:is(Action), "Expected argument prototype to be of type Action!")
 
@@ -241,14 +251,18 @@ function Actor:getAction(prototype)
    end
 end
 
--- Adds a reaction to the actor.
+--- Adds a reaction to the actor.
+-- @function Actor:addReaction
+-- @tparam Reaction reaction The reaction to add to the actor.
 function Actor:addReaction(reaction)
    assert(reaction:is(Reaction), "Expected argument reaction to be of type Reaction!")
 
    table.insert(self.reactions, reaction)
 end
 
--- Gets the first reaction of the given type that the actor has.
+--- Gets the first reaction of the given type that the actor has.
+-- @function Actor:getReaction
+-- @tparam Reaction reaction The type of the reaction to get.
 function Actor:getReaction(reaction)
    for k, v in pairs(self.reactions) do
       if v:is(reaction) then return v end
@@ -259,9 +273,11 @@ end
 -- Conditions
 --
 
--- Attaches a condition to the actor. If the actor already has a condition of
--- the same type and the condition is not stackable, the old condition will be
--- removed.
+--- Attaches a condition to the actor.
+-- If the actor already has a condition of the same type and the condition is not stackable, the old condition will
+-- be removed.
+-- @function Actor:applyCondition
+-- @tparam Condition condition The condition to apply to the actor.
 function Actor:applyCondition(condition)
    if self:hasCondition(getmetatable(condition)) and condition.stackable == false then
       self:removeCondition(condition)
@@ -273,7 +289,9 @@ function Actor:applyCondition(condition)
    condition:onApply()
 end
 
--- Checks if the actor has a condition of the given type.
+--- Checks if the actor has a condition of the given type.
+-- @function Actor:hasCondition
+-- @tparam Condition condition The type of the condition to check.
 function Actor:hasCondition(condition)
    for i = 1, #self.conditions do
       if self.conditions[i]:is(condition) then return true end
@@ -282,8 +300,10 @@ function Actor:hasCondition(condition)
    return false
 end
 
--- Removes a condition from the actor. Returns a bool indicating whether the
--- condition was removed.
+--- Removes a condition from the actor. 
+-- Returns a bool indicating whether the condition was removed.
+-- @function Actor:removeCondition
+-- @tparam Condition condition The type of the condition to remove.
 function Actor:removeCondition(condition)
    for i = 1, #self.conditions do
       if self.conditions[i]:is(condition) then
@@ -296,17 +316,25 @@ function Actor:removeCondition(condition)
    return false
 end
 
--- Returns a list of all conditions that the actor has.
+--- Returns a list of all conditions that the actor has.
+-- @function Actor:getConditions
+-- @treturn table conditions Returns a table of all conditions.
 function Actor:getConditions() return self.conditions end
 
 --
 -- Utility
 --
 
+--- Returns the current position of the actor.
+-- @function Actor:getPosition
+-- @treturn Vector2 Returns a copy of the actor's current position.
 function Actor:getPosition() return Vector2(self.position.x, self.position.y) end
 
-local self_tiles = {}
-local other_tiles = {}
+--- Get the range from this actor to another actor.
+-- @function Actor:getRange
+-- @tparam string type The type of range calculation to use.
+-- @tparam Actor actor The other actor to get the range to.
+-- @treturn number Returns the calculated range.
 function Actor:getRange(type, actor)
    local lowest = math.huge
 
@@ -331,11 +359,16 @@ function Actor:getRange(type, actor)
    return lowest
 end
 
+--- Get the range from this actor to a given vector.
+-- @function Actor:getRangeVec
+-- @tparam string type The type of range calculation to use.
+-- @tparam Vector2 vector The vector to get the range to.
+-- @treturn number Returns the calculated range.
 function Actor:getRangeVec(type, vector) return self.position:getRange(type, vector) end
 
 --- A utility function that returns a bool if the actor is visible.
 -- @function Actor:isVisible
--- @treturn boolean
+-- @treturn boolean Returns a boolean indicating if the actor is visible.
 function Actor:isVisible()
    local visible = not self.visible
    for k, cond in pairs(self:getConditions()) do
