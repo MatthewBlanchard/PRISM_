@@ -26,7 +26,7 @@ jobs:
       
     - name: Setup dependencies
       run: |
-        luarocks install --only-deps ldoc
+        luarocks install ldoc
         echo "$(luarocks path --bin):$PATH" >> $GITHUB_ENV
 
     - name: Build docs
