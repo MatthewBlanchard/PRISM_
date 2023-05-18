@@ -1,2 +1,40 @@
-name: Lua LDoc
-uses: lunarmodules/ldoc@v1.5.0
+name: Build Docs
+
+on:
+  pull_request:
+    branches:
+    - main
+  push:
+    branches:
+    - main
+
+jobs:
+  build:
+    name: Build docs
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Setup Lua
+      uses: leafo/gh-actions-lua@v8
+      with:
+        luaVersion: 5.4
+        
+    - name: Setup Lua Rocks
+      uses: leafo/gh-actions-luarocks@v4
+      
+    - name: Setup dependencies
+      run: |
+        luarocks install --only-deps ldoc
+        echo "$(luarocks path --bin):$PATH" >> $GITHUB_ENV
+
+    - name: Build docs
+      run: make -f ./build/ldoc/doc-site build_docs
+      
+    - name: Deploy
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
