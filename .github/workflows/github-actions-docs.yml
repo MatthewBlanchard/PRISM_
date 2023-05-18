@@ -1,2 +1,2 @@
-- name: Lua LDoc
-  uses: lunarmodules/ldoc@v1.5.0
+name: Lua LDoc
+uses: lunarmodules/ldoc@v1.5.0
