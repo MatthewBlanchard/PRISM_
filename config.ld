@@ -9,6 +9,6 @@ merge=true
 no_space_before_args=true
 not_luadoc=true
 file={
-    "./vector.lua",
-	"./actor.lua",
+    "./math/vector.lua",
+	"./core/actor.lua",
 }
