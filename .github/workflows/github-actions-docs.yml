@@ -23,7 +23,7 @@ jobs:
     - name: Setup dependencies
       run: luarocks install --only-deps ldoc
     - name: Build docs
-      run: make -f build/ldoc/doc-site build_docs
+      run: make -f ./build/ldoc/doc-site build_docs
     - name: Deploy
       if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
       uses: peaceiris/actions-gh-pages@v3
