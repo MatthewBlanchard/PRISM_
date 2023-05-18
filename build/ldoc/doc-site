@@ -1,2 +1,2 @@
 build_docs:
-        ldoc .
+	ldoc .
