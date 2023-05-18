@@ -84,7 +84,7 @@ function Zap:perform(level)
 end
 
 local WandOfChainLightning = Actor:extend()
-WandOfChainLightning.name = "Wand of Lightning"
+WandOfChainLightning.name = "Wand of Chain Lightning"
 WandOfChainLightning.description = "Chaining damage all over the room? Keep me out of there."
 WandOfChainLightning.color = { 1.0, 1.0, 0.0, 1 }
 WandOfChainLightning.char = Tiles["wand_pointy"]

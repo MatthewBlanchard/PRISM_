@@ -31,7 +31,7 @@ function LevelState:load()
 
    local torch = actors.Torch()
    table.insert(player:getComponent(components.Inventory).inventory, torch)
-   table.insert(player:getComponent(components.Inventory).inventory, actors.Wand_of_chain_lightning())
+   table.insert(player:getComponent(components.Inventory).inventory, actors.Bone_dagger())
 
    love.keyboard.setKeyRepeat(true)
 end

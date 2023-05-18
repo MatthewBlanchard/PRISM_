@@ -28,12 +28,13 @@ Torch.components = {
    },
    components.Weapon {
       stat = "ATK",
-      name = "Shortsword",
-      dice = "1d3",
+      name = "Torch",
+      dice = "1d1",
       time = 75,
       effects = {
         burnOnHit
-      }
+      },
+      properties = {"melee", "thrown"}
    },
 }
 

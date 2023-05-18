@@ -12,6 +12,16 @@ function Weapon:__new(options)
    self.time = options.time or 100
    self.bonus = options.bonus or 0
    self.effects = options.effects or {}
+   self.range = options.range or 1
+   self.properties = {}
+
+   if options.properties then
+      for _, property in ipairs(options.properties) do
+         self.properties[property] = true
+      end
+   else
+      self.properties["melee"] = true
+   end
 end
 
 function Weapon:initialize(actor)

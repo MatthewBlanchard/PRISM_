@@ -64,6 +64,10 @@ Bone_Dagger.components = {
       effects = {
          boneShardOnHit,
       },
+      properties = {
+         "melee",
+         "thrown",
+      }
    },
    components.Cost {},
 }
