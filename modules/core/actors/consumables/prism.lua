@@ -26,7 +26,9 @@ local feats = {
    conditions.Spell_slinger,
    conditions.Swift,
    conditions.Tough,
+   conditions.Tripper_feat,
 }
+
 function Gaze:perform(level)
    level:removeActor(self:getTarget(1))
 
