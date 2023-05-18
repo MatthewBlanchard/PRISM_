@@ -1,5 +1,5 @@
-# Based on https://gist.github.com/domenic/ec8b0fc8ab45f39403dd
 name: Build Docs
+
 on:
   pull_request:
     branches:
@@ -7,6 +7,7 @@ on:
   push:
     branches:
     - main
+
 jobs:
   build:
     name: Build docs
@@ -14,16 +15,23 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+      
     - name: Setup Lua
       uses: leafo/gh-actions-lua@v8
       with:
         luaVersion: 5.4
+        
     - name: Setup Lua Rocks
       uses: leafo/gh-actions-luarocks@v4
+      
     - name: Setup dependencies
-      run: luarocks install --only-deps ldoc
+      run: |
+        luarocks install --only-deps ldoc
+        echo "$(luarocks path --bin):$PATH" >> $GITHUB_ENV
+
     - name: Build docs
       run: make -f ./build/ldoc/doc-site build_docs
+      
     - name: Deploy
       if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
       uses: peaceiris/actions-gh-pages@v3
