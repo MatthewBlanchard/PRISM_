@@ -1,2 +1,4 @@
+.PHONY: build_docs 
+
 build_docs:
 	ldoc .
