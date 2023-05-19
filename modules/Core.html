@@ -33,6 +33,8 @@
 
 <h2>Contents</h2>
 <ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Fields">Fields</a></li>
 <li><a href="#Class_Actor">Class Actor </a></li>
 </ul>
 
@@ -54,6 +56,44 @@
 </p>
 
 
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Action:__new">Action:__new(owner[, targets])</a></td>
+	<td class="summary">Constructor for the Action class.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Action:getNumTargets">Action:getNumTargets()</a></td>
+	<td class="summary">Returns the number of targets associated with this action.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Action:getTarget">Action:getTarget(n)</a></td>
+	<td class="summary">Returns the target actor at the specified index.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Action:getTargetObject">Action:getTargetObject(index)</a></td>
+	<td class="summary">Returns the target object at the specified index.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Action:getTargets">Action:getTargets()</a></td>
+	<td class="summary">Returns a list of target actors associated with this action.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Action:hasTarget">Action:hasTarget(actor)</a></td>
+	<td class="summary">Determines if the specified actor is a target of this action.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Action:validateTarget">Action:validateTarget(n, owner, toValidate)</a></td>
+	<td class="summary">Validates the specified target for this action.</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Action.time">Action.time</a></td>
+	<td class="summary">The time it takes to perform this action</td>
+	</tr>
+</table>
 <h2><a href="#Class_Actor">Class Actor </a></h2>
 <table class="function_list">
 	<tr>
@@ -186,6 +226,220 @@
 <br/>
 
 
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Action:__new"></a>
+    <strong>Action:__new(owner[, targets])</strong>
+    </dt>
+    <dd>
+    Constructor for the Action class.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">owner</span>
+            <span class="types"><span class="type">actor</span></span>
+         The actor that is performing the action.
+        </li>
+        <li><span class="parameter">targets</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         An optional list of target objects that the action will affect.
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Action:getNumTargets"></a>
+    <strong>Action:getNumTargets()</strong>
+    </dt>
+    <dd>
+    Returns the number of targets associated with this action.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        The number of targets associated with this action.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Action:getTarget"></a>
+    <strong>Action:getTarget(n)</strong>
+    </dt>
+    <dd>
+    Returns the target actor at the specified index.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         The index of the target actor to retrieve.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">actor</span></span>
+        The target actor at the specified index.
+    </ol>
+     <h3>Or</h3>
+    <ol>
+
+        nil If no target actor exists at that index.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Action:getTargetObject"></a>
+    <strong>Action:getTargetObject(index)</strong>
+    </dt>
+    <dd>
+    Returns the target object at the specified index.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">index</span>
+            <span class="types"><span class="type">number</span></span>
+         The index of the target object to retrieve.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        The target object at the specified index.
+    </ol>
+     <h3>Or</h3>
+    <ol>
+
+        nil If no target object exists at that index.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Action:getTargets"></a>
+    <strong>Action:getTargets()</strong>
+    </dt>
+    <dd>
+    Returns a list of target actors associated with this action.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        A list of target actors associated with this action.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Action:hasTarget"></a>
+    <strong>Action:hasTarget(actor)</strong>
+    </dt>
+    <dd>
+    Determines if the specified actor is a target of this action.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><span class="type">actor</span></span>
+         The actor to check if they are a target of this action.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        true if the specified actor is a target of this action, false otherwise.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Action:validateTarget"></a>
+    <strong>Action:validateTarget(n, owner, toValidate)</strong>
+    </dt>
+    <dd>
+    Validates the specified target for this action.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         The index of the target object to validate.
+        </li>
+        <li><span class="parameter">owner</span>
+            <span class="types"><span class="type">actor</span></span>
+         The actor that is performing the action.
+        </li>
+        <li><span class="parameter">toValidate</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         The target actor to validate.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        true if the specified target actor is valid for this action, false otherwise.
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Action.time"></a>
+    <strong>Action.time</strong>
+    </dt>
+    <dd>
+    The time it takes to perform this action
+
+
+
+
+
+
+
+</dd>
+</dl>
     <h2 class="section-header has-description"><a name="Class_Actor"></a>Class Actor </h2>
 
           <div class="section-description">
@@ -877,7 +1131,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-05-19 02:30:45 </i>
+<i style="float:right;">Last updated 2023-05-19 02:36:49 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
