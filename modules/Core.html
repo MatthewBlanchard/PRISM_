@@ -1,0 +1,884 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>PRISM roguelike engine documentation</title>
+    <link rel="stylesheet" href="../ldoc_fixed.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>PRISM</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Class_Actor">Class Actor </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>Core</strong></li>
+  <li><a href="../modules/Math.html">Math</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>Core</code></h1>
+<p>Core module</p>
+<p>
+
+</p>
+
+
+<h2><a href="#Class_Actor">Class Actor </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Actor.actions">Actor.actions</a></td>
+	<td class="summary">A collection of the actor's innate actions.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor.article">Actor.article</a></td>
+	<td class="summary">The article to use when referring to the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor.char">Actor.char</a></td>
+	<td class="summary">Defines the actor's offset in the sprite sheet.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor.color">Actor.color</a></td>
+	<td class="summary">Defines the actor's base color.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor.conjugate">Actor.conjugate</a></td>
+	<td class="summary">Whether to conjugate verbs when referring to the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor.emissive">Actor.emissive</a></td>
+	<td class="summary">Defines whether the actor's color should be used instead of it's lit color.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor.name">Actor.name</a></td>
+	<td class="summary">The name of the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor.position">Actor.position</a></td>
+	<td class="summary">The position of the actor on the map.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor.pronoun">Actor.pronoun</a></td>
+	<td class="summary">The pronoun to use when referring to the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor.reactions">Actor.reactions</a></td>
+	<td class="summary">A collection of the actor's innate reactions.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor.visible">Actor.visible</a></td>
+	<td class="summary">Defines whether the actor can be seen.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:__addComponent">Actor:__addComponent(component)</a></td>
+	<td class="summary">Adds a component to the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:__new">Actor:__new()</a></td>
+	<td class="summary">Constructor for an actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:__removeComponent">Actor:__removeComponent(component)</a></td>
+	<td class="summary">Removes a component from the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:addAction">Actor:addAction(action)</a></td>
+	<td class="summary">Add an action to the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:addReaction">Actor:addReaction(reaction)</a></td>
+	<td class="summary">Adds a reaction to the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:applyCondition">Actor:applyCondition(condition)</a></td>
+	<td class="summary">Attaches a condition to the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:getAction">Actor:getAction(prototype)</a></td>
+	<td class="summary">Get's an action from the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:getActions">Actor:getActions()</a></td>
+	<td class="summary">Get a list of actions from the actor and all of its components.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:getConditions">Actor:getConditions()</a></td>
+	<td class="summary">Returns a list of all conditions that the actor has.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:getPosition">Actor:getPosition()</a></td>
+	<td class="summary">Returns the current position of the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:getRange">Actor:getRange(type, actor)</a></td>
+	<td class="summary">Get the range from this actor to another actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:getRangeVec">Actor:getRangeVec(type, vector)</a></td>
+	<td class="summary">Get the range from this actor to a given vector.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:getReaction">Actor:getReaction(reaction)</a></td>
+	<td class="summary">Gets the first reaction of the given type that the actor has.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:hasComponent">Actor:hasComponent(type)</a></td>
+	<td class="summary">Returns a bool indicating whether the actor has a component of the given type.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:hasCondition">Actor:hasCondition(condition)</a></td>
+	<td class="summary">Checks if the actor has a condition of the given type.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:initialize">Actor:initialize(level)</a></td>
+	<td class="summary">Called after an actor is added to a level and it's components are initialized.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:initializeComponents">Actor:initializeComponents()</a></td>
+	<td class="summary">Initializes the actor's components.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:isVisible">Actor:isVisible()</a></td>
+	<td class="summary">A utility function that returns a bool if the actor is visible.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:removeAction">Actor:removeAction(action)</a></td>
+	<td class="summary">Remove an action from the actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Actor:removeCondition">Actor:removeCondition(condition)</a></td>
+	<td class="summary">Removes a condition from the actor.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header has-description"><a name="Class_Actor"></a>Class Actor </h2>
+
+          <div class="section-description">
+          Represents entities in the game, including the player, enemies, and items.
+ Actors are composed of Components that define their state and behavior.
+ For example, an actor may have a Sight component that determines their field of vision, explored tiles, and other related aspects.
+ The Sight System handles the mechanics of an actor's sight.
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "Actor.actions"></a>
+    <strong>Actor.actions</strong>
+    </dt>
+    <dd>
+    A collection of the actor's innate actions.  This is used mostly for
+ actions that are 'instrinsic' to the actor, such as a spider casting a web.
+ It might be better to use a component for this, and I may change it in the future.
+
+
+    <ul>
+        <li><span class="parameter">actions</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor.article"></a>
+    <strong>Actor.article</strong>
+    </dt>
+    <dd>
+    The article to use when referring to the actor.  Currently non-functional.
+
+
+    <ul>
+        <li><span class="parameter">article</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor.char"></a>
+    <strong>Actor.char</strong>
+    </dt>
+    <dd>
+    Defines the actor's offset in the sprite sheet.
+
+
+    <ul>
+        <li><span class="parameter">offset</span>
+         integer
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor.color"></a>
+    <strong>Actor.color</strong>
+    </dt>
+    <dd>
+    Defines the actor's base color.
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">color</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor.conjugate"></a>
+    <strong>Actor.conjugate</strong>
+    </dt>
+    <dd>
+    Whether to conjugate verbs when referring to the actor.  Currently non-functional.
+
+
+    <ul>
+        <li><span class="parameter">boolean</span>
+            <span class="types"><a class="type" href="../modules/Core.html#Actor.conjugate">conjugate</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor.emissive"></a>
+    <strong>Actor.emissive</strong>
+    </dt>
+    <dd>
+    Defines whether the actor's color should be used instead of it's lit color.
+
+
+    <ul>
+        <li><span class="parameter">emissive</span>
+            <span class="types"><span class="type">boolean</span></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor.name"></a>
+    <strong>Actor.name</strong>
+    </dt>
+    <dd>
+    The name of the actor.
+
+
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor.position"></a>
+    <strong>Actor.position</strong>
+    </dt>
+    <dd>
+    The position of the actor on the map.
+
+
+    <ul>
+        <li><span class="parameter">position</span>
+            <span class="types"><span class="type">Vector2</span></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor.pronoun"></a>
+    <strong>Actor.pronoun</strong>
+    </dt>
+    <dd>
+    The pronoun to use when referring to the actor.  Currently non-functional.
+
+
+    <ul>
+        <li><span class="parameter">pronoun</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor.reactions"></a>
+    <strong>Actor.reactions</strong>
+    </dt>
+    <dd>
+    A collection of the actor's innate reactions.  This is hardly ever used
+ and marked for removal.
+
+
+    <ul>
+        <li><span class="parameter">reactions</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor.visible"></a>
+    <strong>Actor.visible</strong>
+    </dt>
+    <dd>
+    Defines whether the actor can be seen.
+
+
+    <ul>
+        <li><span class="parameter">passable</span>
+            <span class="types"><span class="type">boolean</span></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:__addComponent"></a>
+    <strong>Actor:__addComponent(component)</strong>
+    </dt>
+    <dd>
+    Adds a component to the actor.  This function will check if the component's
+ prerequisites are met and will throw an error if they are not.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">component</span>
+            <span class="types"><span class="type">Component</span></span>
+         The component to add to the actor.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:__new"></a>
+    <strong>Actor:__new()</strong>
+    </dt>
+    <dd>
+    Constructor for an actor.
+ Initializes and copies the actor's fields from it's prototype.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:__removeComponent"></a>
+    <strong>Actor:__removeComponent(component)</strong>
+    </dt>
+    <dd>
+    Removes a component from the actor.  This function will throw an error if the
+ component is not present on the actor.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">component</span>
+            <span class="types"><span class="type">Component</span></span>
+         The component to remove from the actor.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:addAction"></a>
+    <strong>Actor:addAction(action)</strong>
+    </dt>
+    <dd>
+    Add an action to the actor.
+ This function will throw an error if the action is already present on the actor.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">action</span>
+            <span class="types"><span class="type">Action</span></span>
+         The action to add to the actor.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:addReaction"></a>
+    <strong>Actor:addReaction(reaction)</strong>
+    </dt>
+    <dd>
+    Adds a reaction to the actor.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">reaction</span>
+            <span class="types"><span class="type">Reaction</span></span>
+         The reaction to add to the actor.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:applyCondition"></a>
+    <strong>Actor:applyCondition(condition)</strong>
+    </dt>
+    <dd>
+    Attaches a condition to the actor.
+ If the actor already has a condition of the same type and the condition is not stackable, the old condition will
+ be removed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">condition</span>
+            <span class="types"><span class="type">Condition</span></span>
+         The condition to apply to the actor.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:getAction"></a>
+    <strong>Actor:getAction(prototype)</strong>
+    </dt>
+    <dd>
+    Get's an action from the actor.
+ This function will check the actor's actions and all of its components for the action.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">prototype</span>
+            <span class="types"><span class="type">Action</span></span>
+         The prototype of the action to get.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:getActions"></a>
+    <strong>Actor:getActions()</strong>
+    </dt>
+    <dd>
+    Get a list of actions from the actor and all of its components.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        total_actions Returns a table of all actions.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:getConditions"></a>
+    <strong>Actor:getConditions()</strong>
+    </dt>
+    <dd>
+    Returns a list of all conditions that the actor has.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        conditions Returns a table of all conditions.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:getPosition"></a>
+    <strong>Actor:getPosition()</strong>
+    </dt>
+    <dd>
+    Returns the current position of the actor.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">Vector2</span></span>
+        Returns a copy of the actor's current position.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:getRange"></a>
+    <strong>Actor:getRange(type, actor)</strong>
+    </dt>
+    <dd>
+    Get the range from this actor to another actor.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">type</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The type of range calculation to use.
+        </li>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../modules/Core.html#Actor">Actor</a></span>
+         The other actor to get the range to.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        Returns the calculated range.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:getRangeVec"></a>
+    <strong>Actor:getRangeVec(type, vector)</strong>
+    </dt>
+    <dd>
+    Get the range from this actor to a given vector.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">type</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The type of range calculation to use.
+        </li>
+        <li><span class="parameter">vector</span>
+            <span class="types"><span class="type">Vector2</span></span>
+         The vector to get the range to.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        Returns the calculated range.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:getReaction"></a>
+    <strong>Actor:getReaction(reaction)</strong>
+    </dt>
+    <dd>
+    Gets the first reaction of the given type that the actor has.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">reaction</span>
+            <span class="types"><span class="type">Reaction</span></span>
+         The type of the reaction to get.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:hasComponent"></a>
+    <strong>Actor:hasComponent(type)</strong>
+    </dt>
+    <dd>
+    Returns a bool indicating whether the actor has a component of the given type.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">type</span>
+            <span class="types"><span class="type">Component</span></span>
+         The prototype of the component to check for.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:hasCondition"></a>
+    <strong>Actor:hasCondition(condition)</strong>
+    </dt>
+    <dd>
+    Checks if the actor has a condition of the given type.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">condition</span>
+            <span class="types"><span class="type">Condition</span></span>
+         The type of the condition to check.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:initialize"></a>
+    <strong>Actor:initialize(level)</strong>
+    </dt>
+    <dd>
+    Called after an actor is added to a level and it's components are initialized.  This will
+ happen either at level start or when an actor is spawned.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The level the actor is being added to.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:initializeComponents"></a>
+    <strong>Actor:initializeComponents()</strong>
+    </dt>
+    <dd>
+    Initializes the actor's components.  Components shouldn't need a reference to the
+ level so this is called in Actor:__new.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:isVisible"></a>
+    <strong>Actor:isVisible()</strong>
+    </dt>
+    <dd>
+    A utility function that returns a bool if the actor is visible.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        Returns a boolean indicating if the actor is visible.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:removeAction"></a>
+    <strong>Actor:removeAction(action)</strong>
+    </dt>
+    <dd>
+    Remove an action from the actor.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">action</span>
+            <span class="types"><span class="type">Action</span></span>
+         The action to remove from the actor.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Actor:removeCondition"></a>
+    <strong>Actor:removeCondition(condition)</strong>
+    </dt>
+    <dd>
+    Removes a condition from the actor. <br/>
+ Returns a bool indicating whether the condition was removed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">condition</span>
+            <span class="types"><span class="type">Condition</span></span>
+         The type of the condition to remove.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-05-19 02:30:45 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
