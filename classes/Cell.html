@@ -1,0 +1,437 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>PRISM roguelike engine documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>PRISM</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Fields">Fields</a></li>
+<li><a href="#Metamethods">Metamethods</a></li>
+<li><a href="#Methods">Methods</a></li>
+</ul>
+
+
+<h2>Classes</h2>
+<ul class="nowrap">
+  <li><a href="../classes/Action.html">Action</a></li>
+  <li><a href="../classes/Actor.html">Actor</a></li>
+  <li><strong>Cell</strong></li>
+  <li><a href="../classes/Component.html">Component</a></li>
+  <li><a href="../classes/Condition.html">Condition</a></li>
+  <li><a href="../classes/Event.html">Event</a></li>
+  <li><a href="../classes/Reaction.html">Reaction</a></li>
+  <li><a href="../classes/Scheduler.html">Scheduler</a></li>
+  <li><a href="../classes/System.html">System</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/Math.html">Math</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Class <code>Cell</code></h1>
+<p>A cell is a single tile on the map.</p>
+<p> It defines the properties of the tile and has a few callbacks.
+ Maybe cells should have components so that they can be extended with custom functionality like the grass?
+ Still working on the details there. For now, cells are just a simple way to define the properties of a tile.</p>
+
+
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#cell.lightReduction">cell.lightReduction</a></td>
+	<td class="summary">Reduces the amount of light that passes through this cell by the integer value in this field.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cell.movePenalty">cell.movePenalty</a></td>
+	<td class="summary">Applies a penalty to speed when moving through this cell by the integer value in this field.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cell.name">cell.name</a></td>
+	<td class="summary">Displayed in the user interface.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cell.opaque">cell.opaque</a></td>
+	<td class="summary">Defines whether a cell can be seen through.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cell.passable">cell.passable</a></td>
+	<td class="summary">Defines whether a cell is passable.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cell.sightLimit">cell.sightLimit</a></td>
+	<td class="summary">If set to an integer, an actor standing on this tile's sight range will be limited to this number.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cell.tile">cell.tile</a></td>
+	<td class="summary">Defines the tile appearance.</td>
+	</tr>
+</table>
+<h2><a href="#Metamethods">Metamethods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#cell:__new">cell:__new()</a></td>
+	<td class="summary">Constructor for the Cell class.</td>
+	</tr>
+</table>
+<h2><a href="#Methods">Methods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#cell:onAction">cell:onAction(level, actor, action)</a></td>
+	<td class="summary">Called when an action is taken on the cell.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cell:onEnter">cell:onEnter(level, actor)</a></td>
+	<td class="summary">Called when an actor enters the cell.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cell:onLeave">cell:onLeave(level, actor)</a></td>
+	<td class="summary">Called when an actor leaves the cell.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cell:visibleFromCell">cell:visibleFromCell(level, cell)</a></td>
+	<td class="summary">Determines if a cell is visible from another cell.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "cell.lightReduction"></a>
+    <strong>cell.lightReduction</strong>
+    </dt>
+    <dd>
+    Reduces the amount of light that passes through this cell by the integer value in this field.
+
+
+    <ul>
+        <li><span class="parameter">lightReduction</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cell.movePenalty"></a>
+    <strong>cell.movePenalty</strong>
+    </dt>
+    <dd>
+    Applies a penalty to speed when moving through this cell by the integer value in this field.
+
+
+    <ul>
+        <li><span class="parameter">movePenalty</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cell.name"></a>
+    <strong>cell.name</strong>
+    </dt>
+    <dd>
+    Displayed in the user interface.
+
+
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cell.opaque"></a>
+    <strong>cell.opaque</strong>
+    </dt>
+    <dd>
+    Defines whether a cell can be seen through.
+
+
+    <ul>
+        <li><span class="parameter">opaque</span>
+            <span class="types"><span class="type">boolean</span></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cell.passable"></a>
+    <strong>cell.passable</strong>
+    </dt>
+    <dd>
+    Defines whether a cell is passable.
+
+
+    <ul>
+        <li><span class="parameter">passable</span>
+            <span class="types"><span class="type">boolean</span></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cell.sightLimit"></a>
+    <strong>cell.sightLimit</strong>
+    </dt>
+    <dd>
+    If set to an integer, an actor standing on this tile's sight range will be limited to this number.
+
+
+    <ul>
+        <li><span class="parameter">sightLimit</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cell.tile"></a>
+    <strong>cell.tile</strong>
+    </dt>
+    <dd>
+    Defines the tile appearance.
+
+
+    <ul>
+        <li><span class="parameter">tile</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Metamethods"></a>Metamethods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "cell:__new"></a>
+    <strong>cell:__new()</strong>
+    </dt>
+    <dd>
+    Constructor for the Cell class.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Methods"></a>Methods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "cell:onAction"></a>
+    <strong>cell:onAction(level, actor, action)</strong>
+    </dt>
+    <dd>
+    Called when an action is taken on the cell.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The level where the action took place.
+        </li>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor that took the action.
+        </li>
+        <li><span class="parameter">action</span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
+         The action that was taken.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cell:onEnter"></a>
+    <strong>cell:onEnter(level, actor)</strong>
+    </dt>
+    <dd>
+    Called when an actor enters the cell.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The level where the actor entered the cell.
+        </li>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor that entered the cell.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cell:onLeave"></a>
+    <strong>cell:onLeave(level, actor)</strong>
+    </dt>
+    <dd>
+    Called when an actor leaves the cell.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The level where the actor left the cell.
+        </li>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor that left the cell.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cell:visibleFromCell"></a>
+    <strong>cell:visibleFromCell(level, cell)</strong>
+    </dt>
+    <dd>
+    Determines if a cell is visible from another cell.
+ Cells can have custom functions to determine whether an actor standing on them can be seen.
+ For instance, grass cells allow actors to be seen only if the other actor is in the same
+ clump of grass.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The level where the visibility check is taking place.
+        </li>
+        <li><span class="parameter">cell</span>
+            <span class="types"><a class="type" href="../classes/Cell.html#">Cell</a></span>
+         The cell from which visibility is being checked.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean True if the cell is visible from the provided cell, false otherwise.
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-05-19 03:56:12 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

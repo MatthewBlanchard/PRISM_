@@ -33,14 +33,27 @@
 
 <h2>Contents</h2>
 <ul>
-<li><a href="#Class_Actor">Class Actor </a></li>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Fields">Fields</a></li>
+<li><a href="#Metamethods">Metamethods</a></li>
+<li><a href="#Methods">Methods</a></li>
 </ul>
 
 
+<h2>Classes</h2>
+<ul class="nowrap">
+  <li><a href="../classes/Action.html">Action</a></li>
+  <li><strong>Actor</strong></li>
+  <li><a href="../classes/Cell.html">Cell</a></li>
+  <li><a href="../classes/Component.html">Component</a></li>
+  <li><a href="../classes/Condition.html">Condition</a></li>
+  <li><a href="../classes/Event.html">Event</a></li>
+  <li><a href="../classes/Reaction.html">Reaction</a></li>
+  <li><a href="../classes/Scheduler.html">Scheduler</a></li>
+  <li><a href="../classes/System.html">System</a></li>
+</ul>
 <h2>Modules</h2>
 <ul class="nowrap">
-  <li><a href="../modules/Action.html">Action</a></li>
-  <li><strong>Actor</strong></li>
   <li><a href="../modules/Math.html">Math</a></li>
 </ul>
 
@@ -48,14 +61,21 @@
 
 <div id="content">
 
-<h1>Module <code>Actor</code></h1>
-<p>The core classes that drive the action of the game.</p>
-<p>
+<h1>Class <code>Actor</code></h1>
+<p>Represents entities in the game, including the player, enemies, and items.</p>
+<p> Actors are composed of Components that define their state and behavior.
+ For example, an actor may have a Sight component that determines their field of vision, explored tiles,
+ and other related aspects.</p>
 
-</p>
 
-
-<h2><a href="#Class_Actor">Class Actor </a></h2>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#actor.color">actor.color</a></td>
+	<td class="summary">Defines the actor's base color.</td>
+	</tr>
+</table>
+<h2><a href="#Fields">Fields</a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#actor.actions">actor.actions</a></td>
@@ -68,10 +88,6 @@
 	<tr>
 	<td class="name" nowrap><a href="#actor.char">actor.char</a></td>
 	<td class="summary">Defines the actor's offset in the sprite sheet.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#actor.color">actor.color</a></td>
-	<td class="summary">Defines the actor's base color.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#actor.conjugate">actor.conjugate</a></td>
@@ -101,6 +117,9 @@
 	<td class="name" nowrap><a href="#actor.visible">actor.visible</a></td>
 	<td class="summary">Defines whether the actor can be seen.</td>
 	</tr>
+</table>
+<h2><a href="#Metamethods">Metamethods</a></h2>
+<table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#actor:__addComponent">actor:__addComponent(component)</a></td>
 	<td class="summary">Adds a component to the actor.</td>
@@ -113,6 +132,9 @@
 	<td class="name" nowrap><a href="#actor:__removeComponent">actor:__removeComponent(component)</a></td>
 	<td class="summary">Removes a component from the actor.</td>
 	</tr>
+</table>
+<h2><a href="#Methods">Methods</a></h2>
+<table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#actor:addAction">actor:addAction(action)</a></td>
 	<td class="summary">Add an action to the actor.</td>
@@ -187,14 +209,35 @@
 <br/>
 
 
-    <h2 class="section-header has-description"><a name="Class_Actor"></a>Class Actor </h2>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
 
-          <div class="section-description">
-          Represents entities in the game, including the player, enemies, and items.
- Actors are composed of Components that define their state and behavior.
- For example, an actor may have a Sight component that determines their field of vision, explored tiles,
- and other related aspects.
-          </div>
+    <dl class="function">
+    <dt>
+    <a name = "actor.color"></a>
+    <strong>actor.color</strong>
+    </dt>
+    <dd>
+    Defines the actor's base color.
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">color</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
     <dl class="function">
     <dt>
     <a name = "actor.actions"></a>
@@ -253,29 +296,6 @@
     <ul>
         <li><span class="parameter">offset</span>
          integer
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "actor.color"></a>
-    <strong>actor.color</strong>
-    </dt>
-    <dd>
-    Defines the actor's base color.
-
-
-    <h3>Fields:</h3>
-    <ul>
-        <li><span class="parameter">color</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-
-
-
         </li>
     </ul>
 
@@ -439,6 +459,10 @@
 
 
 </dd>
+</dl>
+    <h2 class="section-header "><a name="Metamethods"></a>Metamethods</h2>
+
+    <dl class="function">
     <dt>
     <a name = "actor:__addComponent"></a>
     <strong>actor:__addComponent(component)</strong>
@@ -451,7 +475,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">component</span>
-            <span class="types"><span class="type">Component</span></span>
+            <span class="types"><a class="type" href="../classes/Component.html#">Component</a></span>
          The component to add to the actor.
         </li>
     </ul>
@@ -488,7 +512,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">component</span>
-            <span class="types"><span class="type">Component</span></span>
+            <span class="types"><a class="type" href="../classes/Component.html#">Component</a></span>
          The component to remove from the actor.
         </li>
     </ul>
@@ -498,6 +522,10 @@
 
 
 </dd>
+</dl>
+    <h2 class="section-header "><a name="Methods"></a>Methods</h2>
+
+    <dl class="function">
     <dt>
     <a name = "actor:addAction"></a>
     <strong>actor:addAction(action)</strong>
@@ -510,7 +538,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">action</span>
-            <span class="types"><span class="type">Action</span></span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
          The action to add to the actor.
         </li>
     </ul>
@@ -531,7 +559,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">reaction</span>
-            <span class="types"><span class="type">Reaction</span></span>
+            <span class="types"><a class="type" href="../classes/Reaction.html#">Reaction</a></span>
          The reaction to add to the actor.
         </li>
     </ul>
@@ -554,7 +582,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">condition</span>
-            <span class="types"><span class="type">Condition</span></span>
+            <span class="types"><a class="type" href="../classes/Condition.html#">Condition</a></span>
          The condition to apply to the actor.
         </li>
     </ul>
@@ -576,7 +604,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">prototype</span>
-            <span class="types"><span class="type">Action</span></span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
          The prototype of the action to get.
         </li>
     </ul>
@@ -661,7 +689,7 @@
          The type of range calculation to use.
         </li>
         <li><span class="parameter">actor</span>
-            <span class="types"><a class="type" href="../modules/Actor.html#Actor">Actor</a></span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
          The other actor to get the range to.
         </li>
     </ul>
@@ -719,7 +747,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">reaction</span>
-            <span class="types"><span class="type">Reaction</span></span>
+            <span class="types"><a class="type" href="../classes/Reaction.html#">Reaction</a></span>
          The type of the reaction to get.
         </li>
     </ul>
@@ -740,7 +768,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">type</span>
-            <span class="types"><span class="type">Component</span></span>
+            <span class="types"><a class="type" href="../classes/Component.html#">Component</a></span>
          The prototype of the component to check for.
         </li>
     </ul>
@@ -761,7 +789,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">condition</span>
-            <span class="types"><span class="type">Condition</span></span>
+            <span class="types"><a class="type" href="../classes/Condition.html#">Condition</a></span>
          The type of the condition to check.
         </li>
     </ul>
@@ -839,7 +867,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">action</span>
-            <span class="types"><span class="type">Action</span></span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
          The action to remove from the actor.
         </li>
     </ul>
@@ -861,7 +889,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">condition</span>
-            <span class="types"><span class="type">Condition</span></span>
+            <span class="types"><a class="type" href="../classes/Condition.html#">Condition</a></span>
          The type of the condition to remove.
         </li>
     </ul>
@@ -878,7 +906,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-05-19 03:14:32 </i>
+<i style="float:right;">Last updated 2023-05-19 03:56:12 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

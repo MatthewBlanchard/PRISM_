@@ -1,0 +1,407 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>PRISM roguelike engine documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>PRISM</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Fields">Fields</a></li>
+<li><a href="#Methods">Methods</a></li>
+</ul>
+
+
+<h2>Classes</h2>
+<ul class="nowrap">
+  <li><a href="../classes/Action.html">Action</a></li>
+  <li><a href="../classes/Actor.html">Actor</a></li>
+  <li><a href="../classes/Cell.html">Cell</a></li>
+  <li><a href="../classes/Component.html">Component</a></li>
+  <li><a href="../classes/Condition.html">Condition</a></li>
+  <li><a href="../classes/Event.html">Event</a></li>
+  <li><a href="../classes/Reaction.html">Reaction</a></li>
+  <li><a href="../classes/Scheduler.html">Scheduler</a></li>
+  <li><strong>System</strong></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/Math.html">Math</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Class <code>System</code></h1>
+<p>A 'System' is a class representing a level-wide event handler that can be attached to a Level object.</p>
+<p> It listens to events such as an actor taking an action, moving, or a tick of time.
+ This should be used for mechanics that affect the entire level; such as hunger, fov, or lighting.
+ For event handlers that apply to a single actor, use a Condition instead. If you want a system that
+ recieves all messages from all levels, like tracking the player's favor with a god attach it to
+ the game instead.</p>
+
+
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#system.global">system.global</a></td>
+	<td class="summary">A system defined global can only be attached to the Game object.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#system.name">system.name</a></td>
+	<td class="summary">A system must define a name that is unique to the System.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#system.requirements">system.requirements</a></td>
+	<td class="summary">A system may define a table of requirements that must be met in order for it to be attached to a Level.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#system.softRequirements">system.softRequirements</a></td>
+	<td class="summary">Very similar to requirements except that the Level will not assert and abort if the required Systems are not attached.</td>
+	</tr>
+</table>
+<h2><a href="#Methods">Methods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#system:afterAction">system:afterAction(level, actor, action)</a></td>
+	<td class="summary">This method is called after an actor has taken an action.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#system:beforeAction">system:beforeAction(level, actor, action)</a></td>
+	<td class="summary">This method is called after an actor has selected an action, but before it is executed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#system:initialize">system:initialize(level)</a></td>
+	<td class="summary">This method is called when the Level is initialized.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#system:onActorAdded">system:onActorAdded(level, actor)</a></td>
+	<td class="summary">This method is called after an actor has been added to the Level.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#system:onActorRemoved">system:onActorRemoved(level, actor)</a></td>
+	<td class="summary">This method is called after an actor has been removed from the Level.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#system:onMove">system:onMove(level, actor, from, to)</a></td>
+	<td class="summary">This method is called after an actor has moved.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#system:onTick">system:onTick(level)</a></td>
+	<td class="summary">This method is called every 100 units of time, a second, and can be used for mechanics such as hunger and fire spreading.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "system.global"></a>
+    <strong>system.global</strong>
+    </dt>
+    <dd>
+    A system defined global can only be attached to the Game object.  It will see all events from all levels.
+ Level will error if a global System is attached to a Level. Game will do the same if a non-global System
+ is attached to it.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "system.name"></a>
+    <strong>system.name</strong>
+    </dt>
+    <dd>
+    A system must define a name that is unique to the System.  If a duplicate name is found, or if the
+ name is not defined, the Level will assert and abort.
+
+
+    <ul>
+        <li><span class="parameter">name</span>
+         string
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "system.requirements"></a>
+    <strong>system.requirements</strong>
+    </dt>
+    <dd>
+    A system may define a table of requirements that must be met in order for it to be attached to a Level.
+ This table should be a list of strings, where each string is the name of a System that must be attached.
+ If any of the required Systems are not attached, the Level will assert and abort during initialization.
+ This insures that the required Systems are attached to the Level before the System is attached.
+ This bucks convention in that it uses strings instead of the actual System class. I want to change all of the
+ core objects to reference other objects by name instead of by class, but I'll save that for saving/loading.
+
+
+    <ul>
+        <li><span class="parameter">requirements</span>
+         table
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "system.softRequirements"></a>
+    <strong>system.softRequirements</strong>
+    </dt>
+    <dd>
+    Very similar to requirements except that the Level will not assert and abort if the required Systems are not attached.
+ This will ensure that if both Systems are attached, they will be attached, and therefore updated in the correct order.
+
+
+    <ul>
+        <li><span class="parameter">softRequirements</span>
+         table
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Methods"></a>Methods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "system:afterAction"></a>
+    <strong>system:afterAction(level, actor, action)</strong>
+    </dt>
+    <dd>
+    This method is called after an actor has taken an action.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The Level object this System is attached to.
+        </li>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The Actor object that has taken an action.
+        </li>
+        <li><span class="parameter">action</span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
+         The Action object that the Actor has executed.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "system:beforeAction"></a>
+    <strong>system:beforeAction(level, actor, action)</strong>
+    </dt>
+    <dd>
+    This method is called after an actor has selected an action, but before it is executed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The Level object this System is attached to.
+        </li>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The Actor object that has selected an action.
+        </li>
+        <li><span class="parameter">action</span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
+         The Action object that the Actor has selected to execute.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "system:initialize"></a>
+    <strong>system:initialize(level)</strong>
+    </dt>
+    <dd>
+    This method is called when the Level is initialized.  It is called after all of the Systems have been attached.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The Level object this System is attached to.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "system:onActorAdded"></a>
+    <strong>system:onActorAdded(level, actor)</strong>
+    </dt>
+    <dd>
+    This method is called after an actor has been added to the Level.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The Level object this System is attached to.
+        </li>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The Actor object that has been added.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "system:onActorRemoved"></a>
+    <strong>system:onActorRemoved(level, actor)</strong>
+    </dt>
+    <dd>
+    This method is called after an actor has been removed from the Level.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The Level object this System is attached to.
+        </li>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The Actor object that has been removed.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "system:onMove"></a>
+    <strong>system:onMove(level, actor, from, to)</strong>
+    </dt>
+    <dd>
+    This method is called after an actor has moved.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The Level object this System is attached to.
+        </li>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The Actor object that has moved.
+        </li>
+        <li><span class="parameter">from</span>
+            <span class="types"><span class="type">Vector2</span></span>
+         The position the Actor moved from.
+        </li>
+        <li><span class="parameter">to</span>
+            <span class="types"><span class="type">Vector2</span></span>
+         The position the Actor moved to.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "system:onTick"></a>
+    <strong>system:onTick(level)</strong>
+    </dt>
+    <dd>
+    This method is called every 100 units of time, a second, and can be used for mechanics such as hunger and fire spreading.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The Level object this System is attached to.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-05-19 03:56:12 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

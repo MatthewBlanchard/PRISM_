@@ -1,0 +1,308 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>PRISM roguelike engine documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>PRISM</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Metamethods">Metamethods</a></li>
+<li><a href="#Methods">Methods</a></li>
+</ul>
+
+
+<h2>Classes</h2>
+<ul class="nowrap">
+  <li><a href="../classes/Action.html">Action</a></li>
+  <li><a href="../classes/Actor.html">Actor</a></li>
+  <li><a href="../classes/Cell.html">Cell</a></li>
+  <li><a href="../classes/Component.html">Component</a></li>
+  <li><a href="../classes/Condition.html">Condition</a></li>
+  <li><a href="../classes/Event.html">Event</a></li>
+  <li><a href="../classes/Reaction.html">Reaction</a></li>
+  <li><strong>Scheduler</strong></li>
+  <li><a href="../classes/System.html">System</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/Math.html">Math</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Class <code>Scheduler</code></h1>
+<p>The 'Scheduler' manages a queue of actors and schedules their actions based on time.</p>
+<p>
+
+</p>
+
+
+<h2><a href="#Metamethods">Metamethods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#scheduler:__new">scheduler:__new()</a></td>
+	<td class="summary">Constructor for the Scheduler class.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scheduler:__tostring">scheduler:__tostring()</a></td>
+	<td class="summary">Provides a string representation of the scheduler, listing all actors in the queue with their time and lastAct.</td>
+	</tr>
+</table>
+<h2><a href="#Methods">Methods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#scheduler:add">scheduler:add(actor, time, lastAct)</a></td>
+	<td class="summary">Adds an actor to the scheduler.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scheduler:addTime">scheduler:addTime(actor, time)</a></td>
+	<td class="summary">Adds time to an actor's current time in the scheduler.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scheduler:has">scheduler:has(actor)</a></td>
+	<td class="summary">Checks if an actor is in the scheduler.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scheduler:next">scheduler:next()</a></td>
+	<td class="summary">Returns the next actor to act.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scheduler:remove">scheduler:remove(actor)</a></td>
+	<td class="summary">Removes an actor from the scheduler.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scheduler:updateTime">scheduler:updateTime(time)</a></td>
+	<td class="summary">Updates the time for all actors in the scheduler.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Metamethods"></a>Metamethods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "scheduler:__new"></a>
+    <strong>scheduler:__new()</strong>
+    </dt>
+    <dd>
+    Constructor for the Scheduler class.
+ Initializes an empty queue and sets the actCount to 0.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scheduler:__tostring"></a>
+    <strong>scheduler:__tostring()</strong>
+    </dt>
+    <dd>
+    Provides a string representation of the scheduler, listing all actors in the queue with their time and lastAct.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        The string representation of the scheduler.
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Methods"></a>Methods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "scheduler:add"></a>
+    <strong>scheduler:add(actor, time, lastAct)</strong>
+    </dt>
+    <dd>
+    Adds an actor to the scheduler.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to add.
+        </li>
+        <li><span class="parameter">time</span>
+            <span class="types"><span class="type">number</span></span>
+         The current time of the actor.
+        </li>
+        <li><span class="parameter">lastAct</span>
+            <span class="types"><span class="type">number</span></span>
+         The time of the actor's last action.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scheduler:addTime"></a>
+    <strong>scheduler:addTime(actor, time)</strong>
+    </dt>
+    <dd>
+    Adds time to an actor's current time in the scheduler.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor whose time to add.
+        </li>
+        <li><span class="parameter">time</span>
+            <span class="types"><span class="type">number</span></span>
+         The amount of time to add.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scheduler:has"></a>
+    <strong>scheduler:has(actor)</strong>
+    </dt>
+    <dd>
+    Checks if an actor is in the scheduler.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        True if the actor is in the scheduler, false otherwise.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scheduler:next"></a>
+    <strong>scheduler:next()</strong>
+    </dt>
+    <dd>
+    Returns the next actor to act.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+        The actor who is next to act.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scheduler:remove"></a>
+    <strong>scheduler:remove(actor)</strong>
+    </dt>
+    <dd>
+    Removes an actor from the scheduler.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to remove.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scheduler:updateTime"></a>
+    <strong>scheduler:updateTime(time)</strong>
+    </dt>
+    <dd>
+    Updates the time for all actors in the scheduler.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">time</span>
+            <span class="types"><span class="type">number</span></span>
+         The amount of time to subtract from each actor's current time.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-05-19 03:56:12 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

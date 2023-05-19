@@ -1,0 +1,514 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>PRISM roguelike engine documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>PRISM</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Methods">Methods</a></li>
+</ul>
+
+
+<h2>Classes</h2>
+<ul class="nowrap">
+  <li><a href="../classes/Action.html">Action</a></li>
+  <li><a href="../classes/Actor.html">Actor</a></li>
+  <li><a href="../classes/Cell.html">Cell</a></li>
+  <li><a href="../classes/Component.html">Component</a></li>
+  <li><strong>Condition</strong></li>
+  <li><a href="../classes/Event.html">Event</a></li>
+  <li><a href="../classes/Reaction.html">Reaction</a></li>
+  <li><a href="../classes/Scheduler.html">Scheduler</a></li>
+  <li><a href="../classes/System.html">System</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/Math.html">Math</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Class <code>Condition</code></h1>
+<p>A <a href="../classes/Condition.html#">Condition</a> is an event handler that is attached to an actor.</p>
+<p> It can listen to events such as an actor taking an action, moving, or a tick of time.
+ This can be used for things like buffs, debuffs, poisons, and other actor-specific mechanics.</p>
+
+
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#condition.afterActions">condition.afterActions</a></td>
+	<td class="summary">A table of events that trigger after an action is taken.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition.onActions">condition.onActions</a></td>
+	<td class="summary">A table of events that trigger when an action is taken.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition.onTicks">condition.onTicks</a></td>
+	<td class="summary">A table of events that trigger when a tick of time passes.</td>
+	</tr>
+</table>
+<h2><a href="#Methods">Methods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#condition:afterAction">condition:afterAction(action, func)</a></td>
+	<td class="summary">Adds an event that triggers after a specific action is performed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition:afterReaction">condition:afterReaction(reaction, func)</a></td>
+	<td class="summary">Adds an event that triggers after a specific reaction is performed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition:onAction">condition:onAction(action, func)</a></td>
+	<td class="summary">Adds an event that triggers when a specific action is performed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition:onActorRemoved">condition:onActorRemoved(level)</a></td>
+	<td class="summary">This function is called when the actor associated with the condition is removed from the level.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition:onApply">condition:onApply()</a></td>
+	<td class="summary">This function is called when the condition is applied.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition:onReaction">condition:onReaction(reaction, func)</a></td>
+	<td class="summary">Adds an event that triggers when a specific reaction is performed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition:onRemove">condition:onRemove()</a></td>
+	<td class="summary">This function is called when the condition is removed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition:onScry">condition:onScry(func)</a></td>
+	<td class="summary">Adds an event that triggers when a scrying is performed in the sight system.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition:onTick">condition:onTick(func)</a></td>
+	<td class="summary">Adds an event that triggers each tick.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition:ownerIsTarget">condition:ownerIsTarget(actor, level, action)</a></td>
+	<td class="summary">Returns whether the owner of the condition is the target of the action.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition:setDuration">condition:setDuration(duration)</a></td>
+	<td class="summary">Sets the duration of the condition and adds a tick event to remove the condition after the duration has passed.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#condition:setTime">condition:setTime(action, func)</a></td>
+	<td class="summary">Adds an event that triggers at a specific time.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "condition.afterActions"></a>
+    <strong>condition.afterActions</strong>
+    </dt>
+    <dd>
+    A table of events that trigger after an action is taken.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition.onActions"></a>
+    <strong>condition.onActions</strong>
+    </dt>
+    <dd>
+    A table of events that trigger when an action is taken.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition.onTicks"></a>
+    <strong>condition.onTicks</strong>
+    </dt>
+    <dd>
+    A table of events that trigger when a tick of time passes.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Methods"></a>Methods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "condition:afterAction"></a>
+    <strong>condition:afterAction(action, func)</strong>
+    </dt>
+    <dd>
+    Adds an event that triggers after a specific action is performed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">action</span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
+         The action that triggers the event.
+        </li>
+        <li><span class="parameter">func</span>
+            <span class="types"><span class="type">function</span></span>
+         The function to be called when the event is fired.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../classes/Event.html#">Event</a></span>
+        The created event.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition:afterReaction"></a>
+    <strong>condition:afterReaction(reaction, func)</strong>
+    </dt>
+    <dd>
+    Adds an event that triggers after a specific reaction is performed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">reaction</span>
+            <span class="types"><a class="type" href="../classes/Reaction.html#">Reaction</a></span>
+         The reaction that triggers the event.
+        </li>
+        <li><span class="parameter">func</span>
+            <span class="types"><span class="type">function</span></span>
+         The function to be called when the event is fired.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../classes/Event.html#">Event</a></span>
+        The created event.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition:onAction"></a>
+    <strong>condition:onAction(action, func)</strong>
+    </dt>
+    <dd>
+    Adds an event that triggers when a specific action is performed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">action</span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
+         The action that triggers the event.
+        </li>
+        <li><span class="parameter">func</span>
+            <span class="types"><span class="type">function</span></span>
+         The function to be called when the event is fired.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../classes/Event.html#">Event</a></span>
+        The created event.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition:onActorRemoved"></a>
+    <strong>condition:onActorRemoved(level)</strong>
+    </dt>
+    <dd>
+    This function is called when the actor associated with the condition is removed from the level.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition:onApply"></a>
+    <strong>condition:onApply()</strong>
+    </dt>
+    <dd>
+    This function is called when the condition is applied.  Can be overridden by child classes.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition:onReaction"></a>
+    <strong>condition:onReaction(reaction, func)</strong>
+    </dt>
+    <dd>
+    Adds an event that triggers when a specific reaction is performed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">reaction</span>
+            <span class="types"><a class="type" href="../classes/Reaction.html#">Reaction</a></span>
+         The reaction that triggers the event.
+        </li>
+        <li><span class="parameter">func</span>
+            <span class="types"><span class="type">function</span></span>
+         The function to be called when the event is fired.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../classes/Event.html#">Event</a></span>
+        The created event.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition:onRemove"></a>
+    <strong>condition:onRemove()</strong>
+    </dt>
+    <dd>
+    This function is called when the condition is removed.  Can be overridden by child classes.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition:onScry"></a>
+    <strong>condition:onScry(func)</strong>
+    </dt>
+    <dd>
+    Adds an event that triggers when a scrying is performed in the sight system.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">func</span>
+            <span class="types"><span class="type">function</span></span>
+         The function to be called when the event is fired.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../classes/Event.html#">Event</a></span>
+        The created event.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition:onTick"></a>
+    <strong>condition:onTick(func)</strong>
+    </dt>
+    <dd>
+    Adds an event that triggers each tick.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">func</span>
+            <span class="types"><span class="type">function</span></span>
+         The function to be called when the event is fired.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../classes/Event.html#">Event</a></span>
+        The created event.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition:ownerIsTarget"></a>
+    <strong>condition:ownerIsTarget(actor, level, action)</strong>
+    </dt>
+    <dd>
+    Returns whether the owner of the condition is the target of the action.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The owner of the condition.
+        </li>
+        <li><span class="parameter">level</span>
+            <span class="types"><span class="type">Level</span></span>
+         The level where the action took place.
+        </li>
+        <li><span class="parameter">action</span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
+         The action to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        Whether the owner of the condition is the target of the action.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition:setDuration"></a>
+    <strong>condition:setDuration(duration)</strong>
+    </dt>
+    <dd>
+    Sets the duration of the condition and adds a tick event to remove the condition after the duration has passed.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">duration</span>
+            <span class="types"><span class="type">number</span></span>
+         The duration of the condition.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "condition:setTime"></a>
+    <strong>condition:setTime(action, func)</strong>
+    </dt>
+    <dd>
+    Adds an event that triggers at a specific time.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">action</span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
+         The action that triggers the event.
+        </li>
+        <li><span class="parameter">func</span>
+            <span class="types"><span class="type">function</span></span>
+         The function to be called when the event is fired.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../classes/Event.html#">Event</a></span>
+        The created event.
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-05-19 03:56:12 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
