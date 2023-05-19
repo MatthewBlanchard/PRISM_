@@ -1,10 +1,10 @@
---- @module Action
+--- A class representing an Action that an actor can take in a game.
+-- An Action consists of an owner, a name, a list of targets, and a list of target actors.
+-- @classmod Action
 
 local Object = require "object"
 
---- A class representing an Action that an actor can take in a game.
--- An Action consists of an owner, a name, a list of targets, and a list of target actors.
--- This class is derived from the Object class.
+
 -- @type Action
 local Action = Object:extend()
 
@@ -12,7 +12,7 @@ local Action = Object:extend()
 Action.time = 100
 
 --- Constructor for the Action class.
--- @tparam actor owner The actor that is performing the action.
+-- @tparam Actor owner The actor that is performing the action.
 -- @tparam[opt] table targets An optional list of target actors. Not all actions require targets.
 function Action:__new(owner, targets)
    self.owner = owner
@@ -39,8 +39,7 @@ end
 
 --- Returns the target actor at the specified index.
 -- @tparam number n The index of the target actor to retrieve.
--- @treturn[1] actor The target actor at the specified index.
--- @return[2] nil If no target actor exists at that index.
+-- @treturn[1] ?Actor The target actor at the specified index.
 function Action:getTarget(n)
    if self.targetActors[n] then return self.targetActors[n] end
 end
@@ -63,7 +62,7 @@ function Action:getTargets() return self.targetActors end
 function Action:getTargetObject(index) return self.targets[index] end
 
 --- Determines if the specified actor is a target of this action.
--- @tparam actor actor The actor to check if they are a target of this action.
+-- @tparam Actor actor The actor to check if they are a target of this action.
 -- @treturn boolean true if the specified actor is a target of this action, false otherwise.
 function Action:hasTarget(actor)
    for _, a in pairs(self.targetActors) do
@@ -73,7 +72,7 @@ end
 
 --- Validates the specified target for this action.
 -- @tparam number n The index of the target object to validate.
--- @tparam actor owner The actor that is performing the action.
+-- @tparam Actor owner The actor that is performing the action.
 -- @tparam table toValidate The target actor to validate.
 -- @treturn boolean true if the specified target actor is valid for this action, false otherwise.
 function Action:validateTarget(n, owner, toValidate)

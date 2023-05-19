@@ -1,5 +1,8 @@
---- The core classes that drive the action of the game.
---- @module Actor
+--- Represents entities in the game, including the player, enemies, and items.
+--- Actors are composed of Components that define their state and behavior.
+--- For example, an actor may have a Sight component that determines their field of vision, explored tiles,
+--- and other related aspects.
+--- @classmod Actor
 
 local Object = require "object"
 local Vector2 = require "math.vector"
@@ -8,10 +11,6 @@ local Component = require "core.component"
 local Action = require "core.action"
 local Reaction = require "core.reaction"
 
---- Represents entities in the game, including the player, enemies, and items.
---- Actors are composed of Components that define their state and behavior.
---- For example, an actor may have a Sight component that determines their field of vision, explored tiles,
---- and other related aspects.
 -- @type Actor
 local Actor = Object:extend()
 

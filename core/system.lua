@@ -1,14 +1,13 @@
--- @module Core
+--- A 'System' is a class representing a level-wide event handler that can be attached to a Level object.
+-- It listens to events such as an actor taking an action, moving, or a tick of time.
+-- This should be used for mechanics that affect the entire level; such as hunger, fov, or lighting.
+-- For event handlers that apply to a single actor, use a Condition instead. If you want a system that
+-- recieves all messages from all levels, like tracking the player's favor with a god attach it to
+-- the game instead.
+-- @classmod System
+
 local Object = require "object"
 
---- A System is a class representing a level-wide event handler that can be attached to a Level object.
---- It listens to events such as an actor taking an action, moving, or a tick of time.
---- This should be used for mechanics that affect the entire level; such as hunger, fov, or lighting.
---- For event handlers that apply to a single actor, use a Condition instead. If you want a system that
---- recieves all messages from all levels, like tracking the player's favor with a god attach it to
---- the game instead.
-
--- @type System
 local System = Object:extend()
 
 --- A system defined global can only be attached to the Game object. It will see all events from all levels.
@@ -54,9 +53,12 @@ function System:beforeAction(level, actor, action) end
 function System:afterAction(level, actor, action) end
 
 function System:beforeMove(level, actor, from, to) end
+
 --- This method is called after an actor has moved.
 -- @tparam Level level The Level object this System is attached to.
 -- @tparam Actor actor The Actor object that has moved.
+-- @tparam Vector2 from The position the Actor moved from.
+-- @tparam Vector2 to The position the Actor moved to.
 function System:onMove(level, actor, from, to) end
 
 --- This method is called after an actor has been added to the Level.

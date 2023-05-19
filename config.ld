@@ -12,4 +12,11 @@ file={
     "./math/vector.lua",
 	"./core/actor.lua",
     "./core/action.lua",
+    "./core/cell.lua",
+    "./core/component.lua",
+    "./core/condition.lua",
+    "./core/event.lua",
+    "./core/reaction.lua",
+    "./core/scheduler.lua",
+    "./core/system.lua"
 }

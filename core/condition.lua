@@ -1,49 +1,21 @@
-local Object = require "object"
-
--- This is a private class that is exclusively instantiated by Condition.
--- It's returned by Condition's"onX" function cycle.
-local Event = Object:extend()
-
-function Event:__new(action, resolutionFunc)
-   self.action = action
-   self.resolve = resolutionFunc
-   self.conditionals = {}
-end
-
-function Event:fire(condition, level, actor, action)
-   return self.resolve(condition, level, actor, action)
-end
-
-function Event:shouldFire(level, action)
-   if not action:is(self.action) then return false end
-
-   if #self.conditionals > 0 then
-      for k, conditional in pairs(self.conditionals) do
-         if not conditional(self.owner.owner, level, action) then return false end
-      end
-
-      return true
-   end
-
-   if not (self.owner.owner == action.owner) then return false end
-
-   return true
-end
-
--- This can be called on the events returned by Condition to add additional and arbitrary
--- requirements. For an example check out wield.lua
-function Event:where(condFunc) table.insert(self.conditionals, condFunc) end
-
--- A condition is an event handler that is attached to an actor.
+--- A `Condition` is an event handler that is attached to an actor.
 -- It can listen to events such as an actor taking an action, moving, or a tick of time.
--- This can be used for things like buffs, debuffs, poisons, and other actor specific mechanics.
--- If you need to handle events more
+-- This can be used for things like buffs, debuffs, poisons, and other actor-specific mechanics.
+-- @classmod Condition
+local Event = require "core.event"
+local Object = require "object"
 
 local Condition = Object:extend()
 
+--- A table of events that trigger when an action is taken.
 Condition.onActions = {}
+
+--- A table of events that trigger after an action is taken.
 Condition.afterActions = {}
+
+--- A table of events that trigger when a tick of time passes.
 Condition.onTicks = {}
+
 Condition.setTimes = {}
 
 function Condition:extend()
@@ -80,11 +52,14 @@ function Condition:extend()
    return self
 end
 
+--- This function is called when the condition is applied. Can be overridden by child classes.
 function Condition:onApply() end
 
+--- This function is called when the condition is removed. Can be overridden by child classes.
 function Condition:onRemove() end
 
--- a helper function to handle condition durations
+--- Sets the duration of the condition and adds a tick event to remove the condition after the duration has passed.
+-- @tparam number duration The duration of the condition.
 function Condition:setDuration(duration)
    self:onTick(function(self, level, actor)
       self.time = (self.time or 0) + 100
@@ -113,6 +88,10 @@ function Condition:getActionEvents(type, level, action)
    return shouldret and e or false
 end
 
+--- Adds an event that triggers when a specific action is performed.
+-- @tparam Action action The action that triggers the event.
+-- @tparam function func The function to be called when the event is fired.
+-- @treturn Event The created event.
 function Condition:onAction(action, func)
    local e = Event(action, func)
 
@@ -120,6 +99,9 @@ function Condition:onAction(action, func)
    return e
 end
 
+--- Adds an event that triggers each tick.
+-- @tparam function func The function to be called when the event is fired.
+-- @treturn Event The created event.
 function Condition:onTick(func)
    local e = Event(nil, func)
 
@@ -127,6 +109,9 @@ function Condition:onTick(func)
    return e
 end
 
+--- Adds an event that triggers when a scrying is performed in the sight system.
+-- @tparam function func The function to be called when the event is fired.
+-- @treturn Event The created event.
 function Condition:onScry(func)
    local e = Event(nil, func)
 
@@ -134,14 +119,26 @@ function Condition:onScry(func)
    return e
 end
 
+--- Adds an event that triggers when a specific reaction is performed.
+-- @tparam Reaction reaction The reaction that triggers the event.
+-- @tparam function func The function to be called when the event is fired.
+-- @treturn Event The created event.
 function Condition:onReaction(reaction, func) self:onAction(reaction, func) end
 
+--- Adds an event that triggers after a specific action is performed.
+-- @tparam Action action The action that triggers the event.
+-- @tparam function func The function to be called when the event is fired.
+-- @treturn Event The created event.
 function Condition:afterAction(action, func)
    local e = Event(action, func)
    table.insert(self.afterActions, e)
    return e
 end
 
+--- Adds an event that triggers at a specific time.
+-- @tparam Action action The action that triggers the event.
+-- @tparam function func The function to be called when the event is fired.
+-- @treturn Event The created event.
 function Condition:setTime(action, func)
    local e = Event(action, func)
 
@@ -149,10 +146,20 @@ function Condition:setTime(action, func)
    return e
 end
 
+--- This function is called when the actor associated with the condition is removed from the level.
 function Condition:onActorRemoved(level) end
 
+--- Adds an event that triggers after a specific reaction is performed.
+-- @tparam Reaction reaction The reaction that triggers the event.
+-- @tparam function func The function to be called when the event is fired.
+-- @treturn Event The created event.
 function Condition:afterReaction(reaction, func) return self:afterAction(reaction, func) end
 
+--- Returns whether the owner of the condition is the target of the action.
+-- @tparam Actor actor The owner of the condition.
+-- @tparam Level level The level where the action took place.
+-- @tparam Action action The action to check.
+-- @treturn boolean Whether the owner of the condition is the target of the action.
 function Condition.ownerIsTarget(actor, level, action) return action:hasTarget(actor) end
 
 return Condition
