@@ -10,9 +10,9 @@ no_space_before_args=true
 not_luadoc=true
 topics = "./build/ldoc/manual.md"
 file={
-    "./math/vector.lua",
-	"./core/actor.lua",
     "./core/action.lua",
+	"./core/actor.lua",
+    "./core/actorstorage.lua",
     "./core/cell.lua",
     "./core/component.lua",
     "./core/condition.lua",
@@ -21,4 +21,5 @@ file={
     "./core/scheduler.lua",
     "./core/system.lua",
     "./core/target.lua",
+    "./math/vector.lua",
 }
