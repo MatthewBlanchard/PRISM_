@@ -1,9 +1,8 @@
---- A small collection of mathematical functions and classes.
---@module Math
+--- A Vector2 represents a 2D vector with x and y components.
+--@classmod Vector2
+
 local Object = require "object"
 
---- A Vector2 represents a 2D vector with x and y components.
---@type Vector2
 local Vector2 = Object:extend()
 
 --- The x component of the vector.
