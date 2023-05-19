@@ -34,13 +34,13 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Class_Actor">Class Actor </a></li>
-<li><a href="#Class_Action">Class Action </a></li>
 </ul>
 
 
 <h2>Modules</h2>
 <ul class="nowrap">
-  <li><strong>Core</strong></li>
+  <li><a href="../modules/Action.html">Action</a></li>
+  <li><strong>Actor</strong></li>
   <li><a href="../modules/Math.html">Math</a></li>
 </ul>
 
@@ -48,7 +48,7 @@
 
 <div id="content">
 
-<h1>Module <code>Core</code></h1>
+<h1>Module <code>Actor</code></h1>
 <p>The core classes that drive the action of the game.</p>
 <p>
 
@@ -58,163 +58,128 @@
 <h2><a href="#Class_Actor">Class Actor </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#Actor.actions">Actor.actions</a></td>
+	<td class="name" nowrap><a href="#actor.actions">actor.actions</a></td>
 	<td class="summary">A collection of the actor's innate actions.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor.article">Actor.article</a></td>
+	<td class="name" nowrap><a href="#actor.article">actor.article</a></td>
 	<td class="summary">The article to use when referring to the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor.char">Actor.char</a></td>
+	<td class="name" nowrap><a href="#actor.char">actor.char</a></td>
 	<td class="summary">Defines the actor's offset in the sprite sheet.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor.color">Actor.color</a></td>
+	<td class="name" nowrap><a href="#actor.color">actor.color</a></td>
 	<td class="summary">Defines the actor's base color.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor.conjugate">Actor.conjugate</a></td>
+	<td class="name" nowrap><a href="#actor.conjugate">actor.conjugate</a></td>
 	<td class="summary">Whether to conjugate verbs when referring to the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor.emissive">Actor.emissive</a></td>
+	<td class="name" nowrap><a href="#actor.emissive">actor.emissive</a></td>
 	<td class="summary">Defines whether the actor's color should be used instead of it's lit color.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor.name">Actor.name</a></td>
+	<td class="name" nowrap><a href="#actor.name">actor.name</a></td>
 	<td class="summary">The name of the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor.position">Actor.position</a></td>
+	<td class="name" nowrap><a href="#actor.position">actor.position</a></td>
 	<td class="summary">The position of the actor on the map.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor.pronoun">Actor.pronoun</a></td>
+	<td class="name" nowrap><a href="#actor.pronoun">actor.pronoun</a></td>
 	<td class="summary">The pronoun to use when referring to the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor.reactions">Actor.reactions</a></td>
+	<td class="name" nowrap><a href="#actor.reactions">actor.reactions</a></td>
 	<td class="summary">A collection of the actor's innate reactions.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor.visible">Actor.visible</a></td>
+	<td class="name" nowrap><a href="#actor.visible">actor.visible</a></td>
 	<td class="summary">Defines whether the actor can be seen.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:__addComponent">Actor:__addComponent(component)</a></td>
+	<td class="name" nowrap><a href="#actor:__addComponent">actor:__addComponent(component)</a></td>
 	<td class="summary">Adds a component to the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:__new">Actor:__new()</a></td>
+	<td class="name" nowrap><a href="#actor:__new">actor:__new()</a></td>
 	<td class="summary">Constructor for an actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:__removeComponent">Actor:__removeComponent(component)</a></td>
+	<td class="name" nowrap><a href="#actor:__removeComponent">actor:__removeComponent(component)</a></td>
 	<td class="summary">Removes a component from the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:addAction">Actor:addAction(action)</a></td>
+	<td class="name" nowrap><a href="#actor:addAction">actor:addAction(action)</a></td>
 	<td class="summary">Add an action to the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:addReaction">Actor:addReaction(reaction)</a></td>
+	<td class="name" nowrap><a href="#actor:addReaction">actor:addReaction(reaction)</a></td>
 	<td class="summary">Adds a reaction to the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:applyCondition">Actor:applyCondition(condition)</a></td>
+	<td class="name" nowrap><a href="#actor:applyCondition">actor:applyCondition(condition)</a></td>
 	<td class="summary">Attaches a condition to the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:getAction">Actor:getAction(prototype)</a></td>
+	<td class="name" nowrap><a href="#actor:getAction">actor:getAction(prototype)</a></td>
 	<td class="summary">Get's an action from the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:getActions">Actor:getActions()</a></td>
+	<td class="name" nowrap><a href="#actor:getActions">actor:getActions()</a></td>
 	<td class="summary">Get a list of actions from the actor and all of its components.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:getConditions">Actor:getConditions()</a></td>
+	<td class="name" nowrap><a href="#actor:getConditions">actor:getConditions()</a></td>
 	<td class="summary">Returns a list of all conditions that the actor has.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:getPosition">Actor:getPosition()</a></td>
+	<td class="name" nowrap><a href="#actor:getPosition">actor:getPosition()</a></td>
 	<td class="summary">Returns the current position of the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:getRange">Actor:getRange(type, actor)</a></td>
+	<td class="name" nowrap><a href="#actor:getRange">actor:getRange(type, actor)</a></td>
 	<td class="summary">Get the range from this actor to another actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:getRangeVec">Actor:getRangeVec(type, vector)</a></td>
+	<td class="name" nowrap><a href="#actor:getRangeVec">actor:getRangeVec(type, vector)</a></td>
 	<td class="summary">Get the range from this actor to a given vector.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:getReaction">Actor:getReaction(reaction)</a></td>
+	<td class="name" nowrap><a href="#actor:getReaction">actor:getReaction(reaction)</a></td>
 	<td class="summary">Gets the first reaction of the given type that the actor has.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:hasComponent">Actor:hasComponent(type)</a></td>
+	<td class="name" nowrap><a href="#actor:hasComponent">actor:hasComponent(type)</a></td>
 	<td class="summary">Returns a bool indicating whether the actor has a component of the given type.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:hasCondition">Actor:hasCondition(condition)</a></td>
+	<td class="name" nowrap><a href="#actor:hasCondition">actor:hasCondition(condition)</a></td>
 	<td class="summary">Checks if the actor has a condition of the given type.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:initialize">Actor:initialize(level)</a></td>
+	<td class="name" nowrap><a href="#actor:initialize">actor:initialize(level)</a></td>
 	<td class="summary">Called after an actor is added to a level and it's components are initialized.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:initializeComponents">Actor:initializeComponents()</a></td>
+	<td class="name" nowrap><a href="#actor:initializeComponents">actor:initializeComponents()</a></td>
 	<td class="summary">Initializes the actor's components.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:isVisible">Actor:isVisible()</a></td>
+	<td class="name" nowrap><a href="#actor:isVisible">actor:isVisible()</a></td>
 	<td class="summary">A utility function that returns a bool if the actor is visible.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:removeAction">Actor:removeAction(action)</a></td>
+	<td class="name" nowrap><a href="#actor:removeAction">actor:removeAction(action)</a></td>
 	<td class="summary">Remove an action from the actor.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Actor:removeCondition">Actor:removeCondition(condition)</a></td>
+	<td class="name" nowrap><a href="#actor:removeCondition">actor:removeCondition(condition)</a></td>
 	<td class="summary">Removes a condition from the actor.</td>
-	</tr>
-</table>
-<h2><a href="#Class_Action">Class Action </a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#Action.time">Action.time</a></td>
-	<td class="summary">The time it takes to perform this action</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#Action:__new">Action:__new(owner[, targets])</a></td>
-	<td class="summary">Constructor for the Action class.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#Action:getNumTargets">Action:getNumTargets()</a></td>
-	<td class="summary">Returns the number of targets associated with this action.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#Action:getTarget">Action:getTarget(n)</a></td>
-	<td class="summary">Returns the target actor at the specified index.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#Action:getTargetObject">Action:getTargetObject(index)</a></td>
-	<td class="summary">Returns the target object at the specified index.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#Action:getTargets">Action:getTargets()</a></td>
-	<td class="summary">Returns a list of target actors associated with this action.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#Action:hasTarget">Action:hasTarget(actor)</a></td>
-	<td class="summary">Determines if the specified actor is a target of this action.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#Action:validateTarget">Action:validateTarget(n, owner, toValidate)</a></td>
-	<td class="summary">Validates the specified target for this action.</td>
 	</tr>
 </table>
 
@@ -232,8 +197,8 @@
           </div>
     <dl class="function">
     <dt>
-    <a name = "Actor.actions"></a>
-    <strong>Actor.actions</strong>
+    <a name = "actor.actions"></a>
+    <strong>actor.actions</strong>
     </dt>
     <dd>
     A collection of the actor's innate actions.  This is used mostly for
@@ -256,8 +221,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor.article"></a>
-    <strong>Actor.article</strong>
+    <a name = "actor.article"></a>
+    <strong>actor.article</strong>
     </dt>
     <dd>
     The article to use when referring to the actor.  Currently non-functional.
@@ -278,8 +243,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor.char"></a>
-    <strong>Actor.char</strong>
+    <a name = "actor.char"></a>
+    <strong>actor.char</strong>
     </dt>
     <dd>
     Defines the actor's offset in the sprite sheet.
@@ -297,8 +262,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor.color"></a>
-    <strong>Actor.color</strong>
+    <a name = "actor.color"></a>
+    <strong>actor.color</strong>
     </dt>
     <dd>
     Defines the actor's base color.
@@ -320,8 +285,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor.conjugate"></a>
-    <strong>Actor.conjugate</strong>
+    <a name = "actor.conjugate"></a>
+    <strong>actor.conjugate</strong>
     </dt>
     <dd>
     Whether to conjugate verbs when referring to the actor.  Currently non-functional.
@@ -342,8 +307,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor.emissive"></a>
-    <strong>Actor.emissive</strong>
+    <a name = "actor.emissive"></a>
+    <strong>actor.emissive</strong>
     </dt>
     <dd>
     Defines whether the actor's color should be used instead of it's lit color.
@@ -364,8 +329,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor.name"></a>
-    <strong>Actor.name</strong>
+    <a name = "actor.name"></a>
+    <strong>actor.name</strong>
     </dt>
     <dd>
     The name of the actor.
@@ -386,8 +351,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor.position"></a>
-    <strong>Actor.position</strong>
+    <a name = "actor.position"></a>
+    <strong>actor.position</strong>
     </dt>
     <dd>
     The position of the actor on the map.
@@ -408,8 +373,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor.pronoun"></a>
-    <strong>Actor.pronoun</strong>
+    <a name = "actor.pronoun"></a>
+    <strong>actor.pronoun</strong>
     </dt>
     <dd>
     The pronoun to use when referring to the actor.  Currently non-functional.
@@ -430,8 +395,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor.reactions"></a>
-    <strong>Actor.reactions</strong>
+    <a name = "actor.reactions"></a>
+    <strong>actor.reactions</strong>
     </dt>
     <dd>
     A collection of the actor's innate reactions.  This is hardly ever used
@@ -453,8 +418,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor.visible"></a>
-    <strong>Actor.visible</strong>
+    <a name = "actor.visible"></a>
+    <strong>actor.visible</strong>
     </dt>
     <dd>
     Defines whether the actor can be seen.
@@ -475,8 +440,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:__addComponent"></a>
-    <strong>Actor:__addComponent(component)</strong>
+    <a name = "actor:__addComponent"></a>
+    <strong>actor:__addComponent(component)</strong>
     </dt>
     <dd>
     Adds a component to the actor.  This function will check if the component's
@@ -497,8 +462,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:__new"></a>
-    <strong>Actor:__new()</strong>
+    <a name = "actor:__new"></a>
+    <strong>actor:__new()</strong>
     </dt>
     <dd>
     Constructor for an actor.
@@ -512,8 +477,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:__removeComponent"></a>
-    <strong>Actor:__removeComponent(component)</strong>
+    <a name = "actor:__removeComponent"></a>
+    <strong>actor:__removeComponent(component)</strong>
     </dt>
     <dd>
     Removes a component from the actor.  This function will throw an error if the
@@ -534,8 +499,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:addAction"></a>
-    <strong>Actor:addAction(action)</strong>
+    <a name = "actor:addAction"></a>
+    <strong>actor:addAction(action)</strong>
     </dt>
     <dd>
     Add an action to the actor.
@@ -545,7 +510,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">action</span>
-            <span class="types"><a class="type" href="../modules/Core.html#Action">Action</a></span>
+            <span class="types"><span class="type">Action</span></span>
          The action to add to the actor.
         </li>
     </ul>
@@ -556,8 +521,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:addReaction"></a>
-    <strong>Actor:addReaction(reaction)</strong>
+    <a name = "actor:addReaction"></a>
+    <strong>actor:addReaction(reaction)</strong>
     </dt>
     <dd>
     Adds a reaction to the actor.
@@ -577,8 +542,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:applyCondition"></a>
-    <strong>Actor:applyCondition(condition)</strong>
+    <a name = "actor:applyCondition"></a>
+    <strong>actor:applyCondition(condition)</strong>
     </dt>
     <dd>
     Attaches a condition to the actor.
@@ -600,8 +565,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:getAction"></a>
-    <strong>Actor:getAction(prototype)</strong>
+    <a name = "actor:getAction"></a>
+    <strong>actor:getAction(prototype)</strong>
     </dt>
     <dd>
     Get's an action from the actor.
@@ -611,7 +576,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">prototype</span>
-            <span class="types"><a class="type" href="../modules/Core.html#Action">Action</a></span>
+            <span class="types"><span class="type">Action</span></span>
          The prototype of the action to get.
         </li>
     </ul>
@@ -622,8 +587,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:getActions"></a>
-    <strong>Actor:getActions()</strong>
+    <a name = "actor:getActions"></a>
+    <strong>actor:getActions()</strong>
     </dt>
     <dd>
     Get a list of actions from the actor and all of its components.
@@ -642,8 +607,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:getConditions"></a>
-    <strong>Actor:getConditions()</strong>
+    <a name = "actor:getConditions"></a>
+    <strong>actor:getConditions()</strong>
     </dt>
     <dd>
     Returns a list of all conditions that the actor has.
@@ -662,8 +627,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:getPosition"></a>
-    <strong>Actor:getPosition()</strong>
+    <a name = "actor:getPosition"></a>
+    <strong>actor:getPosition()</strong>
     </dt>
     <dd>
     Returns the current position of the actor.
@@ -682,8 +647,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:getRange"></a>
-    <strong>Actor:getRange(type, actor)</strong>
+    <a name = "actor:getRange"></a>
+    <strong>actor:getRange(type, actor)</strong>
     </dt>
     <dd>
     Get the range from this actor to another actor.
@@ -696,7 +661,7 @@
          The type of range calculation to use.
         </li>
         <li><span class="parameter">actor</span>
-            <span class="types"><a class="type" href="../modules/Core.html#Actor">Actor</a></span>
+            <span class="types"><a class="type" href="../modules/Actor.html#Actor">Actor</a></span>
          The other actor to get the range to.
         </li>
     </ul>
@@ -713,8 +678,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:getRangeVec"></a>
-    <strong>Actor:getRangeVec(type, vector)</strong>
+    <a name = "actor:getRangeVec"></a>
+    <strong>actor:getRangeVec(type, vector)</strong>
     </dt>
     <dd>
     Get the range from this actor to a given vector.
@@ -744,8 +709,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:getReaction"></a>
-    <strong>Actor:getReaction(reaction)</strong>
+    <a name = "actor:getReaction"></a>
+    <strong>actor:getReaction(reaction)</strong>
     </dt>
     <dd>
     Gets the first reaction of the given type that the actor has.
@@ -765,8 +730,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:hasComponent"></a>
-    <strong>Actor:hasComponent(type)</strong>
+    <a name = "actor:hasComponent"></a>
+    <strong>actor:hasComponent(type)</strong>
     </dt>
     <dd>
     Returns a bool indicating whether the actor has a component of the given type.
@@ -786,8 +751,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:hasCondition"></a>
-    <strong>Actor:hasCondition(condition)</strong>
+    <a name = "actor:hasCondition"></a>
+    <strong>actor:hasCondition(condition)</strong>
     </dt>
     <dd>
     Checks if the actor has a condition of the given type.
@@ -807,8 +772,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:initialize"></a>
-    <strong>Actor:initialize(level)</strong>
+    <a name = "actor:initialize"></a>
+    <strong>actor:initialize(level)</strong>
     </dt>
     <dd>
     Called after an actor is added to a level and it's components are initialized.  This will
@@ -829,8 +794,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:initializeComponents"></a>
-    <strong>Actor:initializeComponents()</strong>
+    <a name = "actor:initializeComponents"></a>
+    <strong>actor:initializeComponents()</strong>
     </dt>
     <dd>
     Initializes the actor's components.  Components shouldn't need a reference to the
@@ -844,8 +809,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:isVisible"></a>
-    <strong>Actor:isVisible()</strong>
+    <a name = "actor:isVisible"></a>
+    <strong>actor:isVisible()</strong>
     </dt>
     <dd>
     A utility function that returns a bool if the actor is visible.
@@ -864,8 +829,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:removeAction"></a>
-    <strong>Actor:removeAction(action)</strong>
+    <a name = "actor:removeAction"></a>
+    <strong>actor:removeAction(action)</strong>
     </dt>
     <dd>
     Remove an action from the actor.
@@ -874,7 +839,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">action</span>
-            <span class="types"><a class="type" href="../modules/Core.html#Action">Action</a></span>
+            <span class="types"><span class="type">Action</span></span>
          The action to remove from the actor.
         </li>
     </ul>
@@ -885,8 +850,8 @@
 
 </dd>
     <dt>
-    <a name = "Actor:removeCondition"></a>
-    <strong>Actor:removeCondition(condition)</strong>
+    <a name = "actor:removeCondition"></a>
+    <strong>actor:removeCondition(condition)</strong>
     </dt>
     <dd>
     Removes a condition from the actor. <br/>
@@ -907,228 +872,13 @@
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="Class_Action"></a>Class Action </h2>
-
-          <div class="section-description">
-          A class representing an Action that an actor can take in a game.
- An Action consists of an owner, a name, a list of targets, and a list of target actors.
- This class is derived from the Object class.
-          </div>
-    <dl class="function">
-    <dt>
-    <a name = "Action.time"></a>
-    <strong>Action.time</strong>
-    </dt>
-    <dd>
-    The time it takes to perform this action
-
-
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "Action:__new"></a>
-    <strong>Action:__new(owner[, targets])</strong>
-    </dt>
-    <dd>
-    Constructor for the Action class.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">owner</span>
-            <span class="types"><span class="type">actor</span></span>
-         The actor that is performing the action.
-        </li>
-        <li><span class="parameter">targets</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         An optional list of target actors. Not all actions require targets.
-         (<em>optional</em>)
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "Action:getNumTargets"></a>
-    <strong>Action:getNumTargets()</strong>
-    </dt>
-    <dd>
-    Returns the number of targets associated with this action.
-
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><span class="type">number</span></span>
-        The number of targets associated with this action.
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "Action:getTarget"></a>
-    <strong>Action:getTarget(n)</strong>
-    </dt>
-    <dd>
-    Returns the target actor at the specified index.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">n</span>
-            <span class="types"><span class="type">number</span></span>
-         The index of the target actor to retrieve.
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><span class="type">actor</span></span>
-        The target actor at the specified index.
-    </ol>
-     <h3>Or</h3>
-    <ol>
-
-        nil If no target actor exists at that index.
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "Action:getTargetObject"></a>
-    <strong>Action:getTargetObject(index)</strong>
-    </dt>
-    <dd>
-    Returns the target object at the specified index.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">index</span>
-            <span class="types"><span class="type">number</span></span>
-         The index of the target object to retrieve.
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-        The target object at the specified index.
-    </ol>
-     <h3>Or</h3>
-    <ol>
-
-        nil If no target object exists at that index.
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "Action:getTargets"></a>
-    <strong>Action:getTargets()</strong>
-    </dt>
-    <dd>
-    Returns a list of target actors associated with this action.
-
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-        A list of target actors associated with this action.
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "Action:hasTarget"></a>
-    <strong>Action:hasTarget(actor)</strong>
-    </dt>
-    <dd>
-    Determines if the specified actor is a target of this action.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">actor</span>
-            <span class="types"><span class="type">actor</span></span>
-         The actor to check if they are a target of this action.
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><span class="type">boolean</span></span>
-        true if the specified actor is a target of this action, false otherwise.
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "Action:validateTarget"></a>
-    <strong>Action:validateTarget(n, owner, toValidate)</strong>
-    </dt>
-    <dd>
-    Validates the specified target for this action.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">n</span>
-            <span class="types"><span class="type">number</span></span>
-         The index of the target object to validate.
-        </li>
-        <li><span class="parameter">owner</span>
-            <span class="types"><span class="type">actor</span></span>
-         The actor that is performing the action.
-        </li>
-        <li><span class="parameter">toValidate</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         The target actor to validate.
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><span class="type">boolean</span></span>
-        true if the specified target actor is valid for this action, false otherwise.
-    </ol>
-
-
-
-
-</dd>
-</dl>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2023-05-19 03:09:55 </i>
+<i style="float:right;">Last updated 2023-05-19 03:14:32 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
