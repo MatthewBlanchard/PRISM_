@@ -8,6 +8,7 @@ sort=true
 merge=true
 no_space_before_args=true
 not_luadoc=true
+topics = "./build/ldoc/manual.md"
 file={
     "./math/vector.lua",
 	"./core/actor.lua",
