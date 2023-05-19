@@ -11,4 +11,5 @@ not_luadoc=true
 file={
     "./math/vector.lua",
 	"./core/actor.lua",
+    "./core/action.lua",
 }

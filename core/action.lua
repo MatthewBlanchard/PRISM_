@@ -1,10 +1,11 @@
 --- A class representing an Action that an actor can take in a game.
 -- An Action consists of an owner, a name, a list of targets, and a list of target actors.
 -- This class is derived from the Object class.
--- @class Action
--- @extends Object
+
 local Object = require "object"
 
+-- @type Action
+-- @extends Object
 local Action = Object:extend()
 
 --- The time it takes to perform this action
