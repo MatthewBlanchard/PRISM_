@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>PRISM roguelike engine documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>PRISM</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Overview">Overview  </a></li>
+<li><a href="#Why_Choose_PRISM_">Why Choose PRISM? </a></li>
+<li><a href="#Getting_Started_with_PRISM">Getting Started with PRISM </a></li>
+</ul>
+
+
+<h2>Topics</h2>
+<ul class="">
+  <li><strong>manual</strong></li>
+</ul>
+<h2>Classes</h2>
+<ul class="nowrap">
+  <li><a href="../classes/Action.html">Action</a></li>
+  <li><a href="../classes/Actor.html">Actor</a></li>
+  <li><a href="../classes/Cell.html">Cell</a></li>
+  <li><a href="../classes/Component.html">Component</a></li>
+  <li><a href="../classes/Condition.html">Condition</a></li>
+  <li><a href="../classes/Event.html">Event</a></li>
+  <li><a href="../classes/Reaction.html">Reaction</a></li>
+  <li><a href="../classes/Scheduler.html">Scheduler</a></li>
+  <li><a href="../classes/System.html">System</a></li>
+  <li><a href="../classes/Vector2.html">Vector2</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+
+<h1>PRISM: A Comprehensive Roguelike Engine</h1>
+
+
+<p><a name="Overview_"></a></p>
+<h2>Overview</h2>
+
+<p>PRISM is a versatile roguelike engine, built on the robust <a href="https://www.lua.org/manual/5.1/">Lua</a> programming language. It offers an open-source, MIT-licensed platform for game development. Although its default interface is based on <a href="love2d.org">Love</a>, PRISM's core remains platform-agnostic, enabling smooth adaptation across any environment that supports Lua.</p>
+
+<p><a name="Why_Choose_PRISM_"></a></p>
+<h2>Why Choose PRISM?</h2>
+
+<h3>Versatile Licensing:</h3>
+
+<p>Existing open-source roguelike engines like the <a href="https://te4.org/">TEngine</a> (the powerhouse behind the acclaimed Tales of Maj’Eyal or ToME) come with GPL licenses, which might not be favorable for all commercial applications. PRISM stands out by providing a stable, feature-rich engine under the more flexible MIT license, appealing to a wider range of projects and use-cases.</p>
+
+<h3>Adaptive Architecture:</h3>
+
+<p>PRISM's architecture promotes modularity, drawing significant inspiration from <a href="https://www.youtube.com/watch?v=JxI3Eu5DPwE">Bob Nystrom's Roguelike Celebration Talk</a>. </p>
+
+<p>In PRISM's game world, <a href="../classes/Actor.html#">Actor</a>s, comprised of <a href="../classes/Component.html#">Component</a>s, serve as dynamic entities. <a href="../classes/Action.html#">Action</a>s drive the gameplay narrative. Actors reside within ???s, the fundamental segments of the game world that also manage the main game loop. At the game's core is a while loop revolving around a scheduler, during which Actor's controller components generate Actions. Upon execution by the Level, these Actions can set off event listeners at both level-wide (<a href="../classes/System.html#">System</a>s) and actor-wide (<a href="../classes/Condition.html#">Condition</a>s) scales. The architecture cleverly blends elements of Entity Component System (ECS) and command pattern paradigms for greater flexibility and control.</p>
+
+<h3>Accessibility:</h3>
+
+<p>PRISM's core, built atop Lua and Love, offers an approachable starting point for developing roguelike games, catering to beginners and experts alike with minimal learning curve. The inclusion of LuaJIT further enhances PRISM's performance, delivering exceptionally swift execution.</p>
+
+<p><a name="Getting_Started_with_PRISM"></a></p>
+<h2>Getting Started with PRISM</h2>
+
+<p>PRISM offers users two primary modules - 'core' and 'extra', which can be seamlessly integrated into their projects. These modules provide a suite of common utilities prevalent in nearly all roguelike games, such as vision, field of view, movement, inventory management, and more. The 'core' module contains essential elements found in nearly all roguelike games, while 'extra' brings additional features like lighting, attacking, and stats management — components that may not be required in all roguelike games or ones that you might want to customize.</p>
+
+<p>In addition to these modules, PRISM also includes a fully functional open-source roguelike game as a real-world application example of the engine. This provides a practical template that you can freely customize, remix, and build upon according to your game development needs.</p>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-05-19 05:18:13 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
