@@ -1,4 +1,4 @@
---- Represents entities in the game, including the player, enemies, and items.
+--- An 'Actor' represents entities in the game, including the player, enemies, and items.
 --- Actors are composed of Components that define their state and behavior.
 --- For example, an actor may have a Sight component that determines their field of vision, explored tiles,
 --- and other related aspects.

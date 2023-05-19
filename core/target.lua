@@ -1,3 +1,6 @@
+--- A 'Target' is a discriminator used to validate the target of an action.
+-- @classmod Target
+
 local Object = require "object"
 local Vector2 = require "math.vector"
 local Actor = require "core.actor"
@@ -8,22 +11,30 @@ local Target = Object:extend()
 Target.range = nil
 targets.Target = Target
 
+-- TOOD: Remove?
 function Target:extend()
    local self = Object.extend(self)
 
    return self
 end
 
+--- Creates a new Target with the specified range.
 function Target:__new(range)
    self.range = range or self.range
    self.canTargetSelf = false
 end
 
+--- Sets the range of the Target.
+-- @tparam number range The range of the Target.
+-- @tparam string enum The type of range. Can be "box" or "circle".
 function Target:setRange(range, enum)
    self.range = range
    self.rtype = enum
 end
 
+--- Validates the target. Each Target subclass must implement this method.
+-- @tparam Actor owner The actor performing the action.
+-- @tparam table toValidate The target to validate.
 function Target:validate(owner, toValidate) end
 
 local ActorTarget = Target:extend()

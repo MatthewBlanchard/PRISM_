@@ -1,4 +1,4 @@
---- A class representing an Action that an actor can take in a game.
+--- An 'Action' is a command that affects a discrete change in the game state.
 -- An Action consists of an owner, a name, a list of targets, and a list of target actors.
 -- @classmod Action
 

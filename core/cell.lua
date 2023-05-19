@@ -1,7 +1,7 @@
---- A cell is a single tile on the map. It defines the properties of the tile and has a few callbacks.
--- Maybe cells should have components so that they can be extended with custom functionality like the grass?
--- Still working on the details there. For now, cells are just a simple way to define the properties of a tile.
--- @classmod Cell
+--- A 'Cell' is a single tile on the map. It defines the properties of the tile and has a few callbacks.
+--- Maybe cells should have components so that they can be extended with custom functionality like the grass?
+--- Still working on the details there. For now, cells are just a simple way to define the properties of a tile.
+--- @classmod Cell
 
 local Object = require "object"
 local Tiles = require "display.tiles"

@@ -1,7 +1,7 @@
 --- The `Component` class represents a component that can be attached to actors.
--- Components are used to add functionality to actors. For instance, the `Moveable` component
--- allows an actor to move around the map.
--- @classmod Component
+--- Components are used to add functionality to actors. For instance, the `Moveable` component
+--- allows an actor to move around the map.
+--- @classmod Component
 
 local Object = require "object"
 

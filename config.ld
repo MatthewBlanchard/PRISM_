@@ -19,5 +19,6 @@ file={
     "./core/event.lua",
     "./core/reaction.lua",
     "./core/scheduler.lua",
-    "./core/system.lua"
+    "./core/system.lua",
+    "./core/target.lua",
 }
