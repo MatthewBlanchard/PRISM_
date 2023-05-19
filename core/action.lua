@@ -1,12 +1,11 @@
---- A class representing an Action that an actor can take in a game.
--- An Action consists of an owner, a name, a list of targets, and a list of target actors.
--- This class is derived from the Object class.
--- @module Core
+--- @module Core
 
 local Object = require "object"
 
+--- A class representing an Action that an actor can take in a game.
+-- An Action consists of an owner, a name, a list of targets, and a list of target actors.
+-- This class is derived from the Object class.
 -- @type Action
--- @extends Object
 local Action = Object:extend()
 
 --- The time it takes to perform this action
@@ -14,7 +13,7 @@ Action.time = 100
 
 --- Constructor for the Action class.
 -- @tparam actor owner The actor that is performing the action.
--- @tparam[opt] table targets An optional list of target objects that the action will affect.
+-- @tparam[opt] table targets An optional list of target actors. Not all actions require targets.
 function Action:__new(owner, targets)
    self.owner = owner
    self.name = self.name or "ERROR"

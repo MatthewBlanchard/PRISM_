@@ -1,5 +1,5 @@
---- Core module
--- @module Core
+--- The core classes that drive the action of the game.
+--- @module Core
 
 local Object = require "object"
 local Vector2 = require "math.vector"
@@ -10,8 +10,8 @@ local Reaction = require "core.reaction"
 
 --- Represents entities in the game, including the player, enemies, and items.
 --- Actors are composed of Components that define their state and behavior.
---- For example, an actor may have a Sight component that determines their field of vision, explored tiles, and other related aspects.
---- The Sight System handles the mechanics of an actor's sight.
+--- For example, an actor may have a Sight component that determines their field of vision, explored tiles,
+--- and other related aspects.
 -- @type Actor
 local Actor = Object:extend()
 
@@ -55,7 +55,7 @@ Actor.emissive = false
 Actor.char = Tiles["player_1"]
 
 --- Whether to conjugate verbs when referring to the actor. Currently non-functional.
--- @tfield conjugate boolean
+-- @tfield boolean conjugate
 Actor.conjugate = true
 
 --- The pronoun to use when referring to the actor. Currently non-functional.

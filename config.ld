@@ -2,7 +2,7 @@
 project="PRISM"
 title="PRISM roguelike engine documentation"
 format="markdown"
-style="!fixed"
+style="./build/ldoc"
 dir="./docs"
 sort=true
 merge=true
