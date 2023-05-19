@@ -1,5 +1,5 @@
 --- The core classes that drive the action of the game.
---- @module Core
+--- @module Actor
 
 local Object = require "object"
 local Vector2 = require "math.vector"

@@ -1,4 +1,4 @@
---- @module Core
+--- @module Action
 
 local Object = require "object"
 
