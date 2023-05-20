@@ -33,7 +33,7 @@
 
 <h2>Contents</h2>
 <ul>
-<li><a href="#Tables">Tables</a></li>
+<li><a href="#Metamethods">Metamethods</a></li>
 <li><a href="#Methods">Methods</a></li>
 </ul>
 
@@ -44,7 +44,7 @@
   <li><a href="../classes/Actor.html">Actor</a></li>
   <li><a href="../classes/ActorStorage.html">ActorStorage</a></li>
   <li><a href="../classes/Cell.html">Cell</a></li>
-  <li><strong>Component</strong></li>
+  <li><a href="../classes/Component.html">Component</a></li>
   <li><a href="../classes/Condition.html">Condition</a></li>
   <li><a href="../classes/Event.html">Event</a></li>
   <li><a href="../classes/Level.html">Level</a></li>
@@ -52,7 +52,7 @@
   <li><a href="../classes/Reaction.html">Reaction</a></li>
   <li><a href="../classes/Scheduler.html">Scheduler</a></li>
   <li><a href="../classes/System.html">System</a></li>
-  <li><a href="../classes/Target.html">Target</a></li>
+  <li><strong>Target</strong></li>
   <li><a href="../classes/Vector2.html">Vector2</a></li>
 </ul>
 <h2>Topics</h2>
@@ -64,28 +64,29 @@
 
 <div id="content">
 
-<h1>Class <code>Component</code></h1>
-<p>The <a href="../classes/Component.html#">Component</a> class represents a component that can be attached to actors.</p>
-<p> Components are used to add functionality to actors. For instance, the <code>Moveable</code> component
- allows an actor to move around the map.</p>
+<h1>Class <code>Target</code></h1>
+<p>A 'Target' is a discriminator used to validate the target of an action.</p>
+<p>
+
+</p>
 
 
-<h2><a href="#Tables">Tables</a></h2>
+<h2><a href="#Metamethods">Metamethods</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#component.requirements">component.requirements</a></td>
-	<td class="summary">A table of requirements that must be met for this component to function.</td>
+	<td class="name" nowrap><a href="#target:__new">target:__new(range)</a></td>
+	<td class="summary">Creates a new Target with the specified range.</td>
 	</tr>
 </table>
 <h2><a href="#Methods">Methods</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#component:checkRequirements">component:checkRequirements(actor)</a></td>
-	<td class="summary">Checks whether an actor has the required components to attach this component.</td>
+	<td class="name" nowrap><a href="#target:setRange">target:setRange(range, enum)</a></td>
+	<td class="summary">Sets the range of the Target.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#component:initialize">component:initialize()</a></td>
-	<td class="summary">Initializes a new instance of the Component class.</td>
+	<td class="name" nowrap><a href="#target:validate">target:validate(owner, toValidate)</a></td>
+	<td class="summary">Validates the target.</td>
 	</tr>
 </table>
 
@@ -93,21 +94,20 @@
 <br/>
 
 
-    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+    <h2 class="section-header "><a name="Metamethods"></a>Metamethods</h2>
 
     <dl class="function">
     <dt>
-    <a name = "component.requirements"></a>
-    <strong>component.requirements</strong>
+    <a name = "target:__new"></a>
+    <strong>target:__new(range)</strong>
     </dt>
     <dd>
-    A table of requirements that must be met for this component to function.
+    Creates a new Target with the specified range.
 
 
-    <h3>Fields:</h3>
+    <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">requirements</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        <li><span class="parameter">range</span>
 
 
 
@@ -124,40 +124,49 @@
 
     <dl class="function">
     <dt>
-    <a name = "component:checkRequirements"></a>
-    <strong>component:checkRequirements(actor)</strong>
+    <a name = "target:setRange"></a>
+    <strong>target:setRange(range, enum)</strong>
     </dt>
     <dd>
-    Checks whether an actor has the required components to attach this component.
+    Sets the range of the Target.
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">actor</span>
-            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
-         The actor to check the requirements against.
+        <li><span class="parameter">range</span>
+            <span class="types"><span class="type">number</span></span>
+         The range of the Target.
+        </li>
+        <li><span class="parameter">enum</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The type of range. Can be "box" or "circle".
         </li>
     </ul>
 
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><span class="type">boolean</span></span>
-        true if the actor meets all requirements, false otherwise.
-    </ol>
 
 
 
 
 </dd>
     <dt>
-    <a name = "component:initialize"></a>
-    <strong>component:initialize()</strong>
+    <a name = "target:validate"></a>
+    <strong>target:validate(owner, toValidate)</strong>
     </dt>
     <dd>
-    Initializes a new instance of the Component class.
+    Validates the target.  Each Target subclass must implement this method.
 
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">owner</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor performing the action.
+        </li>
+        <li><span class="parameter">toValidate</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         The target to validate.
+        </li>
+    </ul>
 
 
 

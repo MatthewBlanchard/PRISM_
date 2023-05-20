@@ -1,0 +1,1124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>PRISM roguelike engine documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>PRISM</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Metamethods">Metamethods</a></li>
+<li><a href="#Methods">Methods</a></li>
+</ul>
+
+
+<h2>Classes</h2>
+<ul class="nowrap">
+  <li><a href="../classes/Action.html">Action</a></li>
+  <li><a href="../classes/Actor.html">Actor</a></li>
+  <li><a href="../classes/ActorStorage.html">ActorStorage</a></li>
+  <li><a href="../classes/Cell.html">Cell</a></li>
+  <li><a href="../classes/Component.html">Component</a></li>
+  <li><a href="../classes/Condition.html">Condition</a></li>
+  <li><a href="../classes/Event.html">Event</a></li>
+  <li><strong>Level</strong></li>
+  <li><a href="../classes/Object.html">Object</a></li>
+  <li><a href="../classes/Reaction.html">Reaction</a></li>
+  <li><a href="../classes/Scheduler.html">Scheduler</a></li>
+  <li><a href="../classes/System.html">System</a></li>
+  <li><a href="../classes/Target.html">Target</a></li>
+  <li><a href="../classes/Vector2.html">Vector2</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/manual.md.html">manual</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Class <code>Level</code></h1>
+<p>The 'Level' holds all of the actors and systems, and runs the game loop.</p>
+<p>
+
+</p>
+
+
+<h2><a href="#Metamethods">Metamethods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#level:__new">level:__new(map, populater)</a></td>
+	<td class="summary">Constructor for the Level class.</td>
+	</tr>
+</table>
+<h2><a href="#Methods">Methods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#level:addActor">level:addActor(actor)</a></td>
+	<td class="summary">Adds an actor to the level.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:addComponent">level:addComponent(actor, component)</a></td>
+	<td class="summary">A utility function that adds a component to an actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:addSystem">level:addSystem(system)</a></td>
+	<td class="summary">Attaches a system to the level.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:eachActor">level:eachActor(...)</a></td>
+	<td class="summary">This method returns an iterator that will return all actors in the level
+ that have the given components.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:eachActorAt">level:eachActorAt(x, y)</a></td>
+	<td class="summary">Returns an iterator that will return all actors at the given position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:eachActorTile">level:eachActorTile(actor)</a></td>
+	<td class="summary">Returns an iterator that will return all tiles that the given actor occupies.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:getAOE">level:getAOE(type, position, range)</a></td>
+	<td class="summary">Returns a list of all actors that are within the given range of the given
+ position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:getActorByType">level:getActorByType(prototype)</a></td>
+	<td class="summary">Returns the first actor that extends the given prototype, or nil if no actor
+ is found.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:getActorController">level:getActorController(actor)</a></td>
+	<td class="summary">Gets the actor's controller.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:getActorsAt">level:getActorsAt(x, y)</a></td>
+	<td class="summary">Returns a list of all actors at the given position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:getCell">level:getCell(x, y)</a></td>
+	<td class="summary">Gets the cell at the given position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:getCellOpaque">level:getCellOpaque(x, y)</a></td>
+	<td class="summary">Returns true if the cell at the given position is opaque, false otherwise.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:getCellPassable">level:getCellPassable(x, y, actor)</a></td>
+	<td class="summary">Returns true if the cell at the given position is passable, false otherwise.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:getCellPassableNoActors">level:getCellPassableNoActors(x, y)</a></td>
+	<td class="summary">Returns true if the cell at the given position is passable, false otherwise.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:getOpacityCache">level:getOpacityCache()</a></td>
+	<td class="summary">Returns the opacity cache for the level.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:getSystem">level:getSystem(system_name)</a></td>
+	<td class="summary">Gets a system by name.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:hasActor">level:hasActor(actor)</a></td>
+	<td class="summary">Returns true if the level contains the given actor, false otherwise.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:hasActorWithComponent">level:hasActorWithComponent(component)</a></td>
+	<td class="summary">Returns true if the level contains an actor with the given component, false otherwise.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:initializeOpacityCache">level:initializeOpacityCache()</a></td>
+	<td class="summary">Initialize the opacity cache.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:insertSparseMapEntries">level:insertSparseMapEntries(actor)</a></td>
+	<td class="summary">This function inserts the actor's entries into the sparse map and opacity cache.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:moveActor">level:moveActor(actor, pos, skipSparseMap)</a></td>
+	<td class="summary">Moves an actor to the given position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:moveActorChecked">level:moveActorChecked(actor, direction)</a></td>
+	<td class="summary">This function does and handles moving multi-tile actors.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:performAction">level:performAction(action, free)</a></td>
+	<td class="summary">Executes an Action, updating the level's state and triggering any events on 'Conditions' or 'Systems'
+ attached to the 'Actor' or 'Level' respectively.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:removeActor">level:removeActor(actor)</a></td>
+	<td class="summary">Removes an actor from the level.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:removeComponent">level:removeComponent(actor, component)</a></td>
+	<td class="summary">A utility function that removes a component from an actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:removeComponentCache">level:removeComponentCache(actor)</a></td>
+	<td class="summary">This function removes an actor from the component cache.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:removeSparseMapEntries">level:removeSparseMapEntries(actor)</a></td>
+	<td class="summary">This function removes the actor's entries from the sparse map and opacity cache.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:run">level:run()</a></td>
+	<td class="summary">Update is the main game loop for a level.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:setCell">level:setCell(x, y, cell)</a></td>
+	<td class="summary">Sets the cell at the given position to the given cell.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:triggerActionEvents">level:triggerActionEvents(onType, action)</a></td>
+	<td class="summary">This function triggers events on 'Conditions' and 'Systems' attached to the 'Actor' or 'Level' respectively.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:updateComponentCache">level:updateComponentCache(actor)</a></td>
+	<td class="summary">This function updates the component cache for the level.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:updateOpacityCache">level:updateOpacityCache(x, y)</a></td>
+	<td class="summary">Updates the opacity cache at the given position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#level:yield">level:yield(...)</a></td>
+	<td class="summary">Yields to the main thread.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Metamethods"></a>Metamethods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "level:__new"></a>
+    <strong>level:__new(map, populater)</strong>
+    </dt>
+    <dd>
+    Constructor for the Level class.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">map</span>
+            <span class="types"><span class="type">rotLove.Map</span></span>
+         The rotLove map to use for the level.
+        </li>
+        <li><span class="parameter">populater</span>
+            <span class="types"><span class="type">function</span></span>
+         A function that takes a level and a map and populates the level with actors.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Methods"></a>Methods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "level:addActor"></a>
+    <strong>level:addActor(actor)</strong>
+    </dt>
+    <dd>
+    Adds an actor to the level.  Handles updating the component cache and
+ inserting the actor into the sparse map. It will also add the actor to the
+ scheduler if it has a controller.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to add.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:addComponent"></a>
+    <strong>level:addComponent(actor, component)</strong>
+    </dt>
+    <dd>
+    A utility function that adds a component to an actor.  It handles updating
+ the component cache and the opacity cache. You can do this manually, but
+ it's easier to use this function.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to add the component to.
+        </li>
+        <li><span class="parameter">component</span>
+            <span class="types"><a class="type" href="../classes/Component.html#">Component</a></span>
+         The component to add.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:addSystem"></a>
+    <strong>level:addSystem(system)</strong>
+    </dt>
+    <dd>
+    Attaches a system to the level.  This function will error if the system
+ doesn't have a name or if a system with the same name already exists, or if
+ the system has a requirement that hasn't been attached yet.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">system</span>
+            <span class="types"><a class="type" href="../classes/System.html#">System</a></span>
+         The system to add.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:eachActor"></a>
+    <strong>level:eachActor(...)</strong>
+    </dt>
+    <dd>
+    This method returns an iterator that will return all actors in the level
+ that have the given components.  If no components are given it will return
+ all actors in the level.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+            <span class="types"><a class="type" href="../classes/Component.html#">Component</a></span>
+         The components to filter by.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">function</span></span>
+        An iterator that returns the next actor that matches the given components.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:eachActorAt"></a>
+    <strong>level:eachActorAt(x, y)</strong>
+    </dt>
+    <dd>
+    Returns an iterator that will return all actors at the given position.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x component of the position to check.
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y component of the position to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">function</span></span>
+        An iterator that returns the next actor at the given position.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:eachActorTile"></a>
+    <strong>level:eachActorTile(actor)</strong>
+    </dt>
+    <dd>
+    Returns an iterator that will return all tiles that the given actor occupies.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to get the tiles for.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">function</span></span>
+        An iterator that returns the next tile that the actor occupies.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:getAOE"></a>
+    <strong>level:getAOE(type, position, range)</strong>
+    </dt>
+    <dd>
+    Returns a list of all actors that are within the given range of the given
+ position.  The type parameter determines the type of range to use. Currently
+ only "fov" and "box" are supported. The fov type uses a field of view
+ algorithm to determine what actors are visible from the given position. The
+ box type uses a simple box around the given position.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">type</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The type of range to use.
+        </li>
+        <li><span class="parameter">position</span>
+            <span class="types"><a class="type" href="../classes/Vector2.html#">Vector2</a></span>
+         The position to check from.
+        </li>
+        <li><span class="parameter">range</span>
+            <span class="types"><span class="type">number</span></span>
+         The range to check.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:getActorByType"></a>
+    <strong>level:getActorByType(prototype)</strong>
+    </dt>
+    <dd>
+    Returns the first actor that extends the given prototype, or nil if no actor
+ is found.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">prototype</span>
+            <span class="types"><span class="type">Prototype</span></span>
+         The prototype to check for.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:getActorController"></a>
+    <strong>level:getActorController(actor)</strong>
+    </dt>
+    <dd>
+    Gets the actor's controller.  This is a utility function that checks the
+ actor's conditions for an override controller and returns it if it exists.
+ Otherwise it returns the actor's normal controller.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to get the controller for.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">Controller</span></span>
+        The actor's controller.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:getActorsAt"></a>
+    <strong>level:getActorsAt(x, y)</strong>
+    </dt>
+    <dd>
+    Returns a list of all actors at the given position.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x component of the position to check.
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y component of the position to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        A list of all actors at the given position.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:getCell"></a>
+    <strong>level:getCell(x, y)</strong>
+    </dt>
+    <dd>
+    Gets the cell at the given position.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x component of the position to get.
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y component of the position to get.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../classes/Cell.html#">Cell</a></span>
+        The cell at the given position.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:getCellOpaque"></a>
+    <strong>level:getCellOpaque(x, y)</strong>
+    </dt>
+    <dd>
+    Returns true if the cell at the given position is opaque, false otherwise.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x component of the position to check.
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y component of the position to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        True if the cell is opaque, false otherwise.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:getCellPassable"></a>
+    <strong>level:getCellPassable(x, y, actor)</strong>
+    </dt>
+    <dd>
+    Returns true if the cell at the given position is passable, false otherwise.  Considers
+ actors in the sparse map as well as the cell's passable property.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x component of the position to check.
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y component of the position to check.
+        </li>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to ignore when checking the sparse map.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:getCellPassableNoActors"></a>
+    <strong>level:getCellPassableNoActors(x, y)</strong>
+    </dt>
+    <dd>
+    Returns true if the cell at the given position is passable, false otherwise.
+ Considers only the cell's passable property.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x component of the position to check.
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y component of the position to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        True if the cell is passable, false otherwise.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:getOpacityCache"></a>
+    <strong>level:getOpacityCache()</strong>
+    </dt>
+    <dd>
+    Returns the opacity cache for the level.  This generally shouldn't be used
+ outside of systems that need to know about opacity.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">DenseMap</span></span>
+        The opacity cache for the level.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:getSystem"></a>
+    <strong>level:getSystem(system_name)</strong>
+    </dt>
+    <dd>
+    Gets a system by name.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">system_name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The name of the system to get.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../classes/System.html#">System</a></span>
+        The system with the given name.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:hasActor"></a>
+    <strong>level:hasActor(actor)</strong>
+    </dt>
+    <dd>
+    Returns true if the level contains the given actor, false otherwise.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to check for.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:hasActorWithComponent"></a>
+    <strong>level:hasActorWithComponent(component)</strong>
+    </dt>
+    <dd>
+    Returns true if the level contains an actor with the given component, false otherwise.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">component</span>
+            <span class="types"><a class="type" href="../classes/Component.html#">Component</a></span>
+         The component to check for.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:initializeOpacityCache"></a>
+    <strong>level:initializeOpacityCache()</strong>
+    </dt>
+    <dd>
+    Initialize the opacity cache.  This should be called after the level is
+ created and before the game loop starts. It will initialize the opacity
+ cache with the cell opacity cache. This is handled automatically by the
+ Level class.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:insertSparseMapEntries"></a>
+    <strong>level:insertSparseMapEntries(actor)</strong>
+    </dt>
+    <dd>
+    This function inserts the actor's entries into the sparse map and opacity cache.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to insert.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:moveActor"></a>
+    <strong>level:moveActor(actor, pos, skipSparseMap)</strong>
+    </dt>
+    <dd>
+    Moves an actor to the given position.  This function doesn't do any checking
+ for overlaps or collisions. It's used by the moveActorChecked function.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to move.
+        </li>
+        <li><span class="parameter">pos</span>
+            <span class="types"><a class="type" href="../classes/Vector2.html#">Vector2</a></span>
+         The position to move the actor to.
+        </li>
+        <li><span class="parameter">skipSparseMap</span>
+            <span class="types"><span class="type">boolean</span></span>
+         If true the sparse map won't be updated.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:moveActorChecked"></a>
+    <strong>level:moveActorChecked(actor, direction)</strong>
+    </dt>
+    <dd>
+    This function does and handles moving multi-tile actors.  Soon
+ I want to make this the default moveActor function and have
+ moveActorUnchecked be a special case.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to move.
+        </li>
+        <li><span class="parameter">direction</span>
+            <span class="types"><a class="type" href="../classes/Vector2.html#">Vector2</a></span>
+         The direction to move the actor in.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:performAction"></a>
+    <strong>level:performAction(action, free)</strong>
+    </dt>
+    <dd>
+    Executes an Action, updating the level's state and triggering any events on 'Conditions' or 'Systems'
+ attached to the 'Actor' or 'Level' respectively.  It also updates the 'Scheduler' if the action isn't
+ a reaction or free action. Lastly, it calls the 'onAction' method on the 'Cell' that the 'Actor' is
+ standing on.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">action</span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
+         The action to perform.
+        </li>
+        <li><span class="parameter">free</span>
+            <span class="types"><span class="type">boolean</span></span>
+         If true the action is a free action and won't update the scheduler.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:removeActor"></a>
+    <strong>level:removeActor(actor)</strong>
+    </dt>
+    <dd>
+    Removes an actor from the level.  Handles updating the component cache and
+ removing the actor from the sparse map. It will also remove the actor from
+ the scheduler if it has a controller.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to remove.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:removeComponent"></a>
+    <strong>level:removeComponent(actor, component)</strong>
+    </dt>
+    <dd>
+    A utility function that removes a component from an actor.  It handles
+ updating the component cache and the opacity cache. You can do this manually, but
+ it's easier to use this function.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to remove the component from.
+        </li>
+        <li><span class="parameter">component</span>
+            <span class="types"><a class="type" href="../classes/Component.html#">Component</a></span>
+         The component to remove.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:removeComponentCache"></a>
+    <strong>level:removeComponentCache(actor)</strong>
+    </dt>
+    <dd>
+    This function removes an actor from the component cache.  It's called be the
+ removeActor function.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to remove from the component cache.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:removeSparseMapEntries"></a>
+    <strong>level:removeSparseMapEntries(actor)</strong>
+    </dt>
+    <dd>
+    This function removes the actor's entries from the sparse map and opacity cache.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to remove.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:run"></a>
+    <strong>level:run()</strong>
+    </dt>
+    <dd>
+    Update is the main game loop for a level.  It's a coroutine that yields
+ back to the main thread when it needs to wait for input from the player.
+ This function is the heart of the game loop.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        "descend" if the player has descended to the next level.</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+        "quit" if the player has quit the game.</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:setCell"></a>
+    <strong>level:setCell(x, y, cell)</strong>
+    </dt>
+    <dd>
+    Sets the cell at the given position to the given cell.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x component of the position to set.
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y component of the position to set.
+        </li>
+        <li><span class="parameter">cell</span>
+            <span class="types"><a class="type" href="../classes/Cell.html#">Cell</a></span>
+         The cell to set.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:triggerActionEvents"></a>
+    <strong>level:triggerActionEvents(onType, action)</strong>
+    </dt>
+    <dd>
+    This function triggers events on 'Conditions' and 'Systems' attached to the 'Actor' or 'Level' respectively.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">onType</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The type of event to trigger.
+        </li>
+        <li><span class="parameter">action</span>
+            <span class="types"><a class="type" href="../classes/Action.html#">Action</a></span>
+         The action to trigger the event with.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:updateComponentCache"></a>
+    <strong>level:updateComponentCache(actor)</strong>
+    </dt>
+    <dd>
+    This function updates the component cache for the level.  It should be called
+ whenever an actor's components change. It's called by the addActor and addComponent
+ functions.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to update the component cache for.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:updateOpacityCache"></a>
+    <strong>level:updateOpacityCache(x, y)</strong>
+    </dt>
+    <dd>
+    Updates the opacity cache at the given position.  This should be called
+ whenever an actor moves or a cell's opacity changes. This is handled
+ automatically by the Level class.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x component of the position to update.
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y component of the position to update.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "level:yield"></a>
+    <strong>level:yield(...)</strong>
+    </dt>
+    <dd>
+    Yields to the main thread.  This is called in run, and a few systems. Any time you want
+ the interface to update you should call this. Avoid calling coroutine.yield directly,
+ as this function will call the onYield method on all systems.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+         Any arguments to pass to the main thread. This will be replaced with the message class in the future.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-05-20 20:36:56 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>PRISM roguelike engine documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>PRISM</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Metamethods">Metamethods</a></li>
+<li><a href="#Methods">Methods</a></li>
+</ul>
+
+
+<h2>Classes</h2>
+<ul class="nowrap">
+  <li><a href="../classes/Action.html">Action</a></li>
+  <li><a href="../classes/Actor.html">Actor</a></li>
+  <li><strong>ActorStorage</strong></li>
+  <li><a href="../classes/Cell.html">Cell</a></li>
+  <li><a href="../classes/Component.html">Component</a></li>
+  <li><a href="../classes/Condition.html">Condition</a></li>
+  <li><a href="../classes/Event.html">Event</a></li>
+  <li><a href="../classes/Level.html">Level</a></li>
+  <li><a href="../classes/Object.html">Object</a></li>
+  <li><a href="../classes/Reaction.html">Reaction</a></li>
+  <li><a href="../classes/Scheduler.html">Scheduler</a></li>
+  <li><a href="../classes/System.html">System</a></li>
+  <li><a href="../classes/Target.html">Target</a></li>
+  <li><a href="../classes/Vector2.html">Vector2</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/manual.md.html">manual</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Class <code>ActorStorage</code></h1>
+<p>The 'ActorStorage' is a container for 'Actors' that maintains a list, spatial map, and component cache.</p>
+<p> It is used by the 'Level' class to store and retrieve actors, and is returned by a few Level methods.
+ You should rarely, if ever, need to use this class directly. It is returned by methods like Level:getAOE()
+ and Level:getActorsAt().
+ It is currently unused.</p>
+
+
+<h2><a href="#Metamethods">Metamethods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:__new">actorstorage:__new()</a></td>
+	<td class="summary">The constructor for the 'ActorStorage' class.</td>
+	</tr>
+</table>
+<h2><a href="#Methods">Methods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:addActor">actorstorage:addActor(actor)</a></td>
+	<td class="summary">Adds an actor to the storage, updating the spatial map and component cache.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:eachActor">actorstorage:eachActor([...])</a></td>
+	<td class="summary">Returns an iterator over the actors in the storage.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:eachActorAt">actorstorage:eachActorAt(x, y)</a></td>
+	<td class="summary">Returns an iterator over the actors in the storage at the given position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:eachActorTile">actorstorage:eachActorTile(actor)</a></td>
+	<td class="summary">Returns an iterator over the tiles occupied by the specified actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:getActorByType">actorstorage:getActorByType(prototype)</a></td>
+	<td class="summary">Returns an iterator over the actors in the storage that have the specified prototype.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:getActorsAt">actorstorage:getActorsAt(x, y)</a></td>
+	<td class="summary">Returns a table of actors in the storage at the given position.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:hasActor">actorstorage:hasActor(actor)</a></td>
+	<td class="summary">Returns whether the storage contains the specified actor.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:hasActorWithComponent">actorstorage:hasActorWithComponent(component)</a></td>
+	<td class="summary">Returns whether the storage contains an actor with the specified component.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:insertSparseMapEntries">actorstorage:insertSparseMapEntries(actor)</a></td>
+	<td class="summary">Inserts the specified actor into the spatial map.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:removeActor">actorstorage:removeActor(actor)</a></td>
+	<td class="summary">Removes an actor from the storage, updating the spatial map and component cache.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:removeComponentCache">actorstorage:removeComponentCache(actor)</a></td>
+	<td class="summary">Removes the specified actor from the component cache.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:removeSparseMapEntries">actorstorage:removeSparseMapEntries(actor)</a></td>
+	<td class="summary">Removes the specified actor from the spatial map.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#actorstorage:updateComponentCache">actorstorage:updateComponentCache(actor)</a></td>
+	<td class="summary">Updates the opacity cache for the specified actor.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Metamethods"></a>Metamethods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "actorstorage:__new"></a>
+    <strong>actorstorage:__new()</strong>
+    </dt>
+    <dd>
+    The constructor for the 'ActorStorage' class.
+ Initializes the list, spatial map, and component cache.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Methods"></a>Methods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "actorstorage:addActor"></a>
+    <strong>actorstorage:addActor(actor)</strong>
+    </dt>
+    <dd>
+    Adds an actor to the storage, updating the spatial map and component cache.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to add.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:eachActor"></a>
+    <strong>actorstorage:eachActor([...])</strong>
+    </dt>
+    <dd>
+    Returns an iterator over the actors in the storage.  If a component is specified, only actors with that
+ component will be returned.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+            <span class="types"><a class="type" href="../classes/Component.html#">Component</a></span>
+         The components to filter by.
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">function</span></span>
+        An iterator over the actors in the storage.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:eachActorAt"></a>
+    <strong>actorstorage:eachActorAt(x, y)</strong>
+    </dt>
+    <dd>
+    Returns an iterator over the actors in the storage at the given position.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x-coordinate to check.
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y-coordinate to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">function</span></span>
+        An iterator over the actors at the given position.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:eachActorTile"></a>
+    <strong>actorstorage:eachActorTile(actor)</strong>
+    </dt>
+    <dd>
+    Returns an iterator over the tiles occupied by the specified actor.  This is a convenience method.
+ You can also use the actor's 'Collideable' component directly.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to iterate over.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">function</span></span>
+        An iterator over the tiles occupied by the actor.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:getActorByType"></a>
+    <strong>actorstorage:getActorByType(prototype)</strong>
+    </dt>
+    <dd>
+    Returns an iterator over the actors in the storage that have the specified prototype.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">prototype</span>
+            <span class="types"><span class="type">Prototype</span></span>
+         The prototype to filter by.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">function</span></span>
+        An iterator over the actors in the storage.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:getActorsAt"></a>
+    <strong>actorstorage:getActorsAt(x, y)</strong>
+    </dt>
+    <dd>
+    Returns a table of actors in the storage at the given position.
+ TODO: Return an ActorStorage object instead of a table.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         The x-coordinate to check.
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         The y-coordinate to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        A table of actors at the given position.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:hasActor"></a>
+    <strong>actorstorage:hasActor(actor)</strong>
+    </dt>
+    <dd>
+    Returns whether the storage contains the specified actor.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        True if the storage contains the actor, false otherwise.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:hasActorWithComponent"></a>
+    <strong>actorstorage:hasActorWithComponent(component)</strong>
+    </dt>
+    <dd>
+    Returns whether the storage contains an actor with the specified component.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">component</span>
+            <span class="types"><a class="type" href="../classes/Component.html#">Component</a></span>
+         The component to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        True if the storage contains an actor with the component, false otherwise.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:insertSparseMapEntries"></a>
+    <strong>actorstorage:insertSparseMapEntries(actor)</strong>
+    </dt>
+    <dd>
+    Inserts the specified actor into the spatial map.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to insert.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:removeActor"></a>
+    <strong>actorstorage:removeActor(actor)</strong>
+    </dt>
+    <dd>
+    Removes an actor from the storage, updating the spatial map and component cache.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to remove.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:removeComponentCache"></a>
+    <strong>actorstorage:removeComponentCache(actor)</strong>
+    </dt>
+    <dd>
+    Removes the specified actor from the component cache.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to remove from the component cache.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:removeSparseMapEntries"></a>
+    <strong>actorstorage:removeSparseMapEntries(actor)</strong>
+    </dt>
+    <dd>
+    Removes the specified actor from the spatial map.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to remove.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "actorstorage:updateComponentCache"></a>
+    <strong>actorstorage:updateComponentCache(actor)</strong>
+    </dt>
+    <dd>
+    Updates the opacity cache for the specified actor.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">actor</span>
+            <span class="types"><a class="type" href="../classes/Actor.html#">Actor</a></span>
+         The actor to update the opacity cache for.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-05-20 20:36:56 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

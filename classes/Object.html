@@ -1,0 +1,237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>PRISM roguelike engine documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>PRISM</h1>
+
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Metamethods">Metamethods</a></li>
+<li><a href="#Methods">Methods</a></li>
+</ul>
+
+
+<h2>Classes</h2>
+<ul class="nowrap">
+  <li><a href="../classes/Action.html">Action</a></li>
+  <li><a href="../classes/Actor.html">Actor</a></li>
+  <li><a href="../classes/ActorStorage.html">ActorStorage</a></li>
+  <li><a href="../classes/Cell.html">Cell</a></li>
+  <li><a href="../classes/Component.html">Component</a></li>
+  <li><a href="../classes/Condition.html">Condition</a></li>
+  <li><a href="../classes/Event.html">Event</a></li>
+  <li><a href="../classes/Level.html">Level</a></li>
+  <li><strong>Object</strong></li>
+  <li><a href="../classes/Reaction.html">Reaction</a></li>
+  <li><a href="../classes/Scheduler.html">Scheduler</a></li>
+  <li><a href="../classes/System.html">System</a></li>
+  <li><a href="../classes/Target.html">Target</a></li>
+  <li><a href="../classes/Vector2.html">Vector2</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/manual.md.html">manual</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Class <code>Object</code></h1>
+<p>A simple class system for Lua.</p>
+<p> This is the base class for all other classes in PRISM.</p>
+
+
+<h2><a href="#Metamethods">Metamethods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#object:__call">object:__call(...)</a></td>
+	<td class="summary">Creates a new instance of the class.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#object:__new">object:__new()</a></td>
+	<td class="summary">The default constructor for the class.</td>
+	</tr>
+</table>
+<h2><a href="#Methods">Methods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#object:extend">object:extend()</a></td>
+	<td class="summary">Creates a new class and sets it's metatable to the extended class.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#object:extends">object:extends(o)</a></td>
+	<td class="summary">Checks if o is the first class in the inheritance chain of self.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#object:is">object:is(o)</a></td>
+	<td class="summary">Checks if o is in the inheritance chain of self.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Metamethods"></a>Metamethods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "object:__call"></a>
+    <strong>object:__call(...)</strong>
+    </dt>
+    <dd>
+    Creates a new instance of the class.  Calls the __new method.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        The new instance.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "object:__new"></a>
+    <strong>object:__new()</strong>
+    </dt>
+    <dd>
+    The default constructor for the class.  Subclasses should override this.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Methods"></a>Methods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "object:extend"></a>
+    <strong>object:extend()</strong>
+    </dt>
+    <dd>
+    Creates a new class and sets it's metatable to the extended class.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        The new class.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "object:extends"></a>
+    <strong>object:extends(o)</strong>
+    </dt>
+    <dd>
+    Checks if o is the first class in the inheritance chain of self.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">o</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         The class to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        True if o is the first class in the inheritance chain of self, false otherwise.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "object:is"></a>
+    <strong>object:is(o)</strong>
+    </dt>
+    <dd>
+    Checks if o is in the inheritance chain of self.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">o</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         The class to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        True if o is in the inheritance chain of self, false otherwise.
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-05-20 20:36:56 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
