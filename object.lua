@@ -1,5 +1,10 @@
+--- A simple class system for Lua. This is the base class for all other classes in PRISM.
+-- @classmod Object
+
 local Object = {}
 
+--- Creates a new class and sets it's metatable to the extended class.
+-- @treturn table The new class.
 function Object:extend()
    local o = {}
    setmetatable(o, self)
@@ -9,7 +14,8 @@ function Object:extend()
    return o
 end
 
--- Metamethods
+--- Creates a new instance of the class. Calls the __new method.
+-- @treturn table The new instance.
 function Object:__call(...)
    local o = {}
    setmetatable(o, self)
@@ -19,12 +25,12 @@ function Object:__call(...)
    return o
 end
 
--- Constructor
+--- The default constructor for the class. Subclasses should override this.
 function Object:__new() end
 
--- Checks if self is a child of o. It will follow
--- the inheritance chain to check if self is a child
--- of o.
+--- Checks if o is in the inheritance chain of self.
+-- @tparam table o The class to check.
+-- @treturn boolean True if o is in the inheritance chain of self, false otherwise.
 function Object:is(o)
    if self == o then return true end
 
@@ -38,8 +44,9 @@ function Object:is(o)
    return false
 end
 
--- Same functionality as is except it will only check
--- the immediate parent of self.
+--- Checks if o is the first class in the inheritance chain of self.
+-- @tparam table o The class to check.
+-- @treturn boolean True if o is the first class in the inheritance chain of self, false otherwise.
 function Object:extends(o)
    if self == o then return true end
 

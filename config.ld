@@ -17,9 +17,11 @@ file={
     "./core/component.lua",
     "./core/condition.lua",
     "./core/event.lua",
+    "./core/level.lua",
     "./core/reaction.lua",
     "./core/scheduler.lua",
     "./core/system.lua",
     "./core/target.lua",
     "./math/vector.lua",
+    "./object.lua",
 }

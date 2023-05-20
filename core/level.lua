@@ -1,7 +1,10 @@
+--- The 'Level' holds all of the actors and systems, and runs the game loop.
+-- @classmod Level
+
 local Object = require "object"
 local Actor = require "core.actor"
+local ActorStorage = require "core.actorstorage"
 local Scheduler = require "core.scheduler"
-local SparseMap = require "structures.sparsemap"
 local Vector2 = require "math.vector"
 local DenseMap = require "structures.densemap"
 
@@ -11,12 +14,13 @@ local Wall = require "modules.core.cells.wall"
 
 local Level = Object:extend()
 
+--- Constructor for the Level class.
+-- @tparam rotLove.Map map The rotLove map to use for the level.
+-- @tparam function populater A function that takes a level and a map and populates the level with actors.
 function Level:__new(map, populater)
    self.systems = {}
 
-   self.actors = {}
-   self.sparseMap = SparseMap() -- holds a sparse map of actors in the scene by position
-   self.componentCache = {} -- holds submaps of actors by component type
+   self.actors = ActorStorage() -- holds all actors in the level
 
    -- Initialize our scheduler. This is used to keep track of time and
    -- actor turns.
@@ -42,6 +46,8 @@ end
 --- Update is the main game loop for a level. It's a coroutine that yields
 --- back to the main thread when it needs to wait for input from the player.
 --- This function is the heart of the game loop.
+-- @treturn string "descend" if the player has descended to the next level.
+-- @treturn string "quit" if the player has quit the game.
 function Level:run()
    self.__map = self.__map:create(self:getMapCallback())
 
@@ -125,6 +131,11 @@ function Level:run()
    end
 end
 
+--- Gets the actor's controller. This is a utility function that checks the
+--- actor's conditions for an override controller and returns it if it exists.
+--- Otherwise it returns the actor's normal controller.
+-- @tparam Actor actor The actor to get the controller for.
+-- @treturn Controller The actor's controller.
 function Level:getActorController(actor)
    for _, condition in ipairs(actor:getConditions()) do
       if condition.overrideController then return condition:overrideController(self, actor) end
@@ -137,6 +148,10 @@ end
 -- Systems
 --
 
+--- Attaches a system to the level. This function will error if the system
+--- doesn't have a name or if a system with the same name already exists, or if
+--- the system has a requirement that hasn't been attached yet.
+-- @tparam System system The system to add.
 function Level:addSystem(system)
    assert(system.name, "System must have a name.")
    assert(
@@ -181,6 +196,9 @@ function Level:addSystem(system)
    table.insert(self.systems, system)
 end
 
+--- Gets a system by name.
+-- @tparam string system_name The name of the system to get.
+-- @treturn System The system with the given name.
 function Level:getSystem(system_name)
    for _, system in ipairs(self.systems) do
       if system.name == system_name then return system end
@@ -191,6 +209,10 @@ end
 -- Actors
 --
 
+--- This function updates the component cache for the level. It should be called
+--- whenever an actor's components change. It's called by the addActor and addComponent
+--- functions.
+-- @tparam Actor actor The actor to update the component cache for.
 function Level:updateComponentCache(actor)
    for _, component in pairs(components) do
       if not self.componentCache[component] then self.componentCache[component] = {} end
@@ -203,12 +225,19 @@ function Level:updateComponentCache(actor)
    end
 end
 
+--- This function removes an actor from the component cache. It's called be the
+--- removeActor function.
+-- @tparam Actor actor The actor to remove from the component cache.
 function Level:removeComponentCache(actor)
    for _, component in pairs(components) do
       if self.componentCache[component] then self.componentCache[component][actor] = nil end
    end
 end
 
+--- Adds an actor to the level. Handles updating the component cache and
+--- inserting the actor into the sparse map. It will also add the actor to the
+--- scheduler if it has a controller.
+-- @tparam Actor actor The actor to add.
 function Level:addActor(actor)
    -- some sanity checks
    assert(actor:is(Actor), "Attemped to add a non-actor object to the level with addActor")
@@ -231,6 +260,10 @@ function Level:addActor(actor)
    self:getCell(actor.position.x, actor.position.y):onEnter(self, actor)
 end
 
+--- Removes an actor from the level. Handles updating the component cache and
+--- removing the actor from the sparse map. It will also remove the actor from
+--- the scheduler if it has a controller.
+-- @tparam Actor actor The actor to remove.
 function Level:removeActor(actor)
    self:removeComponentCache(actor)
 
@@ -251,6 +284,11 @@ function Level:removeActor(actor)
    end
 end
 
+--- A utility function that removes a component from an actor. It handles
+--- updating the component cache and the opacity cache. You can do this manually, but
+--- it's easier to use this function.
+-- @tparam Actor actor The actor to remove the component from.
+-- @tparam Component component The component to remove.
 function Level:removeComponent(actor, component)
    actor:__removeComponent(component)
    self:updateComponentCache(actor)
@@ -260,6 +298,11 @@ function Level:removeComponent(actor, component)
    end
 end
 
+--- A utility function that adds a component to an actor. It handles updating
+--- the component cache and the opacity cache. You can do this manually, but
+--- it's easier to use this function.
+-- @tparam Actor actor The actor to add the component to.
+-- @tparam Component component The component to add.
 function Level:addComponent(actor, component)
    actor:__addComponent(component)
    self:updateComponentCache(actor)
@@ -269,8 +312,8 @@ function Level:addComponent(actor, component)
    end
 end
 
---- A utility function that returns true if the level contains the given
---- actor.
+--- Returns true if the level contains the given actor, false otherwise.
+-- @tparam Actor actor The actor to check for.
 function Level:hasActor(actor)
    for _, candidate_actor in ipairs(self.actors) do
       if candidate_actor == actor then return true end
@@ -279,6 +322,8 @@ function Level:hasActor(actor)
    return false
 end
 
+--- Returns true if the level contains an actor with the given component, false otherwise.
+-- @tparam Component component The component to check for.
 function Level:hasActorWithComponent(component)
    for _, _ in self:eachActor(component) do
       return true
@@ -287,9 +332,9 @@ function Level:hasActorWithComponent(component)
    return false
 end
 
---- A utility function that returns the first actor of a given type
---- that it finds. This is useful for finding the player or the stairs
---- in a level.
+--- Returns the first actor that extends the given prototype, or nil if no actor
+--- is found.
+-- @tparam Prototype prototype The prototype to check for.
 function Level:getActorByType(type)
    for i = 1, #self.actors do
       if self.actors[i]:is(type) then return self.actors[i] end
@@ -299,6 +344,8 @@ end
 --- This method returns an iterator that will return all actors in the level
 --- that have the given components. If no components are given it will return
 --- all actors in the level.
+-- @tparam Component ... The components to filter by.
+-- @treturn function An iterator that returns the next actor that matches the given components.
 function Level:eachActor(...)
    local n = 1
    local comp = { ... }
@@ -345,6 +392,9 @@ function Level:eachActor(...)
 end
 
 local dummy = {}
+--- Returns an iterator that will return all tiles that the given actor occupies.
+-- @tparam Actor actor The actor to get the tiles for.
+-- @treturn function An iterator that returns the next tile that the actor occupies.
 function Level:eachActorTile(actor)
    local count = 0
 
@@ -369,6 +419,10 @@ function Level:eachActorTile(actor)
    end
 end
 
+--- Returns a list of all actors at the given position.
+-- @tparam number x The x component of the position to check.
+-- @tparam number y The y component of the position to check.
+-- @treturn table A list of all actors at the given position.
 function Level:getActorsAt(x, y)
    local actorsAtPosition = {}
    for actor, _ in pairs(self.sparseMap:get(x, y)) do
@@ -378,6 +432,10 @@ function Level:getActorsAt(x, y)
    return actorsAtPosition
 end
 
+--- Returns an iterator that will return all actors at the given position.
+-- @tparam number x The x component of the position to check.
+-- @tparam number y The y component of the position to check.
+-- @treturn function An iterator that returns the next actor at the given position.
 function Level:eachActorAt(x, y)
    local key, _
    local actors = self.sparseMap:get(x, y)
@@ -388,6 +446,11 @@ function Level:eachActorAt(x, y)
    return iterator
 end
 
+--- Moves an actor to the given position. This function doesn't do any checking
+--- for overlaps or collisions. It's used by the moveActorChecked function.
+-- @tparam Actor actor The actor to move.
+-- @tparam Vector2 pos The position to move the actor to.
+-- @tparam boolean skipSparseMap If true the sparse map won't be updated.
 function Level:moveActor(actor, pos, skipSparseMap)
    assert(pos.is and pos:is(Vector2), "Expected a Vector2 for pos in Level:moveActor.")
    assert(
@@ -419,10 +482,11 @@ function Level:moveActor(actor, pos, skipSparseMap)
    end
 end
 
--- moveActor doesn't do any checking for overlaps or collisions
--- this function does and handles moving multi-tile actors. Soon
--- I want to make this the default moveActor function and have
--- moveActorUnchecked be a special case.
+--- This function does and handles moving multi-tile actors. Soon
+--- I want to make this the default moveActor function and have
+--- moveActorUnchecked be a special case.
+-- @tparam Actor actor The actor to move.
+-- @tparam Vector2 direction The direction to move the actor in.
 function Level:moveActorChecked(actor, direction)
    local newPosition = actor.position + direction
 
@@ -481,6 +545,8 @@ function Level:moveActorChecked(actor, direction)
    self:insertSparseMapEntries(actor)
 end
 
+--- This function removes the actor's entries from the sparse map and opacity cache.
+-- @tparam Actor actor The actor to remove.
 function Level:removeSparseMapEntries(actor)
    for vec in self:eachActorTile(actor) do
       self.sparseMap:remove(vec.x, vec.y, actor)
@@ -488,6 +554,8 @@ function Level:removeSparseMapEntries(actor)
    end
 end
 
+--- This function inserts the actor's entries into the sparse map and opacity cache.
+-- @tparam Actor actor The actor to insert.
 function Level:insertSparseMapEntries(actor)
    for vec in self:eachActorTile(actor) do
       self.sparseMap:insert(vec.x, vec.y, actor)
@@ -495,7 +563,13 @@ function Level:insertSparseMapEntries(actor)
    end
 end
 
-function Level:performAction(action, free, animationToPlay)
+--- Executes an Action, updating the level's state and triggering any events on 'Conditions' or 'Systems'
+--- attached to the 'Actor' or 'Level' respectively. It also updates the 'Scheduler' if the action isn't
+--- a reaction or free action. Lastly, it calls the 'onAction' method on the 'Cell' that the 'Actor' is
+--- standing on.
+-- @tparam Action action The action to perform.
+-- @tparam boolean free If true the action is a free action and won't update the scheduler.
+function Level:performAction(action, free)
    -- this happens sometimes if one effect kills an entity and a second effect
    -- tries to damage it for instance.
    if not self:hasActor(action.owner) then return end
@@ -526,7 +600,9 @@ function Level:performAction(action, free, animationToPlay)
    self:getCell(action.owner.position.x, action.owner.position.y):onAction(self, action.owner) -- Dim: placement tbd
 end
 
-local dummy = {} -- just to avoid making garbage
+--- This function triggers events on 'Conditions' and 'Systems' attached to the 'Actor' or 'Level' respectively.
+-- @tparam string onType The type of event to trigger.
+-- @tparam Action ?action The action to trigger the event with.
 function Level:triggerActionEvents(onType, action)
    if onType == "onTicks" then
       for _, actor in ipairs(self.actors) do
@@ -568,6 +644,14 @@ function Level:triggerActionEvents(onType, action)
    end
 end
 
+--- Returns a list of all actors that are within the given range of the given
+--- position. The type parameter determines the type of range to use. Currently
+--- only "fov" and "box" are supported. The fov type uses a field of view
+--- algorithm to determine what actors are visible from the given position. The
+--- box type uses a simple box around the given position.
+-- @tparam string type The type of range to use.
+-- @tparam Vector2 position The position to check from.
+-- @tparam number range The range to check.
 function Level:getAOE(type, position, range)
    assert(position:is(Vector2))
    local seenActors = {}
@@ -591,13 +675,26 @@ function Level:getAOE(type, position, range)
    end
 end
 
+--- Sets the cell at the given position to the given cell.
+-- @tparam number x The x component of the position to set.
+-- @tparam number y The y component of the position to set.
+-- @tparam Cell cell The cell to set.
 function Level:setCell(x, y, cell)
    self.cellOpacityCache:set(x, y, cell.opaque and 1 or 0)
    self.map:set(x, y, cell)
 end
 
+--- Gets the cell at the given position.
+-- @tparam number x The x component of the position to get.
+-- @tparam number y The y component of the position to get.
+-- @treturn Cell The cell at the given position.
 function Level:getCell(x, y) return self.map:get(x, y) end
 
+--- Returns true if the cell at the given position is passable, false otherwise. Considers
+--- actors in the sparse map as well as the cell's passable property.
+-- @tparam number x The x component of the position to check.
+-- @tparam number y The y component of the position to check.
+-- @tparam Actor ?actor The actor to ignore when checking the sparse map.
 function Level:getCellPassable(x, y, actor)
    if self:getCell(x, y) and not self:getCell(x, y).passable then
       return false
@@ -610,12 +707,28 @@ function Level:getCellPassable(x, y, actor)
    end
 end
 
+--- Returns true if the cell at the given position is passable, false otherwise.
+--- Considers only the cell's passable property.
+-- @tparam number x The x component of the position to check.
+-- @tparam number y The y component of the position to check.
+-- @treturn boolean True if the cell is passable, false otherwise.
 function Level:getCellPassableNoActors(x, y) return self:getCell(x, y).passable end
 
+--- Returns true if the cell at the given position is opaque, false otherwise.
+-- @tparam number x The x component of the position to check.
+-- @tparam number y The y component of the position to check.
+-- @treturn boolean True if the cell is opaque, false otherwise.
 function Level:getCellOpaque(x, y) return self.opacityCache:get(x, y) end
 
+--- Returns the opacity cache for the level. This generally shouldn't be used
+--- outside of systems that need to know about opacity.
+-- @treturn DenseMap The opacity cache for the level.
 function Level:getOpacityCache() return self.opacityCache end
 
+--- Initialize the opacity cache. This should be called after the level is
+--- created and before the game loop starts. It will initialize the opacity
+--- cache with the cell opacity cache. This is handled automatically by the
+--- Level class.
 function Level:initializeOpacityCache()
    for x = 1, self.width do
       for y = 1, self.height do
@@ -624,6 +737,11 @@ function Level:initializeOpacityCache()
    end
 end
 
+--- Updates the opacity cache at the given position. This should be called
+--- whenever an actor moves or a cell's opacity changes. This is handled
+--- automatically by the Level class.
+-- @tparam number x The x component of the position to update.
+-- @tparam number y The y component of the position to update.
 function Level:updateOpacityCache(x, y)
    local opaque = false
    for actor, _ in pairs(self.sparseMap:get(x, y)) do
@@ -640,6 +758,8 @@ function Level:updateOpacityCache(x, y)
 end
 
 -- TODO: Replace with global system.
+--- Quits the game. This is a utility function that should be called by
+--- systems that need to quit the game.
 function Level:quit() self.shouldQuit = true end
 
 -- Some simple callback generation stuff.
@@ -677,6 +797,10 @@ function Level:getRandomWalkableTile()
    end
 end
 
+--- Yields to the main thread. This is called in run, and a few systems. Any time you want
+--- the interface to update you should call this. Avoid calling coroutine.yield directly,
+--- as this function will call the onYield method on all systems.
+-- @param ... Any arguments to pass to the main thread. This will be replaced with the message class in the future.
 function Level:yield(...)
    for _, system in ipairs(self.systems) do
       system:onYield(self, ...)
